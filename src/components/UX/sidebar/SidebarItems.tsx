@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Title from "../Title"
 import { IAccountsState } from "../../../types/IAccounts";
-import { useNavigate } from "react-router-dom";
 import HomeContentItem from "../../home/HomeContentItem";
 
 const SidebarItems = ({ fetchData }: { fetchData: (method: 'post' | 'get', url: string, setState: Function) => void }) => {
@@ -11,7 +10,6 @@ const SidebarItems = ({ fetchData }: { fetchData: (method: 'post' | 'get', url: 
       loading: false,
       error: false
    })
-   const navigate = useNavigate()
 
    useEffect(() => {
       fetchData('get', apiUrl, setResult)

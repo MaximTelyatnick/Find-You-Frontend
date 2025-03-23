@@ -25,7 +25,7 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult }: IModalSend
       setSeccess('')
 
       try {
-         const response = await axios.post('http://localhost:5000/send-messages', {
+         await axios.post('http://localhost:5000/send-messages', {
             text_messages: message,
             user_from_id: user?.id,
             user_to_login: login
