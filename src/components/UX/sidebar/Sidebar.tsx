@@ -22,7 +22,6 @@ const Sidebar = () => {
    const apiUrlCheck = `http://localhost:5000/favorites?users_id=${user?.id}`
    const [favQnt, setFavQnt] = useState<number>(0)
    const [messagesQnt, setMessagesQnt] = useState<number>(0)
-   const [error, setError] = useState<string>('')
    const apiUrlGetMessages = `http://localhost:5000/get-messages?user_id=${user?.id}`
 
    const getIsFav = async () => {
@@ -31,7 +30,6 @@ const Sidebar = () => {
 
          setFavQnt(result.data.length)
       } catch (error) {
-         setError('Что-то пошло не так, попробуйте ещё раз!')
       }
    }
 
@@ -43,7 +41,6 @@ const Sidebar = () => {
 
          setMessagesQnt(filtredArr.length)
       } catch (error) {
-         setError('Что-то пошло не так, попробуйте ещё раз!')
       }
    }
 

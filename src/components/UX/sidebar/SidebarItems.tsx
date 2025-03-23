@@ -13,10 +13,6 @@ const SidebarItems = ({ fetchData }: { fetchData: (method: 'post' | 'get', url: 
    })
    const navigate = useNavigate()
 
-   const clickHandler = (id: number) => {
-      navigate(`/${id}`)
-   }
-
    useEffect(() => {
       fetchData('get', apiUrl, setResult)
    }, [])

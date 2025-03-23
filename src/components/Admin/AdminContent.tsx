@@ -1,7 +1,4 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
 import IUser from "../../types/IUser";
-import IUserRole from "../../types/IUserRole";
 import AdminOrders from "./AdminOrders";
 import AdminUsers from "./AdminUsers";
 import AdminReports from "./AdminReports";

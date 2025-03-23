@@ -1,5 +1,4 @@
 import Sidebar from "../UX/sidebar/Sidebar"
-import Title from "../UX/Title"
 import UpButton from "../UX/UpButton"
 import FavoritesContent from "./FavoritesContent"
 import { useState } from "react"

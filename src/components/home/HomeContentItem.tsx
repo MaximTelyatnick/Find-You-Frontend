@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom"
-import { IAccount, IHomeAccount } from "../../types/IAccounts"
+import { IHomeAccount } from "../../types/IAccounts"
 import transformPhoto from "../../utils/transformPhoto"
 
 const HomeContentItem = ({ id, photo, check_video }: IHomeAccount) => {

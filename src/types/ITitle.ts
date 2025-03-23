@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
 export default interface Ititle {
-   children: React.ReactNode,
+   children: ReactNode,
    classes?: string
 }

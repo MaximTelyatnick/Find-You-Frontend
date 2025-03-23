@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { IAccountAll, IFav, IRating } from "../../types/IAccounts"
+import { IAccountAll, IFav } from "../../types/IAccounts"
 import fetchData from "../../services/fetchData";
 import axios from "axios";
 import IUser from "../../types/IUser";
 import AccountHeaderRating from "./AccountHeaderRating";
 import dayjs from "dayjs";
 
-const AccountHeader = ({ account, city, tags, socials, rating, comments }: IAccountAll) => {
+const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const apiUrlCheck = `http://localhost:5000/favorites?users_id=${user?.id}`
@@ -32,7 +32,7 @@ const AccountHeader = ({ account, city, tags, socials, rating, comments }: IAcco
 
    const addFav = async () => {
       try {
-         const response = await axios.post(apiUrlAdd, {
+         await axios.post(apiUrlAdd, {
             accounts_id: account.id,
             users_id: user?.id,
             comment: account.name,
@@ -47,7 +47,7 @@ const AccountHeader = ({ account, city, tags, socials, rating, comments }: IAcco
 
    const removeFav = async () => {
       try {
-         const response = await axios.delete(apiUrlDelete, {
+         await axios.delete(apiUrlDelete, {
             data: {
                accounts_id: account.id,
                users_id: user?.id,

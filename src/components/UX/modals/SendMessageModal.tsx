@@ -1,6 +1,5 @@
-import { useMemo, useRef, useState } from 'react';
+import { useState } from 'react';
 import { IModalSend } from '../../../types/IModal';
-import IAccountEditorConfig from '../../../types/IAccountEditorConfig';
 import axios from 'axios';
 import IUser from '../../../types/IUser';
 import { IMessageState } from '../../../types/IMessage';
@@ -31,8 +30,6 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult }: IModalSend
             user_from_id: user?.id,
             user_to_login: login
          });
-
-         const data = response.data
 
          setSeccess('Сообщение успешно отправленно')
          setResult((prev: IMessageState) => {

@@ -136,7 +136,7 @@ const AdminAccountsEdit = () => {
             formData.append("photo", accountPhoto);
             formData.append("id", String(account.account.id));
 
-            const res = await axios.post(apiUrlUpdate, formData, {
+            await axios.post(apiUrlUpdate, formData, {
                headers: {
                   "Content-Type": "multipart/form-data",  // Указываем правильный заголовок
                },
@@ -163,7 +163,7 @@ const AdminAccountsEdit = () => {
             }
 
             if (value || value == null) {
-               const res = await axios.post(apiUrlDateUpdate, {
+               await axios.post(apiUrlDateUpdate, {
                   id: account?.account.id,
                   new_date_of_create: value
                })

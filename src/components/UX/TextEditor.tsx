@@ -5,7 +5,6 @@ import { ITextEditorProps, SelectionPosition, SelectionRange, StyleTag } from '.
 const TextEditor = ({ content, setContent }: ITextEditorProps) => {
    const [fontSize, setFontSize] = useState<string>('16px');
    const [color, setColor] = useState<string>('#000000');
-   const [showControls, setShowControls] = useState<boolean>(false);
    const [selectionRange, setSelectionRange] = useState<SelectionRange | null>(null);
    const [linkInputVisible, setLinkInputVisible] = useState<boolean>(false);
    const [linkUrl, setLinkUrl] = useState<string>('https://');
@@ -44,7 +43,6 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
 
       if (selection.start !== selection.end) {
          setSelectionRange(selection);
-         setShowControls(true);
 
          // Расчет позиции для отображения инпута над выделенным текстом
          const textareaRect = textarea.getBoundingClientRect();
@@ -55,7 +53,6 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
             left: selectionCoords.left - textareaRect.left
          });
       } else {
-         setShowControls(false);
          setLinkInputVisible(false);
       }
    };
@@ -125,7 +122,6 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
       }
 
       setContent(before + newText + after);
-      setShowControls(false);
    };
 
    const handleLinkSubmit = (e: FormEvent): void => {
@@ -140,16 +136,11 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
       setContent(before + newText + after);
       setLinkInputVisible(false);
       setLinkUrl('https://');
-      setShowControls(false);
    };
 
    const cancelLinkInput = (): void => {
       setLinkInputVisible(false);
       setLinkUrl('https://');
-   };
-
-   const renderHTML = () => {
-      return { __html: content };
    };
 
    return (

@@ -110,7 +110,7 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
                {errorMessage && <p style={{ color: 'red' }}>Вы уже отправили жалобу на этот коментарий</p>}
                {seccess && <p style={{ color: 'green' }}>Ваша жалоба будет рассмотрена в ближайшее время</p>}
                <strong>{author_nickname}</strong>
-               <div dangerouslySetInnerHTML={{ __html: text }} />
+               <div>{text}</div>
                <p>{date.toLocaleString("ru-RU", {
                   year: "numeric",
                   month: "2-digit",

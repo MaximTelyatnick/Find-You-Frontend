@@ -47,7 +47,7 @@ const AdminAccounts = () => {
       return items.map(item => (
          <div>
             <p>{item.author_nickname} {item.time_comment}</p>
-            <p dangerouslySetInnerHTML={{ __html: item.text }} />
+            <p dangerouslySetInnerHTML={{ __html:  }} />
             <div style={{ margin: '0 0 0 15px' }}>
                {showComments(item.children)}
             </div>

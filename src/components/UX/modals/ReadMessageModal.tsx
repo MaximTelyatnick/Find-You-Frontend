@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { IModalRead } from "../../../types/IModal";
 
-const ReadMessageModal = ({ isOpen, setIsOpen, children, id, date_messages, time_messages, text_messages, sender, receiver }: IModalRead) => {
+const ReadMessageModal = ({ isOpen, setIsOpen, children, date_messages, time_messages, text_messages, sender, receiver }: IModalRead) => {
 
    const openModal = () => setIsOpen(true);
    const closeModal = () => setIsOpen(false);
@@ -27,7 +27,7 @@ const ReadMessageModal = ({ isOpen, setIsOpen, children, id, date_messages, time
                         </div>
                      </div>
                      <div className="modal-read__main">
-                        <p dangerouslySetInnerHTML={{ __html: text_messages }} />
+                        <p>{text_messages}</p>
                      </div>
                   </div>
                </div>
