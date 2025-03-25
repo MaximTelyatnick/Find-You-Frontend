@@ -7,7 +7,7 @@ import transformPhoto from "../../utils/transformPhoto"
 import IUser from "../../types/IUser"
 
 const AdminUsers = () => {
-   const apiUrl = 'http://localhost:5000/get-user'
+   const apiUrl = 'http://167.86.84.197/api/get-user'
    const storedUser = localStorage.getItem('user');
    let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const [login, setLogin] = useState<string>('')

@@ -5,8 +5,8 @@ import IUser from "../../types/IUser"
 
 const AdminUsersToolbar = ({ setResult, userId }: IAdminUserToolbar) => {
 
-   const apiUrlDelete = 'http://localhost:5000/delete-user'
-   const apiUrlAddRole = `http://localhost:5000/add-role`
+   const apiUrlDelete = 'http://167.86.84.197/api/delete-user'
+   const apiUrlAddRole = `http://167.86.84.197/api/add-role`
 
    const [role, setRole] = useState<string>('user')
    const [error, setError] = useState<string>('')

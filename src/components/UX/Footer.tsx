@@ -10,7 +10,7 @@ const Footer = () => {
    const navigate = useNavigate();
    const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
    const [startDate, endDate] = dateRange;
-   const apiUrl = `http://localhost:5000/sections?page_name=Футер`
+   const apiUrl = `http://167.86.84.197/api/sections?page_name=Футер`
    const [error, setError] = useState<boolean>(false)
    const [sections, setSections] = useState<IAdminSections | null>(null)
 

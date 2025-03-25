@@ -23,7 +23,7 @@ const AccountInfo = ({ account, city, socials, files }: IAccountAll) => {
          <div className="span5">
             <div className="thumbnail">
                {account.photo && account.photo.data ? <img src={transformPhoto(account.photo)} /> :
-                  files[0] ? <img src={`http://localhost:5000${files[0]}`} /> :
+                  files[0] ? <img src={`http://167.86.84.197/api${files[0]}`} /> :
                      <img src='/images/blog_image.jpg' />}
             </div>
          </div>

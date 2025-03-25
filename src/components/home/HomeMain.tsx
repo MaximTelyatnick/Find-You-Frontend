@@ -17,7 +17,7 @@ const HomeMain = ({ pageNumber, cityId, tagIds, search, dateRange }: {
    const [totalPages, setTotalPages] = useState<number>(1);
    const visiblePages: number = 5;
 
-   let apiUrl = `http://localhost:5000/accounts?page=${pageNumber}`;
+   let apiUrl = `http://167.86.84.197/api/accounts?page=${pageNumber}`;
 
    if (cityId) apiUrl += `&city_id=${cityId}`;
    if (tagIds && tagIds.length > 0) apiUrl += `&tag_id=${tagIds.join(",")}`;
