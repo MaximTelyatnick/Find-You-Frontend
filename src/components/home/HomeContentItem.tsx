@@ -11,7 +11,7 @@ const HomeContentItem = ({ id, photo, check_video }: IHomeAccount) => {
 
    return (
       <div className="account-item" style={{ cursor: 'pointer' }} onClick={clickHandler}>
-         {typeof photo == 'string' ? <img src={`http://167.86.84.197/api${photo}`} /> :
+         {typeof photo == 'string' ? <img src={`http://localhost:5000${photo}`} /> :
             photo && photo.data ? <img src={transformPhoto(photo)} /> :
                <img src='/images/blog_image.jpg' />}
          {!!check_video && <div className="account-item__icon">

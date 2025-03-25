@@ -10,7 +10,7 @@ import { ru } from "date-fns/locale"
 const AdminOrders = () => {
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
-   const apiUrl = `http://167.86.84.197/api/get-admin-orders?user_id=${user?.id}`
+   const apiUrl = `http://localhost:5000/get-admin-orders?user_id=${user?.id}`
    const [result, setResult] = useState<IOrderState>({
       items: null,
       loading: false,

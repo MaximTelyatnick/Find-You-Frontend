@@ -4,11 +4,11 @@ import { IAdminAccountAll } from "../../types/Admin";
 import transformPhoto from "../../utils/transformPhoto";
 
 const AdminAccountsEdit = () => {
-   const apiUrlGet = 'http://167.86.84.197/api/account'
-   const apiUrlDelete = 'http://167.86.84.197/api/delete-account'
-   const apiUrlUpdate = 'http://167.86.84.197/api/update-photo'
-   const apiUrlDateUpdate = 'http://167.86.84.197/api/update-account-date'
-   const apiUrl = 'http://167.86.84.197/api'
+   const apiUrlGet = 'http://localhost:5000/account'
+   const apiUrlDelete = 'http://localhost:5000/delete-account'
+   const apiUrlUpdate = 'http://localhost:5000/update-photo'
+   const apiUrlDateUpdate = 'http://localhost:5000/update-account-date'
+   const apiUrl = 'http://localhost:5000'
    const [id, setId] = useState<string>('');
    const [account, setAccount] = useState<IAdminAccountAll | null>(null)
    const [success, setSuccess] = useState<string>('');
@@ -224,7 +224,7 @@ const AdminAccountsEdit = () => {
                      } else if (typeof item === "string") {
                         // Если item — это строка (ссылка), проверяем расширение
                         isImage = item.includes(".jpg") || item.includes(".jpeg") || item.includes(".png");
-                        src = item.startsWith("blob") ? item : `http://167.86.84.197/api${item}`;
+                        src = item.startsWith("blob") ? item : `http://localhost:5000${item}`;
                      }
 
                      return (

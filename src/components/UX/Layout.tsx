@@ -4,7 +4,7 @@ import { ILayout } from "../../types/Admin"
 const Layout = ({ layoutId, text, urls, publicComponent }: ILayout) => {
    const layoutNames: string[] = ['Текст | Изображение', 'Изображение | Текст', 'Текст', 'Текст | 2 Изображения', '2 Изображения | Текст', 'Изображение | Изображение', 'Изображение | 2 Изображения', '2 Изображения | Изображение', '3 Изображения']
    const [layout, setLayout] = useState<string[]>([])
-   const basicUrl = 'http://167.86.84.197/api'
+   const basicUrl = 'http://localhost:5000'
 
    if (publicComponent) {
       urls = urls.map(item => `${basicUrl}${item}`)

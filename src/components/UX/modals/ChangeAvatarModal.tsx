@@ -10,7 +10,7 @@ const ChangeAvatarModal = ({ isOpen, setIsOpen, children }: IModal) => {
    const storedUser = localStorage.getItem('user');
    let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const [error, setError] = useState<string>('');
-   const apiUrlUpdate = 'http://167.86.84.197/api/change-user-avatar'
+   const apiUrlUpdate = 'http://localhost:5000/change-user-avatar'
    const [accountPhoto, setAccountPhoto] = useState<File | null>()
 
    const saveHandlerPhoto = async () => {

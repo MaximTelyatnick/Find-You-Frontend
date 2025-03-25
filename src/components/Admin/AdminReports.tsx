@@ -5,7 +5,7 @@ import Title from "../UX/Title"
 import AdminReportsItem from "./AdminReportsItem"
 
 const AdminReports = () => {
-   const apiUrl = `http://167.86.84.197/api/reports`
+   const apiUrl = `http://localhost:5000/reports`
    const [filter, setFilter] = useState<string>('new')
    const [result, setResult] = useState<IAdminReportsState>({
       items: null,

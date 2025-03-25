@@ -48,7 +48,7 @@ const AdminSections = () => {
             }
          });
 
-         await axios.post("http://167.86.84.197/api/save-sections", formData, {
+         await axios.post("http://localhost:5000/save-sections", formData, {
             headers: {
                "Content-Type": "multipart/form-data",
             },
