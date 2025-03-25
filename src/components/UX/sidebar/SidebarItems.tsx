@@ -4,7 +4,7 @@ import { IAccountsState } from "../../../types/IAccounts";
 import HomeContentItem from "../../home/HomeContentItem";
 
 const SidebarItems = ({ fetchData }: { fetchData: (method: 'post' | 'get', url: string, setState: Function) => void }) => {
-   let apiUrl = `http://localhost:5000/accounts?page=1&limit=10`;
+   let apiUrl = `http://167.86.84.197:5000/accounts?page=1&limit=10`;
    const [result, setResult] = useState<IAccountsState>({
       items: null,
       loading: false,

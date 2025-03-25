@@ -9,9 +9,9 @@ import dayjs from "dayjs";
 const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
-   const apiUrlCheck = `http://localhost:5000/favorites?users_id=${user?.id}`
-   const apiUrlAdd = 'http://localhost:5000/add-favorite'
-   const apiUrlDelete = 'http://localhost:5000/delete-favorite'
+   const apiUrlCheck = `http://167.86.84.197:5000/favorites?users_id=${user?.id}`
+   const apiUrlAdd = 'http://167.86.84.197:5000/add-favorite'
+   const apiUrlDelete = 'http://167.86.84.197:5000/delete-favorite'
    const [isFav, setIsFav] = useState<boolean>(false)
    const [seccess, setSeccess] = useState<string>('')
    const [error, setError] = useState<string>('')

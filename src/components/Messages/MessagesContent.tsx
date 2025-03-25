@@ -10,8 +10,8 @@ const MessagesContent = () => {
    const [isOpenSend, setIsOpenSend] = useState<boolean>(false);
    const storedUser = localStorage.getItem('user');
    let user: IUser = storedUser ? JSON.parse(storedUser) : null;
-   const apiUrl = `http://localhost:5000/get-messages?user_id=${user?.id}`
-   const apiUrlDelete = `http://localhost:5000/delete-messages`
+   const apiUrl = `http://167.86.84.197:5000/get-messages?user_id=${user?.id}`
+   const apiUrlDelete = `http://167.86.84.197:5000/delete-messages`
    const [result, setResult] = useState<IMessageState>({
       items: null,
       error: false,

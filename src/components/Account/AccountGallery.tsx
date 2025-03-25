@@ -17,9 +17,9 @@ const AccountGallery = ({ files }: IAccountAll) => {
             {files.sort((a, b) => Number(a.endsWith(".mp4")) - Number(b.endsWith(".mp4"))).map((item) => (
                <div key={item} className="account-gallery__item" onClick={() => openModal(item)}>
                   {item.includes('.jpg') ? (
-                     <img src={`http://localhost:5000${item}`} alt="Image" />
+                     <img src={`http://167.86.84.197:5000${item}`} alt="Image" />
                   ) : (
-                     <video src={`http://localhost:5000${item}`} autoPlay muted />
+                     <video src={`http://167.86.84.197:5000${item}`} autoPlay muted />
                   )}
                </div>
             ))}
@@ -29,9 +29,9 @@ const AccountGallery = ({ files }: IAccountAll) => {
          {isOpen && activeItem && (
             <GalleryModal isOpen={isOpen} setIsOpen={setIsOpen}>
                {activeItem.includes('.jpg') ? (
-                  <img src={`http://localhost:5000${activeItem}`} alt="Image" />
+                  <img src={`http://167.86.84.197:5000${activeItem}`} alt="Image" />
                ) : (
-                  <video src={`http://localhost:5000${activeItem}`} autoPlay muted />
+                  <video src={`http://167.86.84.197:5000${activeItem}`} autoPlay muted />
                )}
             </GalleryModal>
          )}
