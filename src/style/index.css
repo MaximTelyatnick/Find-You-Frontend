@@ -569,6 +569,9 @@
         -ms-flex-wrap: wrap;
             flex-wrap: wrap;
         gap: 10px;
+        -webkit-box-pack: center;
+            -ms-flex-pack: center;
+                justify-content: center;
     }
     .account-item {
         position: relative;
@@ -633,7 +636,7 @@
     }
     .account-header-rate__stars svg:hover,
     .account-header-rate__stars svg:hover ~ svg {
-        fill: #FCD53F;
+        fill: #FCD53F !important;
     }
     
     .account-info__title {
@@ -1995,8 +1998,12 @@
         }
         .sidebar-items {
         }
+        .account__items {
+            justify-content: center;
+        }
         .account-item, .sidebar-items .account-item {
-            width: calc(50% - 10px);
+            width: 300px;
+            height: 350px;
         }
     
         .react-datepicker {
@@ -2093,7 +2100,7 @@
         }
     
         .account-item__icon {
-            top: 16%;
+            top: 7%;
             right: -38%;
         }
     }
@@ -2271,19 +2278,11 @@
         .admin-accounts-get__form button, .admin-accounts-get__files button{
             width: 100%;
         }
-    
-        .account-item__icon {
-            top: 11%;
-            right: -38%;
-        }
     }
     
     @media (max-width: 424px) {
         .account-item, .sidebar-items .account-item {
             width: 100%;
-        }
-        .account-gallery__item {
-            height: 150px;
         }
     }
     
