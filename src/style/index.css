@@ -569,9 +569,6 @@
         -ms-flex-wrap: wrap;
             flex-wrap: wrap;
         gap: 10px;
-        -webkit-box-pack: center;
-            -ms-flex-pack: center;
-                justify-content: center;
     }
     .account-item {
         position: relative;
@@ -1999,7 +1996,9 @@
         .sidebar-items {
         }
         .account__items {
-            justify-content: center;
+            -webkit-box-pack: center;
+                -ms-flex-pack: center;
+                    justify-content: center;
         }
         .account-item, .sidebar-items .account-item {
             width: 300px;
