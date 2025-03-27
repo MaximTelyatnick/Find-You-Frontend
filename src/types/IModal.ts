@@ -3,7 +3,7 @@ import IMessage from "./IMessage"
 export default interface IModal {
    isOpen: boolean,
    setIsOpen: Function
-   children: React.ReactNode
+   children: React.ReactElement<{ src: string }>;
 }
 
 export interface IModalRead extends IMessage {
