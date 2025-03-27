@@ -1,7 +1,7 @@
 import { isValidElement, useRef } from 'react';
-import IModal from '../../../types/IModal';
+import { IModalGallery } from '../../../types/IModal';
 
-const GalleryModal = ({ isOpen, setIsOpen, children }: IModal) => {
+const GalleryModal = ({ isOpen, setIsOpen, children }: IModalGallery) => {
    if (!isOpen) return null;
 
    const videoRef = useRef<HTMLVideoElement | null>(null);

@@ -3,7 +3,7 @@ import IMessage from "./IMessage"
 export default interface IModal {
    isOpen: boolean,
    setIsOpen: Function
-   children: React.ReactElement<{ src: string }>;
+   children: React.ReactNode
 }
 
 export interface IModalRead extends IMessage {
@@ -32,4 +32,8 @@ export interface IModalComment extends IModal {
    comment: string;
    editComment: Function;
    removeComment: Function;
+}
+
+export interface IModalGallery extends Omit<IModal, 'children'> {
+   children: React.ReactElement<{ src: string }>;
 }
