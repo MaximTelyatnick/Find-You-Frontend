@@ -25,7 +25,7 @@ const AdminUsers = () => {
 
    return (
       <div className="admin-users">
-         <Title classes='pt'>Пользователи</Title>
+         <Title >Пользователи</Title>
          {result.loading && <div className="loader">
             <div className="loader__circle"></div>
          </div>}

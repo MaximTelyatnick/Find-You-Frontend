@@ -15,12 +15,15 @@ const AccountGallery = ({ files }: IAccountAll) => {
       <div>
          <div className="account-gallery" style={{ padding: '40px 0 0 0' }}>
             {files.sort((a, b) => Number(a.endsWith(".mp4")) - Number(b.endsWith(".mp4"))).map((item) => (
-               <div key={item} className="account-gallery__item" onClick={() => openModal(item)}>
-                  {item.includes('.jpg') ? (
-                     <img src={`http://167.86.84.197:5000${item}`} alt="Image" />
-                  ) : (
-                     <video src={`http://167.86.84.197:5000${item}`} autoPlay muted />
-                  )}
+               item.includes('.jpg') && <div key={item} className="account-gallery__item" onClick={() => openModal(item)}>
+                  <img src={`http://167.86.84.197:5000${item}`} alt="Image" />
+               </div>
+            ))}
+         </div>
+         <div className="account-gallery" style={{ padding: '25px 0 0 0' }}>
+            {files.sort((a, b) => Number(a.endsWith(".mp4")) - Number(b.endsWith(".mp4"))).map((item) => (
+               !item.includes('.jpg') && <div key={item} className="account-gallery__item" onClick={() => openModal(item)}>
+                  <video src={`http://167.86.84.197:5000${item}`} autoPlay muted />
                </div>
             ))}
          </div>

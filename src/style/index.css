@@ -481,8 +481,10 @@
     }
     
     .galleryModal .modal-content{
-        width: 90vw;
-        height: 90vh;
+        width: 60vw;
+        height: auto;
+        max-height: 80vh;
+        margin: -150px 0 0 0;
     }
     .galleryModal__body {
         width: 100%;
@@ -1392,6 +1394,9 @@
         padding: 10px 0;
     }
     
+    .admin-order {
+        padding: 40px 0 0 0;
+    }
     .admin-order__header {
         display: -webkit-box;
         display: -ms-flexbox;
@@ -1456,7 +1461,7 @@
     
     
     .admin-users {
-        padding: 75px 0 0 0;
+        padding: 40px 0 0 0;
     }
     .admin-users__form input{
         margin: 0;
@@ -1523,7 +1528,7 @@
     
     
     .admin-reports {
-        padding: 75px 0 0 0;
+        padding: 40px 0 0 0;
     }
     .admin-reports__buttons {
         display: -webkit-box;
@@ -1615,7 +1620,7 @@
         cursor: pointer;
     }
     .admin-accounts {
-        padding: 75px 0 0 0 ;
+        padding: 40px 0 0 0 ;
     }
     .admin-accounts h5{
         font-size: 20px !important;
@@ -1645,7 +1650,7 @@
         -webkit-box-direction: normal;
             -ms-flex-direction: column;
                 flex-direction: column;
-        padding: 20px 0;
+        padding: 20px 0 0 0;
         gap: 5px;
     }
     .admin-accounts-get__time p {
@@ -1679,15 +1684,20 @@
                 align-items: center;
         color: #e36f6f;
         cursor: pointer;
+        margin: 30px 0 0 0;
+        width: fit-content;
     }
     .admin-accounts-get__images {
-        width: 67%;
+        width: 100%;
         display: -webkit-box;
         display: -ms-flexbox;
         display: flex;
         gap: 5px;
         -ms-flex-wrap: wrap;
             flex-wrap: wrap;
+    }
+    .admin-accounts-get__photo {
+        margin: 40px 0 0 0;
     }
     .admin-accounts-get__photo img {
         height: 120px;
@@ -1754,7 +1764,7 @@
     
     
     .admin-section {
-    
+     padding: 40px 0 0 0;
     }
     .admin-section__content {
     
@@ -1955,6 +1965,44 @@
       }
     
     
+
+
+      .video-container {
+        position: relative;
+        background: #fff;
+        padding: 10px;
+    }
+    .video-container video {
+        width: 100%;
+        padding-bottom: 0;
+    }
+    .controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        gap: 10px;
+    }
+    .controls button {
+        padding: 8px 12px;
+        border: none;
+        background: #79c0ad;
+        color: white;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: 0.3s;
+    }
+    .controls button:hover {
+        background: #e36f6f;
+    }
+    .controls input[type="range"] {
+        width: 100px;
+    }
+
+
+
+
+
     
     @media(max-width: 979px) {
         .row {
@@ -2209,10 +2257,6 @@
         .admin-order-item__bin {
             margin: 0;
         }
-    
-        .admin-users {
-            padding: 40px 0 0 0;
-        }
         .admin-users__item {
             -webkit-box-orient: vertical;
             -webkit-box-direction: normal;
@@ -2223,9 +2267,7 @@
                     align-items: start;
         }
     
-        .admin-reports {
-            padding: 40px 0 0 0;
-        }
+        
         .admin-reports-item__text span, .admin-reports-item__delete p {
             margin: -4px 0 0 0;
         }
@@ -2246,10 +2288,6 @@
             margin: 0 0 0 -5px;
         }
     
-    
-        .admin-accounts {
-            padding: 40px 0 0 0 ;
-        }
         .admin-accounts-get__images {
             -webkit-box-pack: center;
                 -ms-flex-pack: center;
@@ -2276,6 +2314,18 @@
         }
         .admin-accounts-get__form button, .admin-accounts-get__files button{
             width: 100%;
+        }
+
+        .galleryModal .modal-content {
+            height: auto;
+            width: 80vw;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .galleryModal__body img, .galleryModal__body video {
+            height: 300px;
         }
     }
     
