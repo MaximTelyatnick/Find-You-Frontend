@@ -4,7 +4,7 @@ import { IAdminUser, IAdminUserToolbar } from "../../types/Admin"
 import IUser from "../../types/IUser"
 
 const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar) => {
-   const apiUrlAddRole = `http://localhost:5000/add-role`
+   const apiUrlAddRole = `http://167.86.84.197:5000/add-role`
 
    const [role, setRole] = useState<string>('user')
    const [error, setError] = useState<string>('')

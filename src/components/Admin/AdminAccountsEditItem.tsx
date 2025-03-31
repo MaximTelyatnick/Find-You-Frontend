@@ -19,7 +19,7 @@ const AdminAccountsEditItem = ({ account, setAccountsSelected }: { account: IHom
          <div className="admin-accounts-edit__right">
             <input type="checkbox" onChange={handleCheckboxChange} />
             <div className="admin-accounts-edit__img">
-               {typeof account.photo == 'string' ? <img src={`http://localhost:5000${account.photo}`} /> :
+               {typeof account.photo == 'string' ? <img src={`http://167.86.84.197:5000${account.photo}`} /> :
                   account.photo && account.photo.data ? <img src={transformPhoto(account.photo)} /> :
                      <img src='/images/blog_image.jpg' />}
                {!!account.check_video && <div className="account-item__icon">

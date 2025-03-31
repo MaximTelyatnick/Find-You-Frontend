@@ -5,7 +5,7 @@ import Title from "../../UX/Title";
 import AdminAccountsEdit from "../AdminAccountsEdit";
 
 const AdminAccountsContent = () => {
-   const apiUrlUpload = 'http://localhost:5000/upload-file'
+   const apiUrlUpload = 'http://167.86.84.197:5000/upload-file'
    const [file, setFile] = useState<File | null>(null);
    const [loading, setLoading] = useState<boolean>(false);
    const [success, setSuccess] = useState<boolean>(false);

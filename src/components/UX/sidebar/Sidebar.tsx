@@ -18,10 +18,10 @@ const Sidebar = () => {
    const storedUser = localStorage.getItem('user');
    let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const [userCheck, setUserCheck] = useState<boolean>(false)
-   const apiUrlCheck = `http://localhost:5000/favorites?users_id=${user?.id}`
+   const apiUrlCheck = `http://167.86.84.197:5000/favorites?users_id=${user?.id}`
    const [favQnt, setFavQnt] = useState<number>(0)
    const [messagesQnt, setMessagesQnt] = useState<number>(0)
-   const apiUrlGetMessages = `http://localhost:5000/get-messages?user_id=${user?.id}`
+   const apiUrlGetMessages = `http://167.86.84.197:5000/get-messages?user_id=${user?.id}`
 
    const getIsFav = async () => {
       try {

@@ -10,13 +10,13 @@ import transformPhoto from "../../utils/transformPhoto";
 import AdminAccountsEditSocial from "./AdminAccountsEditSocial";
 
 const AdminAccountsEdit = () => {
-   const apiUrlGet = 'http://localhost:5000/account'
-   const apiUrlDelete = 'http://localhost:5000/delete-account'
-   const apiUrlDeleteAccounts = 'http://localhost:5000/delete-accounts'
-   const apiUrlUpdate = 'http://localhost:5000/update-photo'
-   const apiUrlDateUpdate = 'http://localhost:5000/update-account-date'
-   const apiUrlAccUpdate = 'http://localhost:5000/update-account'
-   const apiUrl = 'http://localhost:5000'
+   const apiUrlGet = 'http://167.86.84.197:5000/account'
+   const apiUrlDelete = 'http://167.86.84.197:5000/delete-account'
+   const apiUrlDeleteAccounts = 'http://167.86.84.197:5000/delete-accounts'
+   const apiUrlUpdate = 'http://167.86.84.197:5000/update-photo'
+   const apiUrlDateUpdate = 'http://167.86.84.197:5000/update-account-date'
+   const apiUrlAccUpdate = 'http://167.86.84.197:5000/update-account'
+   const apiUrl = 'http://167.86.84.197:5000'
    const [account, setAccount] = useState<IAdminAccountAll | null>(null)
    const [accounts, setAccounts] = useState<IAccount[] | null>(null)
    const [accountsSelected, setAccountsSelected] = useState<number[]>([])
@@ -71,7 +71,7 @@ const AdminAccountsEdit = () => {
       setError('')
       setSuccess('')
 
-      let apiUrlAccouts = `http://localhost:5000/accounts?page=${page}`;
+      let apiUrlAccouts = `http://167.86.84.197:5000/accounts?page=${page}`;
       if (searchInput) apiUrlAccouts += `&search=${searchInput}`;
 
       try {
@@ -299,7 +299,7 @@ const AdminAccountsEdit = () => {
                      } else if (typeof item === "string") {
                         // Если item — это строка (ссылка), проверяем расширение
                         isImage = item.includes(".jpg") || item.includes(".jpeg") || item.includes(".png");
-                        src = item.startsWith("blob") ? item : `http://localhost:5000${item}`;
+                        src = item.startsWith("blob") ? item : `http://167.86.84.197:5000${item}`;
                      }
 
                      return (

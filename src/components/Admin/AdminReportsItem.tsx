@@ -5,8 +5,8 @@ import { IAdminReport, IAdminReportsItemState, IAdminReportsState } from "../../
 import dayjs from "dayjs"
 
 const AdminReportsItem = ({ reporter_user_login, reported_user_login, account_name, account_id, created_at, report_text, comment_id, id, setResult, comment_text }: IAdminReportsItemState) => {
-   const apiUrlDelete = 'http://localhost:5000/delete-reports'
-   const apiUrlDeleteComment = 'http://localhost:5000/delete-comment'
+   const apiUrlDelete = 'http://167.86.84.197:5000/delete-reports'
+   const apiUrlDeleteComment = 'http://167.86.84.197:5000/delete-comment'
    const navigate = useNavigate()
    const [error, setError] = useState<string>('')
    const [seccess, setSeccess] = useState<string>('')

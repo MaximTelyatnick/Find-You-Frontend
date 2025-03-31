@@ -37,7 +37,7 @@ const AccountGallery = ({ files }: IAccountAll) => {
          <div className="account-gallery" style={{ padding: '40px 0 0 0' }}>
             {imageFiles.map((item, index) => (
                <div key={item} className="account-gallery__item" onClick={() => openModal(index)}>
-                  <img src={`http://localhost:5000${item}`} alt="Image" />
+                  <img src={`http://167.86.84.197:5000${item}`} alt="Image" />
                </div>
             ))}
          </div>
@@ -47,7 +47,7 @@ const AccountGallery = ({ files }: IAccountAll) => {
                .filter(item => !item.includes('.jpg'))
                .map((item, index) => (
                   <div key={`video-container-${index}`} className="account-gallery__item">
-                     <VideoPlayer key={`video-player-${index}`} src={`http://localhost:5000${item}`} />
+                     <VideoPlayer key={`video-player-${index}`} src={`http://167.86.84.197:5000${item}`} />
                   </div>
                ))
             }
@@ -62,7 +62,7 @@ const AccountGallery = ({ files }: IAccountAll) => {
                onPrev={handlePrev}
                onNext={handleNext}
             >
-               <img src={`http://localhost:5000${imageFiles[activeItemIndex]}`} alt="Image" />
+               <img src={`http://167.86.84.197:5000${imageFiles[activeItemIndex]}`} alt="Image" />
             </GalleryModal>
          )}
       </div>
