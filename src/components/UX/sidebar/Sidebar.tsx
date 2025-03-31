@@ -3,7 +3,6 @@ import SidebarSearch from "./SidebarSearch";
 import SidebarCities from "./SidebarCities";
 import SidebarItems from "./SidebarItems";
 import { useEffect, useState } from "react";
-import fetchData from "../../../services/fetchData";
 import IUser from "../../../types/IUser";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -137,7 +136,7 @@ const Sidebar = () => {
          <SidebarCities setUserCheck={setUserCheck} />
 
          <br />
-         <SidebarItems fetchData={fetchData} />
+         <SidebarItems />
 
          <div>
             <p>

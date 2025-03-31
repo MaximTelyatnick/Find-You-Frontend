@@ -4,13 +4,19 @@ import { ISocials } from "../../types/IAccounts"
 
 const AdminAccountsEditSocial = ({ social_name, id, text, setAccountSocials }: IAdminAccountsEditSocial) => {
    const [textInput, setTextInput] = useState<string>(text)
+   const socialsTypes: string[] = ['Facebook', 'Odnoklassniki', 'ICQ', 'Instagram', 'Twitter', 'Email', 'Telegram', 'TikTok', 'OnlyFans', 'Phone']
 
    const deleteAccountsSocialsHandler = (id: number) => {
       setAccountSocials((prev: ISocials[]) => [...prev].filter(item => item.id != id))
    }
 
    const changeAccountSocialsHandler = (id: number, option: string) => {
-
+      setAccountSocials((prev: ISocials[]) => [...prev].map(item => {
+         if (item.id == id) {
+            item.social_name = option
+            item.type_social_id = socialsTypes.indexOf(option)
+         }
+      }))
    }
 
    useEffect(() => {

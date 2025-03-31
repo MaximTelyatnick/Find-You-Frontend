@@ -3,7 +3,6 @@ import axios from "axios";
 import { IComment } from "../../../types/IAccounts";
 import Title from "../../UX/Title";
 import AdminAccountsEdit from "../AdminAccountsEdit";
-import AdminAccountItems from "./AdminAccountItems";
 
 const AdminAccountsContent = () => {
    const apiUrlUpload = 'http://localhost:5000/upload-file'
@@ -76,10 +75,6 @@ const AdminAccountsContent = () => {
          <h5>Получение аккаунта</h5>
          {error && <p style={{ color: 'red' }}>{error}</p>}
          {success && <p style={{ color: 'green' }}>{success}</p>}
-         <form className="admin-accounts-get__form" onSubmit={(e) => { e.preventDefault(); navigate(`/admin-accounts?page=1&search=${searchInput}`) }}>
-            <input type="text" placeholder="Id аккаунта" onChange={(e) => { setSearchInput(e.target.value) }} />
-            <button className="btn btn-info">Получить</button>
-         </form>
          <AdminAccountsEdit />
       </div>
    )

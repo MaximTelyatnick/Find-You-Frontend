@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { IAccountAll, IAccountsState } from "../../types/IAccounts"
 import Title from "../UX/Title"
-import fetchData from "../../services/fetchData";
 import HomeContentItem from "../home/HomeContentItem";
 import axios from "axios";
 

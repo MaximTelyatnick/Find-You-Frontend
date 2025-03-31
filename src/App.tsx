@@ -26,7 +26,7 @@ import AdminSections from "./pages/AdminSections";
 
 
 const App = () => {
-   // useSecurityRestrictions(); // Вызываем хук внутри компонента
+   useSecurityRestrictions(); // Вызываем хук внутри компонента
 
    return (
       <BrowserRouter>

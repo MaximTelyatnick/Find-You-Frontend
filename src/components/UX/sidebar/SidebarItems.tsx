@@ -4,7 +4,7 @@ import { IAccountsState } from "../../../types/IAccounts";
 import HomeContentItem from "../../home/HomeContentItem";
 import axios from "axios";
 
-const SidebarItems = ({ fetchData }: { fetchData: (method: 'post' | 'get', url: string, setState: Function) => void }) => {
+const SidebarItems = () => {
    let apiUrl = `http://localhost:5000/accounts?page=1&limit=10`;
    const [result, setResult] = useState<IAccountsState>({
       items: null,
