@@ -3,6 +3,7 @@ import { IAccountAll, IAccountsState } from "../../types/IAccounts"
 import Title from "../UX/Title"
 import fetchData from "../../services/fetchData";
 import HomeContentItem from "../home/HomeContentItem";
+import axios from "axios";
 
 const AccountSimilars = ({ account, tags }: IAccountAll) => {
    const [result, setResult] = useState<IAccountsState>({
@@ -10,10 +11,31 @@ const AccountSimilars = ({ account, tags }: IAccountAll) => {
       loading: false,
       error: false
    })
-   const apiUrl = `http://167.86.84.197:5000/accounts?page=1&tag_id=${tags[0].id}`
+   const apiUrl = `http://localhost:5000/accounts?page=1&tag_id=${tags[0].id}`
+
+   const getData = async () => {
+      try {
+         setResult((prev) => ({ ...prev, loading: true }))
+
+         const response = await axios.get(apiUrl);
+
+         setResult({
+            items: response.data.accounts,
+            loading: false,
+            error: false
+         })
+
+      } catch (error: any) {
+         setResult({
+            items: null,
+            loading: false,
+            error: true
+         })
+      }
+   }
 
    useEffect(() => {
-      fetchData('get', apiUrl, setResult)
+      getData()
    }, [])
 
    return (

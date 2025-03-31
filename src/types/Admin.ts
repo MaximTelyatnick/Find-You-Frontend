@@ -1,28 +1,38 @@
-import { IAccountAll } from "./IAccounts";
+import { IAccountAll, ISocials } from "./IAccounts";
 import IOrder from "./IOrder";
+
+export interface IAdminAccountsEditSocial extends ISocials {
+   setAccountSocials: Function
+}
 
 export interface IAdminOrdersItemProps extends IOrder {
    setResult: Function
 }
 
-interface IAdminUser {
+export interface IAdminUser {
    id: number;
    login: string;
-   avatar: string | null;
+   avatar: { type: string; data: number[]; } | null;
    date_of_create: string;
    mail: string;
    session_id: string | null;
    role: string; // Если используем COALESCE, role всегда строка (может быть пустой)
 }
 
-export interface IAdminUserState {
-   items: IAdminUser | null,
-   loading: boolean,
-   error: boolean,
+export interface IAdminUsersContentItem {
+   user: IAdminUser,
+   setUsersSelected: Function,
+}
+
+export interface IAdminUsersState {
+   users: IAdminUser[],
+   setUsers: Function,
+   setUsersSelected: Function,
 }
 
 export interface IAdminUserToolbar {
    setResult: Function,
+   setSelected: Function
    userId: number
 }
 

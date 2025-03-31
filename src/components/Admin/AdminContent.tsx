@@ -1,42 +1,32 @@
+import { useNavigate } from "react-router-dom";
 import IUser from "../../types/IUser";
-import AdminOrders from "./AdminOrders";
-import AdminUsers from "./AdminUsers";
-import AdminReports from "./AdminReports";
-import AdminAccounts from "./AdminAccounts";
-import AdminSections from "./AdminSections";
-import { useState } from "react";
 
 const AdminContent = () => {
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
-   const [visiblePage, setVisiblePage] = useState<string>('')
+   const navigate = useNavigate()
 
    return (
       <>
          {user?.role != 'admin' && user?.role != 'moder' && <p>У вас нет прав</p>}
          {user?.role == 'admin' || user?.role == 'moder' ? <div>
             <div className="admin">
-               <div className="btn" onClick={() => { setVisiblePage('Заказы') }}>
+               <div className="btn" onClick={() => { navigate('/admin-orders') }}>
                   Заказы
                </div>
-               <div className="btn" onClick={() => { setVisiblePage('Пользователи') }}>
+               <div className="btn" onClick={() => { navigate('/admin-users') }}>
                   Пользователи
                </div>
-               <div className="btn" onClick={() => { setVisiblePage('Жалобы') }}>
+               <div className="btn" onClick={() => { navigate('/admin-reports') }}>
                   Жалобы
                </div>
-               <div className="btn" onClick={() => { setVisiblePage('Аккаунты') }}>
+               <div className="btn" onClick={() => { navigate('/admin-accounts') }}>
                   Аккаунты
                </div>
-               <div className="btn" onClick={() => { setVisiblePage('Секции') }}>
+               <div className="btn" onClick={() => { navigate('/admin-sections') }}>
                   Секции
                </div>
             </div>
-            {visiblePage == 'Заказы' && <AdminOrders />}
-            {visiblePage == 'Пользователи' && <AdminUsers />}
-            {visiblePage == 'Жалобы' && <AdminReports />}
-            {visiblePage == 'Аккаунты' && <AdminAccounts />}
-            {visiblePage == 'Секции' && <AdminSections />}
          </div> : ''}
       </>
    )

@@ -1,41 +1,68 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { IAccountAll } from "../../types/IAccounts";
 import GalleryModal from "../UX/modals/GalleryModal";
+import VideoPlayer from "../UX/VideoPlayer";
 
 const AccountGallery = ({ files }: IAccountAll) => {
    const [isOpen, setIsOpen] = useState(false);
-   const [activeItem, setActiveItem] = useState<string | null>(null);
+   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
 
-   const openModal = (item: string) => {
-      setActiveItem(item);
+   // Сортируем файлы и фильтруем только изображения для галереи
+   const imageFiles = useMemo(() => {
+      return files
+         .filter(item => item.includes('.jpg'))
+         .sort((a, b) => Number(a.endsWith(".mp4")) - Number(b.endsWith(".mp4")));
+   }, [files]);
+
+   // Все файлы для отображения
+   const filesSorted = useMemo(() => {
+      return files.sort((a, b) => Number(a.endsWith(".mp4")) - Number(b.endsWith(".mp4")));
+   }, [files]);
+
+   const openModal = (index: number) => {
+      setActiveItemIndex(index);
       setIsOpen(true);
+   };
+
+   const handlePrev = () => {
+      setActiveItemIndex((prev) => (prev > 0 ? prev - 1 : imageFiles.length - 1));
+   };
+
+   const handleNext = () => {
+      setActiveItemIndex((prev) => (prev < imageFiles.length - 1 ? prev + 1 : 0));
    };
 
    return (
       <div>
          <div className="account-gallery" style={{ padding: '40px 0 0 0' }}>
-            {files.sort((a, b) => Number(a.endsWith(".mp4")) - Number(b.endsWith(".mp4"))).map((item) => (
-               item.includes('.jpg') && <div key={item} className="account-gallery__item" onClick={() => openModal(item)}>
-                  <img src={`http://167.86.84.197:5000${item}`} alt="Image" />
-               </div>
-            ))}
-         </div>
-         <div className="account-gallery" style={{ padding: '25px 0 0 0' }}>
-            {files.sort((a, b) => Number(a.endsWith(".mp4")) - Number(b.endsWith(".mp4"))).map((item) => (
-               !item.includes('.jpg') && <div key={item} className="account-gallery__item" onClick={() => openModal(item)}>
-                  <video src={`http://167.86.84.197:5000${item}`} autoPlay muted />
+            {imageFiles.map((item, index) => (
+               <div key={item} className="account-gallery__item" onClick={() => openModal(index)}>
+                  <img src={`http://localhost:5000${item}`} alt="Image" />
                </div>
             ))}
          </div>
 
-         {/* Модалка вызывается один раз и получает активный элемент */}
-         {isOpen && activeItem && (
-            <GalleryModal isOpen={isOpen} setIsOpen={setIsOpen}>
-               {activeItem.includes('.jpg') ? (
-                  <img src={`http://167.86.84.197:5000${activeItem}`} alt="Image" />
-               ) : (
-                  <video src={`http://167.86.84.197:5000${activeItem}`} autoPlay muted />
-               )}
+         <div className="account-gallery account-gallery__videos" style={{ padding: '25px 0 0 0' }}>
+            {filesSorted
+               .filter(item => !item.includes('.jpg'))
+               .map((item, index) => (
+                  <div key={`video-container-${index}`} className="account-gallery__item">
+                     <VideoPlayer key={`video-player-${index}`} src={`http://localhost:5000${item}`} />
+                  </div>
+               ))
+            }
+         </div>
+
+         {isOpen && (
+            <GalleryModal
+               isOpen={isOpen}
+               setIsOpen={setIsOpen}
+               currentIndex={activeItemIndex}
+               totalImages={imageFiles.length}
+               onPrev={handlePrev}
+               onNext={handleNext}
+            >
+               <img src={`http://localhost:5000${imageFiles[activeItemIndex]}`} alt="Image" />
             </GalleryModal>
          )}
       </div>

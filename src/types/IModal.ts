@@ -34,6 +34,12 @@ export interface IModalComment extends IModal {
    removeComment: Function;
 }
 
-export interface IModalGallery extends Omit<IModal, 'children'> {
-   children: React.ReactElement<{ src: string }>;
+export interface IModalGallery {
+   isOpen: boolean;
+   setIsOpen: (isOpen: boolean) => void;
+   children: React.ReactNode;
+   currentIndex?: number;
+   totalImages?: number;
+   onPrev?: () => void;
+   onNext?: () => void;
 }

@@ -19,10 +19,10 @@ const Sidebar = () => {
    const storedUser = localStorage.getItem('user');
    let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const [userCheck, setUserCheck] = useState<boolean>(false)
-   const apiUrlCheck = `http://167.86.84.197:5000/favorites?users_id=${user?.id}`
+   const apiUrlCheck = `http://localhost:5000/favorites?users_id=${user?.id}`
    const [favQnt, setFavQnt] = useState<number>(0)
    const [messagesQnt, setMessagesQnt] = useState<number>(0)
-   const apiUrlGetMessages = `http://167.86.84.197:5000/get-messages?user_id=${user?.id}`
+   const apiUrlGetMessages = `http://localhost:5000/get-messages?user_id=${user?.id}`
 
    const getIsFav = async () => {
       try {
@@ -42,6 +42,12 @@ const Sidebar = () => {
          setMessagesQnt(filtredArr.length)
       } catch (error) {
       }
+   }
+
+   const logout = () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem('user');
+      navigate('/')
    }
 
    useEffect(() => {
@@ -113,6 +119,7 @@ const Sidebar = () => {
                   </svg>
                   <span onClick={() => { navigate('/comments') }}>Мои коментарии</span>
                </div>
+               <div className="btn btn-info sidebar-user__button" onClick={logout}>Выйти</div>
             </div> :
             <div className="sidebar__user">
                <p>Вы не авторизованы на <br />сайте, доступ к архиву <br />закрыт. </p>

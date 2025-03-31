@@ -399,6 +399,9 @@
     .sidebar-user__profile p {
         margin: 0;
     }
+    .sidebar-user__button {
+        margin: 10px 0 0 0;
+    }
     .sidebar-user__avatar {
         border: 2px #888 solid;
         border-radius: 50%;
@@ -480,21 +483,99 @@
         margin: 0;
     }
     
-    .galleryModal .modal-content{
-        width: 60vw;
-        height: auto;
-        max-height: 80vh;
-        margin: -150px 0 0 0;
+    .galleryModal {
+        background-color: rgba(0, 0, 0, 0.8);
     }
+    
+    .galleryModal .modal-content {
+        margin: auto;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: transparent;
+        position: relative;
+    }
+    
     .galleryModal__body {
-        width: 100%;
-        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        max-width: 90vw;
+        max-height: 90vh;
+        overflow: hidden;
+        position: relative;
     }
-    .galleryModal__body img, .galleryModal__body video {
-        width: 100%;
-        height: 100%;
-        -o-object-fit: cover;
-           object-fit: cover;
+         
+    .galleryModal__body img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        display: block;
+    }
+    
+    /* Новые стили для навигации */
+    .galleryModal__nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.5);
+        width: 50px;
+        height: 50px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: background-color 0.3s;
+    }
+    
+    .galleryModal__nav:hover {
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    
+    .galleryModal__nav--prev {
+        left: 20px;
+    }
+    
+    .galleryModal__nav--next {
+        right: 20px;
+    }
+    
+    /* Стиль для счетчика */
+    .galleryModal__counter {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        padding: 5px 10px;
+        font-size: 14px;
+        z-index: 10;
+    }
+    
+    /* Стиль для кнопки закрытия */
+    .galleryModal__close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: background-color 0.3s;
+    }
+    
+    .galleryModal__close:hover {
+        background-color: rgba(0, 0, 0, 0.7);
     }
     
     .avatar-modal {
@@ -620,11 +701,16 @@
     .account-header-rate__nums span{
         font-size: 24px;
     }
+    .account-header-rate__rating {
+        position: relative;
+    }
     .account-header-rate__stars {
         display: -webkit-box;
         display: -ms-flexbox;
         display: flex;
         rotate: 180deg;
+        position: relative;
+        z-index: 3;
     }
     .account-header-rate__stars svg {   
         cursor: pointer;
@@ -636,6 +722,22 @@
     .account-header-rate__stars svg:hover,
     .account-header-rate__stars svg:hover ~ svg {
         fill: #FCD53F !important;
+    }
+
+    .account-header-rate__overlay {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        position: absolute;
+        overflow: hidden;
+        top: 0;
+        z-index: 2;
+        width: 100%;
+    }
+    .account-header-rate__overlay svg {
+        fill: #FCD53F;
+        flex-shrink: 0;
+        height: 20px;
     }
     
     .account-info__title {
@@ -653,17 +755,29 @@
         -ms-flex-wrap: wrap;
             flex-wrap: wrap;
     }
+    .account-gallery__videos .account-gallery__item {
+        width: calc(33.3% - 10px);
+        height: 270px;
+    }
     .account-gallery__item {
-        width: calc(25% - 10px);
-        height: 180px;
+        width: calc(16.6% - 10px);
+        height: 120px;
         margin: 0 !important;
     }
-    .account-gallery__item img, .account-gallery__item video{
+    .account-gallery__item img, .account-gallery__item video {
         height: 100%;
         width: 100%;
         -o-object-fit: cover;
            object-fit: cover;
     }
+
+    .account-gallery__item .video-js.vjs-youtube-like {
+        min-width: 100%;
+        height: 270px;
+        max-height: 270px;
+        padding: 0;
+    }
+
     .comment-editor svg {
         cursor: pointer;
     }
@@ -1466,7 +1580,9 @@
     .admin-users__form input{
         margin: 0;
     }
-    .admin-users__item {
+    .admin-users__content {
+    }
+    .admin-users-item {
         display: -webkit-box;
         display: -ms-flexbox;
         display: flex;
@@ -1476,10 +1592,26 @@
         -webkit-box-align: center;
             -ms-flex-align: center;
                 align-items: center;
-        font-size: 20px;
+        font-size: 14px;
         margin: 10px 0 0 0;
     }
-    .admin-users__avatar {
+    .admin-users-item input {
+        width: 20px;
+        height: 20px;
+    }
+    .admin-users-item__login {
+        width: 10%;
+    }
+    .admin-users-item__mail {
+        width: 30%;
+    }
+    .admin-users-item__create {
+        width: 20%;
+    }
+    .admin-users-item__role {
+        width: 15%;
+    }
+    .admin-users-item__avatar {
         width: 50px;
         height: 50px;
         background: #ccc;
@@ -1495,18 +1627,18 @@
                 align-items: center;
         overflow: hidden;
     }
-    .admin-users__avatar img {
+    .admin-users-item__avatar img {
         width: 100%;
         height: 100%;
         -o-object-fit: cover;
            object-fit: cover;
     }
-    .admin-users__text {
-        display: -webkit-box;
-        display: -ms-flexbox;
+
+    .admin-users-item__right {
         display: flex;
+        gap: 10px;
+        align-items: center;
     }
-    
     
     
     .admin-users-toolbar {
@@ -1519,7 +1651,7 @@
         -webkit-box-pack: justify;
             -ms-flex-pack: justify;
                 justify-content: space-between;
-        margin: 10px 0 0 0;
+        margin: 10px 0 20px 0;
     }
     .admin-users-toolbar__form select {
         border: 0;
@@ -1626,6 +1758,56 @@
         font-size: 20px !important;
         padding: 30px 0 15px 0;
     }
+
+    .admin-accounts-get__toolbar {
+        display: flex;
+        gap: 10px;
+    }
+    .admin-accounts-get__toolbar svg {
+        cursor: pointer;
+    }
+
+    .admin-accounts-edit__item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+    .admin-accounts-edit__right {
+        display: flex;
+        align-items: center;
+    }
+    .admin-accounts-edit__right input {
+        width: 25px;
+        height: 25px;
+    }
+    .admin-accounts-edit__img {
+        position: relative;
+        overflow: hidden;
+    }
+    .admin-accounts-edit__img img {
+        width: 180px;
+        height: 240px;
+        object-fit: cover;
+        margin: 0 0 0 15px;
+    }
+    .admin-accounts-edit__name {
+        font-size: 14px;
+    }
+    .admin-accounts-edit__name svg {
+        margin: 0 0 -5px 0;
+        cursor: pointer;
+    }
+    .admin-accounts-edit__date {
+        font-size: 14px;
+    }
+    .admin-accounts-edit__name span {
+        font-size: 18px;
+    }
+    .admin-accounts-edit__date span {
+        font-size: 18px;
+    }
+
     .admin-accounts-get__block {
         display: -webkit-box;
         display: -ms-flexbox;
@@ -1663,6 +1845,17 @@
     .admin-accounts-get__time input {
         margin: 0;
         width: calc(100% - 14px);
+    }
+    .admin-accounts-get__social {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .admin-accounts-get__social svg {
+        cursor: pointer;
+    }
+    .admin-accounts-get__add {
+        margin: 0 0 15px 0 !important;
     }
     .admin-accounts-get__reset {
         background: #e36f6f;
@@ -1967,39 +2160,6 @@
     
 
 
-      .video-container {
-        position: relative;
-        background: #fff;
-        padding: 10px;
-    }
-    .video-container video {
-        width: 100%;
-        padding-bottom: 0;
-    }
-    .controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 10px;
-        gap: 10px;
-    }
-    .controls button {
-        padding: 8px 12px;
-        border: none;
-        background: #79c0ad;
-        color: white;
-        cursor: pointer;
-        border-radius: 5px;
-        transition: 0.3s;
-    }
-    .controls button:hover {
-        background: #e36f6f;
-    }
-    .controls input[type="range"] {
-        width: 100px;
-    }
-
-
 
 
 
@@ -2257,7 +2417,7 @@
         .admin-order-item__bin {
             margin: 0;
         }
-        .admin-users__item {
+        .admin-users-item {
             -webkit-box-orient: vertical;
             -webkit-box-direction: normal;
                 -ms-flex-direction: column;
@@ -2326,6 +2486,11 @@
         }
         .galleryModal__body img, .galleryModal__body video {
             height: 300px;
+        }
+
+        .admin-accounts-edit__item {
+            flex-direction: column;
+            align-items: start;
         }
     }
     
@@ -2434,4 +2599,5 @@
             .modal-footer a:hover {
                 text-decoration: underline;
             }
+
     

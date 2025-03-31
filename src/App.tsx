@@ -18,10 +18,15 @@ import Referral from "./pages/Referral";
 import Refusual from "./pages/Refusual";
 import useSecurityRestrictions from "./utils/useSecurity";
 import Bypassing from "./pages/Bypassing";
+import AdminOrders from "./pages/AdminOrders";
+import AdminReports from "./pages/AdminReports";
+import AdminUsers from "./pages/AdminUsers";
+import AdminAccounts from "./pages/AdminAccounts";
+import AdminSections from "./pages/AdminSections";
 
 
 const App = () => {
-   useSecurityRestrictions(); // Вызываем хук внутри компонента
+   // useSecurityRestrictions(); // Вызываем хук внутри компонента
 
    return (
       <BrowserRouter>
@@ -43,6 +48,11 @@ const App = () => {
             <Route path="comments" element={<Comments />} />
             <Route path="messages" element={<Messages />} />
             <Route path="admin" element={<Admin />} />
+            <Route path="admin-orders" element={<AdminOrders />} />
+            <Route path="admin-reports" element={<AdminReports />} />
+            <Route path="admin-users" element={<AdminUsers />} />
+            <Route path="admin-accounts" element={<AdminAccounts />} />
+            <Route path="admin-sections" element={<AdminSections />} />
             <Route path="/:accountId" element={<AccountPage />} />
          </Routes>
       </BrowserRouter>

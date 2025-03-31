@@ -1,10 +1,10 @@
 import { useState } from "react"
-import Title from "../UX/Title"
-import AdminSectionsItem from "./AdminSectionsItem"
-import { ISection } from "../../types/Admin"
 import axios from "axios"
+import { ISection } from "../../../types/Admin"
+import Title from "../../UX/Title"
+import AdminSectionsItem from "../AdminSectionsItem"
 
-const AdminSections = () => {
+const AdminSectionsContent = () => {
    const [sections, setSections] = useState<ISection[]>([])
    const [page, setPage] = useState<string>('')
    const [dropdownPage, setDropdownPage] = useState<boolean>(false);
@@ -48,7 +48,7 @@ const AdminSections = () => {
             }
          });
 
-         await axios.post("http://167.86.84.197:5000/save-sections", formData, {
+         await axios.post("http://localhost:5000/save-sections", formData, {
             headers: {
                "Content-Type": "multipart/form-data",
             },
@@ -113,4 +113,4 @@ const AdminSections = () => {
    )
 }
 
-export default AdminSections
+export default AdminSectionsContent

@@ -1,57 +1,57 @@
-import { isValidElement, useRef } from 'react';
 import { IModalGallery } from '../../../types/IModal';
+import { useEffect } from 'react';
 
-const GalleryModal = ({ isOpen, setIsOpen, children }: IModalGallery) => {
+const GalleryModal = ({ isOpen, setIsOpen, children, currentIndex, totalImages, onPrev, onNext }: IModalGallery) => {
    if (!isOpen) return null;
 
-   const videoRef = useRef<HTMLVideoElement | null>(null);
-
-   console.log(children);
-
-
-   // Воспроизведение / пауза
-   const togglePlayPause = () => {
-      if (videoRef.current) {
-         if (videoRef.current.paused) {
-            videoRef.current.play();
-         } else {
-            videoRef.current.pause();
-         }
-      }
+   const handleClose = () => {
+      setIsOpen(false);
    };
 
-   // Перемотка
-   const skipTime = (seconds: number) => {
-      if (videoRef.current) {
-         videoRef.current.currentTime += seconds;
-      }
-   };
+   // Добавляем обработчик нажатия клавиш для навигации
+   useEffect(() => {
+      const handleKeyDown = (e: KeyboardEvent) => {
+         if (e.key === 'ArrowLeft') onPrev?.();
+         if (e.key === 'ArrowRight') onNext?.();
+         if (e.key === 'Escape') handleClose();
+      };
 
-   // Регулировка громкости
-   const handleVolumeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (videoRef.current) {
-         videoRef.current.volume = Number(event.target.value);
-      }
-   };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+   }, [onPrev, onNext]);
 
    return (
       <div id="galleryModal" className="modal galleryModal">
          <div className="modal-content">
-            <div className="modal-header">
-               Галерея
-               <span className="close-btn" onClick={() => setIsOpen(false)}>&times;</span>
+            {/* Счетчик изображений */}
+            <div className="galleryModal__counter">
+               {currentIndex ? currentIndex : 0 + 1} / {totalImages}
             </div>
+
+            {/* Кнопка закрытия */}
+            <div className="galleryModal__close" onClick={handleClose}>
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M6 6L18 18" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+               </svg>
+            </div>
+
+            {/* Левая стрелка */}
+            <div className="galleryModal__nav galleryModal__nav--prev" onClick={onPrev}>
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 18L9 12L15 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+               </svg>
+            </div>
+
+            {/* Правая стрелка */}
+            <div className="galleryModal__nav galleryModal__nav--next" onClick={onNext}>
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M9 18L15 12L9 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+               </svg>
+            </div>
+
             <div className="galleryModal__body">
-               {isValidElement(children) && children.type === "video" ?
-                  <div className="video-container">
-                     <video ref={videoRef} src={children.props.src} autoPlay className="video" />
-                     <div className="controls">
-                        <button onClick={togglePlayPause}>▶ / ⏸</button>
-                        <button onClick={() => skipTime(-5)}>⏪ 5 сек</button>
-                        <button onClick={() => skipTime(5)}>⏩ 5 сек</button>
-                        <input type="range" min="0" max="1" step="0.1" defaultValue="1" onChange={handleVolumeChange} />
-                     </div>
-                  </div> : children}
+               {children}
             </div>
          </div>
       </div>

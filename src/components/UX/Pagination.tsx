@@ -1,7 +1,7 @@
 import IPaginationProp from "../../types/IPaginationProps"
 import { useNavigate } from "react-router-dom";
 
-const Pagination = ({ itemsLength, page, totalPages, cityId, tagIds, search, visiblePages }: IPaginationProp) => {
+const Pagination = ({ itemsLength, page, totalPages, cityId, tagIds, search, visiblePages, type }: IPaginationProp) => {
 
    const navigate = useNavigate()
 
@@ -30,11 +30,11 @@ const Pagination = ({ itemsLength, page, totalPages, cityId, tagIds, search, vis
    };
 
    const clickHandler = (num: number) => {
-      let query = `/?page=${num}`;
+      let query = `/${type == 'admin' ? 'admin-accounts' : type == 'users' ? 'admin-users' : ''}?page=${num}`;
 
       if (cityId) query += `&city_id=${cityId}`;
       if (tagIds && tagIds.length > 0) query += `&tag_id=${tagIds.join(",")}`;
-      if (search) query += `&search=${search}`
+      if (search) query += `&${type == 'users' ? 'login' : 'search'}=${search}`
 
       navigate(query);
    };

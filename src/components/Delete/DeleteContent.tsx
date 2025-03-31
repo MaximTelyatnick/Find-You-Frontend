@@ -17,8 +17,8 @@ const DeleteContent = () => {
       loading: false,
       error: false,
    })
-   const apiUrlAdd: string = 'http://167.86.84.197:5000/add-order'
-   const apiUrlGet: string = `http://167.86.84.197:5000/get-orders?user_id=${user?.id}&type=delete`
+   const apiUrlAdd: string = 'http://localhost:5000/add-order'
+   const apiUrlGet: string = `http://localhost:5000/get-orders?user_id=${user?.id}&type=delete`
 
    const sendFormHandler = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()

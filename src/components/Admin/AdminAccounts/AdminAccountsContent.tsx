@@ -1,11 +1,12 @@
 import { useState } from "react";
-import Title from "../UX/Title"
 import axios from "axios";
-import { IComment } from "../../types/IAccounts";
-import AdminAccountsEdit from "./AdminAccountsEdit";
+import { IComment } from "../../../types/IAccounts";
+import Title from "../../UX/Title";
+import AdminAccountsEdit from "../AdminAccountsEdit";
+import AdminAccountItems from "./AdminAccountItems";
 
-const AdminAccounts = () => {
-   const apiUrlUpload = 'http://167.86.84.197:5000/upload-file'
+const AdminAccountsContent = () => {
+   const apiUrlUpload = 'http://localhost:5000/upload-file'
    const [file, setFile] = useState<File | null>(null);
    const [loading, setLoading] = useState<boolean>(false);
    const [success, setSuccess] = useState<boolean>(false);
@@ -72,9 +73,16 @@ const AdminAccounts = () => {
             {error && <p style={{ color: "red" }}>{error}</p>}
             {success && <p style={{ color: "green" }}>Файлы успешно добавленны</p>}
          </div>
+         <h5>Получение аккаунта</h5>
+         {error && <p style={{ color: 'red' }}>{error}</p>}
+         {success && <p style={{ color: 'green' }}>{success}</p>}
+         <form className="admin-accounts-get__form" onSubmit={(e) => { e.preventDefault(); navigate(`/admin-accounts?page=1&search=${searchInput}`) }}>
+            <input type="text" placeholder="Id аккаунта" onChange={(e) => { setSearchInput(e.target.value) }} />
+            <button className="btn btn-info">Получить</button>
+         </form>
          <AdminAccountsEdit />
       </div>
    )
 }
 
-export default AdminAccounts
+export default AdminAccountsContent

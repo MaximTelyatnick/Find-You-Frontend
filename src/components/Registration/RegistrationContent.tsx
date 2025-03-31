@@ -25,12 +25,12 @@ const RegistrationContent = () => {
    useEffect(() => { fetchCaptcha(); }, []);
 
    const fetchCaptcha = async () => {
-      const response = await axios.get("http://167.86.84.197:5000/captcha");
+      const response = await axios.get("http://localhost:5000/captcha");
       setCaptcha(response.data);
    };
 
    const checkLogin = async () => {
-      fetchData('get', `http://167.86.84.197:5000/check-login/${login}`, setLoginAvailable)
+      fetchData('get', `http://localhost:5000/check-login/${login}`, setLoginAvailable)
    };
 
    const sendFormHandler = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -43,7 +43,7 @@ const RegistrationContent = () => {
       if (code !== captcha.text) return setMessage("Капча введена неправильно!")
 
       try {
-         const response = await axios.post("http://167.86.84.197:5000/register", { login, password, email, code });
+         const response = await axios.post("http://localhost:5000/register", { login, password, email, code });
 
          localStorage.setItem('token', response.data.token);
 

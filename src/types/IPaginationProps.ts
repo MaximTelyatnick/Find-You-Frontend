@@ -6,4 +6,5 @@ export default interface IPaginationProps {
    cityId?: number;
    tagIds?: number[];
    search?: string;
+   type?: string;
 }

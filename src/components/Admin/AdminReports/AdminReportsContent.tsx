@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react"
-import fetchData from "../../services/fetchData"
-import { IAdminReportsState } from "../../types/Admin"
-import Title from "../UX/Title"
-import AdminReportsItem from "./AdminReportsItem"
+import { IAdminReportsState } from "../../../types/Admin"
+import fetchData from "../../../services/fetchData"
+import Title from "../../UX/Title"
+import AdminReportsItem from "../AdminReportsItem"
 
-const AdminReports = () => {
-   const apiUrl = `http://167.86.84.197:5000/reports`
+const AdminReportsContent = () => {
+   const apiUrl = `http://localhost:5000/reports`
    const [filter, setFilter] = useState<string>('new')
    const [result, setResult] = useState<IAdminReportsState>({
       items: null,
@@ -51,4 +51,4 @@ const AdminReports = () => {
    )
 }
 
-export default AdminReports
+export default AdminReportsContent

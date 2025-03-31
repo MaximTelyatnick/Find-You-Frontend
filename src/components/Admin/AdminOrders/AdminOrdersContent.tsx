@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react"
-import fetchData from "../../services/fetchData"
-import { IOrderState } from "../../types/IOrder"
-import Title from "../UX/Title"
-import AdminOrdersItem from "./AdminOrdersItem"
-import IUser from "../../types/IUser"
+import fetchData from "../../../services/fetchData"
 import DatePicker from "react-datepicker"
 import { ru } from "date-fns/locale"
+import IUser from "../../../types/IUser"
+import { IOrderState } from "../../../types/IOrder"
+import Title from "../../UX/Title"
+import AdminOrdersItem from "../AdminOrdersItem"
 
-const AdminOrders = () => {
+const AdminOrdersContent = () => {
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
-   const apiUrl = `http://167.86.84.197:5000/get-admin-orders?user_id=${user?.id}`
+   const apiUrl = `http://localhost:5000/get-admin-orders?user_id=${user?.id}`
    const [result, setResult] = useState<IOrderState>({
       items: null,
       loading: false,
@@ -118,4 +118,4 @@ const AdminOrders = () => {
    )
 }
 
-export default AdminOrders
+export default AdminOrdersContent

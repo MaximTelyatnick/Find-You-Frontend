@@ -6,8 +6,8 @@ import { IOrderState } from "../../types/IOrder";
 import IUser from "../../types/IUser";
 
 const AdminOrdersItem = ({ id, text, created_at, status, setResult }: IAdminOrdersItemProps) => {
-   const apiUrl = 'http://167.86.84.197:5000/update-orders'
-   const apiUrlDelete = 'http://167.86.84.197:5000/delete-orders'
+   const apiUrl = 'http://localhost:5000/update-orders'
+   const apiUrlDelete = 'http://localhost:5000/delete-orders'
    const statusArr: string[] = [
       'Отклонена',
       'Новое',

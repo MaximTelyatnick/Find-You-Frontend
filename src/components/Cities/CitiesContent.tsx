@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import fetchData from "../../services/fetchData";
 
 const CitiesContent = () => {
-   const apiUrl: string = 'http://167.86.84.197:5000/cities'
+   const apiUrl: string = 'http://localhost:5000/cities'
    const navigate = useNavigate()
    const [result, setResult] = useState<ICityProps>({
       items: null,
@@ -48,7 +48,7 @@ const CitiesContent = () => {
             </div>}
             {!result.loading && result.error && <p>Что-то пошло не так, попробуйте ещё раз</p>}
             {groupedCities &&
-               Object.keys(groupedCities).map(letter => (
+               Object.keys(groupedCities).sort().map(letter => (
                   <div key={letter}>
                      <h6 style={{ textAlign: 'left' }}>{letter}</h6>
                      <p style={{ color: '#e36f6f' }}>
