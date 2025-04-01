@@ -299,7 +299,7 @@ const AdminAccountsEdit = () => {
                      } else if (typeof item === "string") {
                         // Если item — это строка (ссылка), проверяем расширение
                         isImage = item.includes(".jpg") || item.includes(".jpeg") || item.includes(".png");
-                        src = item.startsWith("blob") ? item : `http://167.86.84.197:5000${item}`;
+                        src = item.startsWith("blob") ? item : `${item}`;
                      }
 
                      return (
