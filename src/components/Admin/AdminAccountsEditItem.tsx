@@ -9,8 +9,8 @@ const AdminAccountsEditItem = ({ account, setAccountsSelected }: { account: IHom
    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       setAccountsSelected((prevSelected: number[]) =>
          event.target.checked
-            ? [...prevSelected, account.id]  // Добавляем ID, если чекбокс включен
-            : prevSelected.filter(id => id !== account.id) // Удаляем ID, если чекбокс выключен
+            ? [...prevSelected, account.id]
+            : prevSelected.filter(id => id !== account.id)
       );
    };
 
