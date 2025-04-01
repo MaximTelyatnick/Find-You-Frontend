@@ -11,7 +11,6 @@ import AdminAccountsEditSocial from "./AdminAccountsEditSocial";
 
 const AdminAccountsEdit = () => {
    const apiUrlGet = 'http://167.86.84.197:5000/account'
-   const apiUrlDelete = 'http://167.86.84.197:5000/delete-account'
    const apiUrlDeleteAccounts = 'http://167.86.84.197:5000/delete-accounts'
    const apiUrlUpdate = 'http://167.86.84.197:5000/update-photo'
    const apiUrlDateUpdate = 'http://167.86.84.197:5000/update-account-date'
@@ -116,25 +115,6 @@ const AdminAccountsEdit = () => {
          }
          return prev
       })
-   }
-
-   const deleteAccountHandler = async () => {
-      try {
-         setError('')
-         setSuccess('')
-
-         await axios.delete(apiUrlDelete, {
-            data: {
-               account_id: account?.account.id,
-               account_identificator: account?.account.identificator
-            }
-         })
-
-         setSuccess('Аккаунт успешно удалено')
-         setAccount(null)
-      } catch (error) {
-         setError('Ошибка при удалении аккаунта, попробуйте ещё раз!')
-      }
    }
 
    const deleteAccountsHandler = async () => {
@@ -356,13 +336,6 @@ const AdminAccountsEdit = () => {
                <div className="admin-accounts-get__files">
                   <input type="file" accept=".jpg" onChange={(e) => { setAccountPhoto(e.target.files ? e.target.files[0] : null) }} />
                   <button className="btn btn-info" onClick={saveHandlerPhoto}>Сохранить</button>
-               </div>
-
-               <div className="admin-accounts-get__bin" onClick={deleteAccountHandler}>
-                  <span>!!! Удалить аккаунт</span>
-                  <svg width="20" height="20" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-                     <path d="M55.4166 11.6667H45.2083L42.2916 8.75H27.7083L24.7916 11.6667H14.5833V17.5H55.4166M17.5 55.4167C17.5 56.9638 18.1146 58.4475 19.2085 59.5415C20.3025 60.6354 21.7862 61.25 23.3333 61.25H46.6666C48.2137 61.25 49.6975 60.6354 50.7914 59.5415C51.8854 58.4475 52.5 56.9638 52.5 55.4167V20.4167H17.5V55.4167Z" fill="#E36F6F" />
-                  </svg> !!!
                </div>
             </div>
          </>
