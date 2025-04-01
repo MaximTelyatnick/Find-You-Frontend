@@ -191,7 +191,7 @@ const AdminAccountsEdit = () => {
                   "Content-Type": "multipart/form-data",  // Указываем правильный заголовок
                },
             });
-
+            setAccountPhoto(null)
             setSuccess('Фото успешно обновленно')
          } catch (error) {
             setError('Ошибка при обновлении фото, попробуйте ещё раз!')
