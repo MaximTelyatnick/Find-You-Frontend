@@ -79,9 +79,8 @@ const AdminAccountsEdit = () => {
          setTotalPages(result.data.totalPages || 1);
 
          setAccounts(result.data.accounts)
-         setSuccess('Аккаунт успешно получен')
       } catch (error) {
-         setError('Ошибка при получении аккаунта, попробуйте ещё раз!')
+         setError('Ошибка при получении аккаунтов, попробуйте ещё раз!')
       }
    }
 
@@ -132,6 +131,7 @@ const AdminAccountsEdit = () => {
          accountsSelected.forEach(itemSelected => {
             setAccounts(prev => prev && prev.filter(item => item.id != itemSelected))
          })
+         setAccountsSelected([])
       } catch (error) {
          setError('Ошибка при удалении аккаунтов, попробуйте ещё раз!')
       }
