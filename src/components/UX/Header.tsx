@@ -12,7 +12,7 @@ const Header = ({ activeLink }: { activeLink?: string }) => {
          navigate('/Cities');
       } else if (linkName === 'Tags') {
          navigate('/Tags');
-      } else if (linkName === 'Order') {
+      } else if (linkName === 'Orders') {
          navigate('/Order');
       } else if (linkName === 'Delete') {
          navigate('/Delete');
@@ -41,8 +41,8 @@ const Header = ({ activeLink }: { activeLink?: string }) => {
                      <li className={activeLink === 'Tags' ? 'active' : ''}>
                         <a onClick={() => handleLinkClick('Tags')}>Тэги</a>
                      </li>
-                     <li className={activeLink === 'Order' ? 'active' : ''}>
-                        <a onClick={() => handleLinkClick('Order')}>Заказы</a>
+                     <li className={activeLink === 'Orders' ? 'active' : ''}>
+                        <a onClick={() => handleLinkClick('Orders')}>Заказы</a>
                      </li>
                      <li className={activeLink === 'Delete' ? 'active' : ''}>
                         <a onClick={() => handleLinkClick('Delete')}>Удаление</a>

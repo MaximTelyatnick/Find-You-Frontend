@@ -6,7 +6,7 @@ import Header from "../components/UX/Header"
 const Order = () => {
    return (
       <>
-         <Header activeLink="ORDER" />
+         <Header activeLink="Orders" />
          <GradientHeader logoPath="ЗАКАЗЫ" />
          <OrderMain />
          <Footer />
