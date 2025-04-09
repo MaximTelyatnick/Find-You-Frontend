@@ -48,11 +48,7 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
 
          // Получаем актуальную информацию о пользователе перед изменением роли
          const userResponse = await axios.get(`http://167.86.84.197:5000/get-role?user_id=${userId}`);
-         const selectedUser = userResponse.data || {
-            id: new Date(),
-            name: 'user',
-            userId,
-         };
+         const selectedUser = userResponse.data;
 
          // Дополнительная проверка прав перед отправкой запроса
          if (currentUser?.role === 'moder' &&
