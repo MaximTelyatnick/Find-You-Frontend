@@ -20,6 +20,7 @@ const AdminAccountsEdit = () => {
    const [accounts, setAccounts] = useState<IAccount[] | null>(null)
    const [accountsSelected, setAccountsSelected] = useState<number[]>([])
    const [success, setSuccess] = useState<string>('');
+   const [loading, setLoading] = useState<boolean>(false);
    const [error, setError] = useState<string>('');
    const [accountName, setAccountName] = useState<string>(account?.account.name ? account?.account.name : '');
    const [accountCity, setAccountCity] = useState<string>(account?.city.name_ru ? account?.city.name_ru : '');
@@ -70,7 +71,7 @@ const AdminAccountsEdit = () => {
       setError('')
       setSuccess('')
 
-      let apiUrlAccouts = `http://167.86.84.197:5000/accounts?page=${page}`;
+      let apiUrlAccouts = `http://167.86.84.197:5000/accounts?page=${page}&limit=20`;
       if (searchInput) apiUrlAccouts += `&search=${searchInput}`;
 
       try {
@@ -88,6 +89,7 @@ const AdminAccountsEdit = () => {
       setError('')
       setSuccess('')
       setAccount(null)
+      setLoading(true)
 
       try {
          const result = await axios.get(`${apiUrlGet}?id=${accountsSelected[0]}`)
@@ -96,11 +98,14 @@ const AdminAccountsEdit = () => {
          setAccountName(result.data.account.name)
          setAccountCity(result.data.city.name_ru)
          setAccountTags(result.data.tags.map((item: ITag) => item.name_ru).join(", "))
+         setAccountDate(result.data.account.date_of_create)
          setAccountSocials(result.data.socials)
+         setLoading(false)
 
          setSuccess('Аккаунт успешно получен')
       } catch (error) {
          setError('Ошибка при получении аккаунта, попробуйте ещё раз!')
+         setLoading(false)
       }
    }
 
@@ -120,6 +125,7 @@ const AdminAccountsEdit = () => {
       try {
          setError('')
          setSuccess('')
+         setLoading(true)
 
          await axios.delete(apiUrlDeleteAccounts, {
             data: {
@@ -128,11 +134,13 @@ const AdminAccountsEdit = () => {
          })
 
          setSuccess('Аккаунты успешно удалены')
+         setLoading(false)
          accountsSelected.forEach(itemSelected => {
             setAccounts(prev => prev && prev.filter(item => item.id != itemSelected))
          })
          setAccountsSelected([])
       } catch (error) {
+         setLoading(false)
          setError('Ошибка при удалении аккаунтов, попробуйте ещё раз!')
       }
    }
@@ -252,13 +260,24 @@ const AdminAccountsEdit = () => {
       }
    }
 
+   const formatDateForInput = (dateStr: string): string => {
+      if (!dateStr) return '';
+      try {
+         return new Date(dateStr).toISOString().slice(0, 16)
+      } catch (error) {
+         return '';
+      }
+   }
+
    useEffect(() => {
       getAccountsHandler()
    }, [page, search])
 
    return (
       <div className="admin-accounts-get">
-         <h5>Получение аккаунта</h5>
+         {loading && <div className="loader">
+            <div className="loader__circle"></div>
+         </div>}
          {error && <p style={{ color: 'red' }}>{error}</p>}
          {success && <p style={{ color: 'green' }}>{success}</p>}
          <form className="admin-accounts-get__form" onSubmit={(e) => { e.preventDefault(); navigate(`/admin-accounts?page=1&search=${searchInput}`) }}>
@@ -307,6 +326,7 @@ const AdminAccountsEdit = () => {
             <div>
                <h3>Информация о аккаунте</h3>
                <div className="admin-accounts-get__time">
+                  <p>Идентификатор : {account.account.identificator}</p>
                   <p>Имя :</p>
                   <input type="text" placeholder="Имя аккаунта" value={accountName} onChange={(e) => { setAccountName(e.target.value) }} />
                   <p>Город :</p>
@@ -315,7 +335,7 @@ const AdminAccountsEdit = () => {
                   <input type="text" placeholder="Тэги аккаунта" value={accountTags} onChange={(e) => { setAccountTags(e.target.value) }} />
                   <p>Контакты :</p>
                   {accountSocials.map(item => (
-                     <AdminAccountsEditSocial {...item} setAccountSocials={setAccountSocials} />
+                     <AdminAccountsEditSocial key={item.id} {...item} setAccountSocials={setAccountSocials} />
                   ))}
                   <button className="btn btn-info admin-accounts-get__add" onClick={() => { addAccountSocialsHandler() }}>Добавить контакт</button>
                   <button className="btn btn-info" onClick={() => { updateAccInfo() }}>Сохранить</button>
@@ -323,7 +343,7 @@ const AdminAccountsEdit = () => {
 
                <div className="admin-accounts-get__time">
                   <p>Указать дату создания :</p>
-                  <input type="datetime-local" placeholder="Дата создания / публикации" value={accountDate} onChange={(e) => { setAccountDate(e.target.value) }} />
+                  <input type="datetime-local" placeholder="Дата создания / публикации" value={formatDateForInput(accountDate)} onChange={(e) => { setAccountDate(e.target.value) }} />
                   <button className="btn btn-info" onClick={() => { updateDate('save') }}>Сохранить</button>
                   <button className="admin-accounts-get__reset" onClick={() => { updateDate('reset') }}>Сбросить дату</button>
                </div>

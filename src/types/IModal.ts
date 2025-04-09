@@ -10,10 +10,13 @@ export interface IModalRead extends IMessage {
    isOpen: boolean,
    setIsOpen: Function
    children: React.ReactNode
+   responseHandler: Function
 }
 
 export interface IModalSend extends IModal {
-   setResult: Function
+   setResult?: Function
+   responseLogin: string
+   setResponseLogin: Function
 }
 
 export interface IModalRecovery extends IModal {

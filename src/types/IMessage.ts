@@ -16,4 +16,5 @@ export interface IMessageState {
 export interface IMessageItemProps extends IMessage {
    selected: number[];
    setSelected: Function;
+   responseHandler: Function;
 }

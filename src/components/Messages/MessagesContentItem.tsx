@@ -4,7 +4,7 @@ import IUser from "../../types/IUser";
 import { useState } from "react";
 import ReadMessageModal from "../UX/modals/ReadMessageModal";
 
-const MessagesContentItem = ({ id, date_messages, time_messages, text_messages, sender, receiver, selected, setSelected }: IMessageItemProps) => {
+const MessagesContentItem = ({ id, date_messages, time_messages, text_messages, sender, receiver, selected, setSelected, responseHandler }: IMessageItemProps) => {
    const [isOpenRead, setIsOpenRead] = useState<boolean>(false);
    const storedUser = localStorage.getItem('user');
    let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
@@ -19,7 +19,7 @@ const MessagesContentItem = ({ id, date_messages, time_messages, text_messages, 
 
    return (
       <div className="messages-table-item">
-         <ReadMessageModal isOpen={isOpenRead} setIsOpen={setIsOpenRead} id={id} date_messages={date_messages} time_messages={time_messages} text_messages={text_messages} sender={sender} receiver={receiver}>
+         <ReadMessageModal responseHandler={responseHandler} isOpen={isOpenRead} setIsOpen={setIsOpenRead} id={id} date_messages={date_messages} time_messages={time_messages} text_messages={text_messages} sender={sender} receiver={receiver}>
             <div className="messages-table-item__title"><p>
                {sender == user?.login ? <svg width="25" height="25" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g clipPath="url(#clip0_3_3)">
@@ -39,7 +39,7 @@ const MessagesContentItem = ({ id, date_messages, time_messages, text_messages, 
             </div>
          </ReadMessageModal>
          <div className="messages-table-item__author"><p>{sender}</p></div>
-         <div className="messages-table-item__date"><p>{dayjs(date_messages).format("DD:MM:YYYY") + " " + time_messages.slice(0, 5)}</p></div>
+         <div className="messages-table-item__date"><p>{dayjs(date_messages).format("DD.MM.YYYY") + " " + time_messages.slice(0, 5)}</p></div>
          <div className="messages-table-item__checkbox"><input type="checkbox" checked={[...selected].includes(id) && true} onChange={selectHandler} /></div>
       </div>
    )

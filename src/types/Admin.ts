@@ -7,6 +7,7 @@ export interface IAdminAccountsEditSocial extends ISocials {
 
 export interface IAdminOrdersItemProps extends IOrder {
    setResult: Function
+   openSendMessageModal: Function
 }
 
 export interface IAdminUser {

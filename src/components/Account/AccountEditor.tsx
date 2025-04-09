@@ -3,6 +3,7 @@ import Title from "../UX/Title";
 import { AccountReplyProps, IAccountState, IComment } from "../../types/IAccounts";
 import IUser from "../../types/IUser";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, setResult }: AccountReplyProps) => {
    const apiUrlAdd: string = 'http://167.86.84.197:5000/add-comment';
@@ -12,6 +13,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
    const [seccess, setSeccess] = useState<boolean>(false)
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
+   const navigate = useNavigate()
 
    useEffect(() => {
       const editText = editComment ? editComment.text : ''
@@ -49,7 +51,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
          return comment;
       });
    };
-
 
    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
@@ -122,6 +123,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
 
          setSeccess(true)
          setComment('')
+         navigate(0)
       } catch (error) {
          setError(true)
          setSeccess(false)

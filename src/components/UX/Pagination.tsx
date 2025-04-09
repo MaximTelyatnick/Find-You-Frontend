@@ -30,7 +30,7 @@ const Pagination = ({ itemsLength, page, totalPages, cityId, tagIds, search, vis
    };
 
    const clickHandler = (num: number) => {
-      let query = `/${type == 'admin' ? 'admin-accounts' : type == 'users' ? 'admin-users' : ''}?page=${num}`;
+      let query = `/${type == 'admin' ? 'admin-accounts' : type == 'users' ? 'admin-users' : type == 'orders' ? 'admin-orders' : ''}?page=${num}`;
 
       if (cityId) query += `&city_id=${cityId}`;
       if (tagIds && tagIds.length > 0) query += `&tag_id=${tagIds.join(",")}`;

@@ -3,8 +3,6 @@ const validatePassword = (password: string): string => {
    if (!/[A-Z]/.test(password)) return "Пароль должен содержать хотя бы одну заглавную букву.";
    if (!/[a-z]/.test(password)) return "Пароль должен содержать хотя бы одну строчную букву.";
    if (!/\d/.test(password)) return "Пароль должен содержать хотя бы одну цифру.";
-   if (!/[!@#$%^&*()_+{}\[\]:;<>,.?/~\\-]/.test(password))
-      return "Пароль должен содержать хотя бы один специальный символ.";
 
    return "";
 };

@@ -2,10 +2,10 @@ import { useState } from "react";
 import dayjs from "dayjs";
 import axios from "axios";
 import { IAdminOrdersItemProps } from "../../types/Admin";
-import { IOrderState } from "../../types/IOrder";
+import { IAdminOrderState } from "../../types/IOrder";
 import IUser from "../../types/IUser";
 
-const AdminOrdersItem = ({ id, text, created_at, status, setResult }: IAdminOrdersItemProps) => {
+const AdminOrdersItem = ({ id, login, text, type, created_at, status, setResult, openSendMessageModal }: IAdminOrdersItemProps) => {
    const apiUrl = 'http://167.86.84.197:5000/update-orders'
    const apiUrlDelete = 'http://167.86.84.197:5000/delete-orders'
    const statusArr: string[] = [
@@ -30,15 +30,17 @@ const AdminOrdersItem = ({ id, text, created_at, status, setResult }: IAdminOrde
          })
 
          setSelecetd(num)
-         setResult((prev: IOrderState) => ({
+         setResult((prev: IAdminOrderState) => ({
             ...prev,
-            items: prev.items && [...prev.items].map(item => {
-               if (item.id == id) {
-                  item.status = num
+            items: prev.items
+               ? {
+                  ...prev.items,
+                  data: prev.items.data.map(item =>
+                     item.id === id ? { ...item, status: num } : item
+                  )
                }
-               return item
-            })
-         }))
+               : null
+         }));
          setSeccess(true)
       } catch (error) {
          setError('Произошла ошибка при смене статуса')
@@ -55,10 +57,16 @@ const AdminOrdersItem = ({ id, text, created_at, status, setResult }: IAdminOrde
             user_id: user?.id,
          })
 
-         setResult((prev: IOrderState) => ({
+         setResult((prev: IAdminOrderState) => ({
             ...prev,
-            items: prev.items && [...prev.items].filter(item => item.id != id)
-         }))
+            items: prev.items
+               ? {
+                  ...prev.items,
+                  data: prev.items.data.filter(item => item.id !== id)
+               }
+               : null
+         }));
+
 
       } catch (error) {
          setError('Что-то пошло не так, попробуйте ещё раз!')
@@ -69,15 +77,26 @@ const AdminOrdersItem = ({ id, text, created_at, status, setResult }: IAdminOrde
       setActive(prev => !prev)
    }
 
+   const handleOpenSendMessage = () => {
+      openSendMessageModal(login);
+   }
+
    return (
       <div>
          {error && <p style={{ color: 'red' }}>{error}</p>}
          {seccess && <p style={{ color: 'green' }}>Смена статуса прошла успешно</p>}
          <div className="admin-order-item">
-            <p className="order-item__text">{text}</p>
+            <div className="order-item__text">
+               <p className="order-item__response">от: {login} <svg onClick={handleOpenSendMessage} width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M4 4H20V16H5.17L4 17.17V4ZM4 2C2.9 2 2.01 2.9 2.01 4L2 22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2H4ZM6 12H18V14H6V12ZM6 9H18V11H6V9ZM6 6H18V8H6V6Z" fill="#5B9A8B" />
+               </svg> {type == 'delete' && '(Удаление)'} {type == 'add' && '(Заказ)'}</p>
+               <p>{text}</p>
+            </div>
             <p className="order-item__time">{dayjs(new Date(created_at)).format("DD.MM.YYYY: hh-mm")}</p>
             <div className={`admin-order-dropdown ${active && 'active'}`}>
-               <div onClick={dropdownHandler} className={`admin-order-dropdown__button order-item__status order-item__${selected}`}>{statusArr[selected]}</div>
+               <div>
+                  <div onClick={dropdownHandler} className={`admin-order-dropdown__button order-item__status order-item__${selected}`}>{statusArr[selected]}</div>
+               </div>
                <div className="admin-order-dropdown__main">
                   <div className="admin-order-dropdown__item order-item__status order-item__1" onClick={() => { setSelecetdHandler(1) }}>Новое</div>
                   <div className="admin-order-dropdown__item order-item__status order-item__2" onClick={() => { setSelecetdHandler(2) }}>Принято</div>

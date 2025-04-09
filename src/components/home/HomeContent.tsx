@@ -10,11 +10,14 @@ const HomeContent = ({ items, loading, error }: IAccountsState) => {
          </div>}
          {!items?.length && !loading && <div><p>По запросу ничего не найдено. Попробуйте другой город, тег или ключевое слово. </p></div>}
          {!loading && error && <div><p>Что-то пошло не так, попробуйте ещё раз</p></div>}
-         {items && items.map(item => {
-            if (item.date_of_create && new Date(item.date_of_create) < new Date()) {
-               return <HomeContentItem {...item} key={item.id} />
-            }
-         })}
+         {items && items.filter(item => {
+            if (!item.date_of_create) return false
+            if (new Date(item.date_of_create) > new Date()) return false
+
+            return true
+         }).map(item => (
+            <HomeContentItem {...item} key={item.id} />
+         ))}
       </div>
    )
 }

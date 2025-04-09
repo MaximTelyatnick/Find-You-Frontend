@@ -973,6 +973,52 @@
         margin: 0 !important;
     }
     
+    .react-datepicker__day--highlighted {
+        background-color: #f59c94;
+        color: white;
+        border-radius: 50%;
+    }
+    
+    .react-datepicker__day--highlighted:hover {
+    background-color: #e67c73;
+    }
+    
+    /* Стили для кастомного заголовка */
+    .datepicker-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    }
+    
+    .datepicker-selects {
+    display: flex;
+    gap: 8px;
+    }
+    
+    .datepicker-select {
+    padding: 2px 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    }
+    
+    .datepicker-nav-btn {
+    border: none;
+    background-color: transparent;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #e67c73;
+    }
+    
+    .datepicker-nav-btn:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+    }
     .react-datepicker__day--keyboard-selected {
         background-color: rgba(91, 154, 139, 0.2) !important;
     }
@@ -1142,13 +1188,26 @@
     }
     .order__row {
         padding: 10px 0 0 0;
+        display: flex;
+        flex-direction: column;
+    }
+    .order__row .form__capcha, .order__row .form__row {
+        padding: 0;
+        margin: 0;
+    }
+    .order__row .layout-row textarea {
+        width: 100%;
+        resize: none;
+    }
+    .order__submit {
+        margin: 10px 0 0 0;
     }
     .order__row input {
         padding: 6px;
         width: 66%;
     }
     .order__row button {
-        margin: 0 0 10px 0;
+        margin: 0 0 0 0;
         width: 34%;
         height: 34px;
     }
@@ -1166,6 +1225,19 @@
         width: 60%;
         margin: 0;
     }
+    .order-item__response {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center;
+        gap: 10px;
+    }
+    .order-item__response svg {
+        cursor: pointer;
+    }
+    
     .order-item__time {
         width: 25%;
         margin: 0;
@@ -1456,6 +1528,13 @@
         text-align: right;
         font-size: 14px;
     }
+    .modal-read__response p{
+        text-transform: uppercase;
+        padding: 15px 0 0 0;
+        cursor: pointer;
+        text-decoration: underline;
+        width: fit-content;
+    }
     
     .form__content label{
         padding: 15px 0 0 0;
@@ -1524,9 +1603,6 @@
         display: -webkit-box;
         display: -ms-flexbox;
         display: flex;
-        -webkit-box-align: center;
-            -ms-flex-align: center;
-                align-items: center;
         margin: 20px 0 0 0;
         gap: 20px;
     }
@@ -2337,7 +2413,6 @@
             display: -ms-grid;
             display: grid;
             row-gap: 10px;
-            -ms-grid-columns: (1fr)[2];
             grid-template-columns: repeat(2, 1fr);
         }
         .order-item__text {
@@ -2412,6 +2487,9 @@
             -webkit-box-direction: normal;
                 -ms-flex-direction: column;
                     flex-direction: column;
+            -webkit-box-align: center;
+            -ms-flex-align: center;
+                align-items: center;
             gap: 5px;
         }
         .admin-order-item__bin {

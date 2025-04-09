@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import fetchData from "../../services/fetchData";
 import ICaptcha from "../../types/ICaptcha";
 import validatePassword from "../../utils/validatePassword";
+import RegistrationSuccessModal from "../UX/modals/RegistrationSuccessModal";
 
 const RegistrationContent = () => {
    const [login, setLogin] = useState<string>("");
@@ -10,6 +11,7 @@ const RegistrationContent = () => {
    const [repeatPassword, setRepeatPassword] = useState<string>("");
    const [email, setEmail] = useState<string>("");
    const [code, setCode] = useState<string>("");
+   const [isOpen, setIsOpen] = useState<boolean>(false)
    const [captcha, setCaptcha] = useState<ICaptcha>({
       data: '',
       text: ''
@@ -43,10 +45,16 @@ const RegistrationContent = () => {
       if (code !== captcha.text) return setMessage("Капча введена неправильно!")
 
       try {
-         const response = await axios.post("http://167.86.84.197:5000/register", { login, password, email, code });
+         await axios.post("http://167.86.84.197:5000/register", { login, password, email, code });
 
-         localStorage.setItem('token', response.data.token);
+         const responseLogin = await axios.post('http://167.86.84.197:5000/login', {
+            login,
+            password
+         });
 
+         setIsOpen(true)
+         localStorage.setItem('token', responseLogin.data.token);
+         localStorage.setItem('user', JSON.stringify(responseLogin.data.user));
          setSeccessful(true);
       } catch (error: any) {
          setMessage(error.response.data.message || 'Что-то пошло не так');
@@ -94,7 +102,11 @@ const RegistrationContent = () => {
                <button type="button" className="btn btn-info form__button" onClick={fetchCaptcha}>Обновить капчу</button>
             </div>
 
-            <div><button type="submit" className="btn btn-info form__button form__submit" >Отправить</button></div>
+            <div>
+               <RegistrationSuccessModal isOpen={isOpen} setIsOpen={setIsOpen}>
+                  <button type="submit" className="btn btn-info form__button form__submit" >Отправить</button>
+               </RegistrationSuccessModal>
+            </div>
          </form>
       </div>
    );
