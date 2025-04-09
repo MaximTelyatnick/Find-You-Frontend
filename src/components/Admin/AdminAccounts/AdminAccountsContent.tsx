@@ -37,7 +37,7 @@ const AdminAccountsContent = () => {
 
          setSuccess(true);
       } catch (err: any) {
-         setError(err.response?.data?.error || "Ошибка запроса");
+         setError(err.response?.data?.message || "Ошибка запроса");
       } finally {
          setLoading(false);
       }

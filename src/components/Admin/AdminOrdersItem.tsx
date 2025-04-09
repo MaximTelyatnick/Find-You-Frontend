@@ -92,7 +92,7 @@ const AdminOrdersItem = ({ id, login, text, type, created_at, status, setResult,
                </svg> {type == 'delete' && '(Удаление)'} {type == 'add' && '(Заказ)'}</p>
                <p>{text}</p>
             </div>
-            <p className="order-item__time">{dayjs(new Date(created_at)).format("DD.MM.YYYY: hh-mm")}</p>
+            <p className="order-item__time">{dayjs(new Date(created_at)).format("DD.MM.YYYY: hh-mm A")}</p>
             <div className={`admin-order-dropdown ${active && 'active'}`}>
                <div>
                   <div onClick={dropdownHandler} className={`admin-order-dropdown__button order-item__status order-item__${selected}`}>{statusArr[selected]}</div>
