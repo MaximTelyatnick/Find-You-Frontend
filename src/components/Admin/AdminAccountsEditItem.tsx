@@ -22,9 +22,6 @@ const AdminAccountsEditItem = ({ account, setAccountsSelected }: { account: IHom
                {typeof account.photo == 'string' ? <img src={`${account.photo}`} /> :
                   account.photo && account.photo.data ? <img src={transformPhoto(account.photo)} /> :
                      <img src='/images/blog_image.jpg' />}
-               {!!account.check_video && <div className="account-item__icon">
-                  VIDEO
-               </div>}
             </div>
          </div>
          <p className="admin-accounts-edit__name">Название: <svg onClick={() => { navigate(`/${account.id}`) }} width="20" height="20" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
