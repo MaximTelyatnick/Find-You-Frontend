@@ -73,11 +73,11 @@ const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
          <div className="">
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {seccess && <p style={{ color: 'green' }}>{seccess}</p>}
-            <p>Дата добавления: <span style={{ color: '#e36f6f' }}>{
-               dayjs(new Date(account.date_of_create)).format("DD.MM.YYYY")
-            }</span> / Город: <span style={{ color: '#e36f6f' }}>{
-               city.name_ru
-            }</span> / Закладки
+            <p>Дата добавления: <span style={{ color: '#e36f6f' }}>{account.date_of_create
+               ? dayjs(account.date_of_create).format("DD.MM.YYYY: HH-mm")
+               : "Не указана"}</span> / Город: <span style={{ color: '#e36f6f' }}>{
+                  city.name_ru
+               }</span> / Закладки
                {isFav ? <svg style={{ margin: '0 0 -5px 5px', cursor: 'pointer' }} onClick={removeFav} width="20" height="20" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M56.875 8.75H13.125C10.7088 8.75 8.75 10.7088 8.75 13.125V56.875C8.75 59.2912 10.7088 61.25 13.125 61.25H56.875C59.2912 61.25 61.25 59.2912 61.25 56.875V13.125C61.25 10.7088 59.2912 8.75 56.875 8.75Z" stroke="#E36F6F" strokeWidth="5" strokeLinejoin="round" />
                   <path d="M23.3333 35H46.6667" stroke="#E36F6F" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
