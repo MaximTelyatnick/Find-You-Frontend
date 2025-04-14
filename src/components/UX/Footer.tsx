@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { IAdminSections } from '../../types/Admin';
 import axios from 'axios';
 import { IAccount } from "../../types/IAccounts";
+import { format, startOfDay } from 'date-fns';
 
 const Footer = () => {
    const navigate = useNavigate();
@@ -18,13 +19,7 @@ const Footer = () => {
 
    // Функция для обработки изменения диапазона дат
    const handleDateRangeChange = (update: [Date | null, Date | null]) => {
-      // Корректируем даты, чтобы исправить проблему с -1 днем
-      const adjustedDates: [Date | null, Date | null] = [
-         update[0] ? new Date(update[0].getTime()) : null,
-         update[1] ? new Date(update[1].getTime()) : null
-      ];
-
-      setDateRange(adjustedDates);
+      setDateRange(update);
    };
 
    // Загружаем даты создания аккаунтов для подсветки
@@ -34,13 +29,14 @@ const Footer = () => {
             const response = await axios.get('http://167.86.84.197:5000/accounts');
             if (response.data && response.data.accounts) {
                const dates = response.data.accounts.filter((item: IAccount) => {
-                  if (!item.date_of_create) return false
-                  if (new Date(item.date_of_create) > new Date()) return false
+                  if (!item.date_of_create) return false;
+                  if (new Date(item.date_of_create) > new Date()) return false;
 
-                  return true
-               }).map((account: any) =>
-                  new Date(account.date_of_create)
-               );
+                  return true;
+               }).map((account: any) => {
+                  // Нормализуем дату, убирая время
+                  return startOfDay(new Date(account.date_of_create));
+               });
                setHighlightedDates(dates);
             }
          } catch (error) {
@@ -51,13 +47,20 @@ const Footer = () => {
       fetchAccountDates();
    }, []);
 
-   // Обновляем URL при изменении диапазона дат
+   // Обновляем URL при изменении диапазона дат - исправленная версия
    useEffect(() => {
       if (startDate && endDate) {
+         // Используем функцию format из date-fns для правильного форматирования даты
+         const formatDateCorrectly = (date: Date | null): string => {
+            if (!date) return '';
+            return format(startOfDay(date), 'yyyy-MM-dd');
+         };
+
          const formattedRange = JSON.stringify([
-            startDate instanceof Date ? startDate.toISOString().split("T")[0] : new Date(startDate).toISOString().split("T")[0],
-            endDate instanceof Date ? endDate.toISOString().split("T")[0] : new Date(endDate).toISOString().split("T")[0]
+            formatDateCorrectly(startDate),
+            formatDateCorrectly(endDate)
          ]);
+
          navigate(`/?date_range=${encodeURIComponent(formattedRange)}`);
       }
    }, [startDate, endDate, navigate]);
@@ -77,7 +80,7 @@ const Footer = () => {
       getSections();
    }, []);
 
-   // Кастомные заголовки для выбора месяца и года
+   // Кастомные заголовки для выбора месяца и года с расширенным диапазоном годов
    const renderCustomHeader = ({
       date,
       changeYear,
@@ -87,7 +90,9 @@ const Footer = () => {
       prevMonthButtonDisabled,
       nextMonthButtonDisabled
    }: any) => {
-      const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i);
+      // Расширенный диапазон годов с 2000 до 2100
+      const years = Array.from({ length: 101 }, (_, i) => 2000 + i);
+
       const months = [
          "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
          "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"

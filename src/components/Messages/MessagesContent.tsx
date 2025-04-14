@@ -60,15 +60,26 @@ const MessagesContent = () => {
       }
    };
 
+   // Исправленная логика фильтрации для правильного определения всех сообщений
+   const getFilteredMessages = () => {
+      if (!result.items) return [];
+
+      return result.items.filter(item => {
+         if (!filter) return true;
+
+         if (filter === 'sent') {
+            return item.sender === user.login; // Отправленные - где текущий пользователь отправитель
+         } else if (filter === 'incoming') {
+            return item.receiver === user.login; // Входящие - где текущий пользователь получатель
+         }
+         return false;
+      });
+   };
+
    const selectAllMessages = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.checked) {
-         let idsArr: number[] = [];
-         result.items?.filter(item => {
-            if (!filter) return true;
-            if (item.sender == user.login && filter == 'sent') return true;
-            if (item.sender != user.login && filter == 'incoming') return true;
-            return false;
-         }).forEach(item => idsArr.push(item.id));
+         // Используем уже отфильтрованные сообщения для выбора всех
+         const idsArr = getFilteredMessages().map(item => item.id);
          setSelected(idsArr);
       } else {
          setSelected([]);
@@ -86,6 +97,9 @@ const MessagesContent = () => {
    useEffect(() => {
       fetchData('get', apiUrl, setResult);
    }, []);
+
+   // Получаем отфильтрованные сообщения для отображения
+   const filteredMessages = getFilteredMessages();
 
    return (
       <>
@@ -126,27 +140,13 @@ const MessagesContent = () => {
                   <input
                      type="checkbox"
                      onChange={selectAllMessages}
-                     checked={selected.length > 0 &&
-                        selected.length === result.items?.filter(item => {
-                           if (!filter) return true;
-                           if (item.sender == user.login && filter == 'sent') return true;
-                           if (item.sender != user.login && filter == 'incoming') return true;
-                           return false;
-                        }).length}
+                     checked={selected.length > 0 && filteredMessages.length > 0 &&
+                        selected.length === filteredMessages.length}
                   />
                </div>
             </div>
             {result.error && <p style={{ color: 'red' }}>Что-то пошло не так, попробуйте ещё раз!</p>}
-            {result.items && result.items.filter(item => {
-               if (!filter) return item;
-
-               if (item.sender == user.login && filter == 'sent') {
-                  return item;
-               } else if (item.sender != user.login && filter == 'incoming') {
-                  return item;
-               }
-               return null;
-            }).map(item => (
+            {filteredMessages.map(item => (
                <MessagesContentItem
                   responseHandler={responseHandler}
                   {...item}

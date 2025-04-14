@@ -3,6 +3,7 @@ import { IModalSend } from '../../../types/IModal';
 import axios from 'axios';
 import IUser from '../../../types/IUser';
 import { IMessageState } from '../../../types/IMessage';
+import dayjs from 'dayjs';
 
 const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogin, setResponseLogin }: IModalSend) => {
    const [message, setMessage] = useState<string>("");
@@ -48,6 +49,10 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
       }
 
       try {
+         const now = new Date();
+         const formattedDate = dayjs(now).format('YYYY-MM-DD');
+         const formattedTime = dayjs(now).format('HH:mm:ss');
+
          await axios.post('http://167.86.84.197:5000/send-messages', {
             text_messages: message,
             user_from_id: user?.id,
@@ -56,15 +61,16 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
 
          setSeccess('Сообщение успешно отправлено');
 
+         // Добавляем сообщение в список с правильным форматированием даты и времени
          setResult && setResult((prev: IMessageState) => {
             if (prev.items) {
                return {
                   ...prev,
                   items: [{
-                     id: Date.now().toString(),
-                     date_messages: Date.now().toString(),
-                     time_messages: Date.now().toString(),
-                     sender: user?.login,
+                     id: Date.now(),
+                     date_messages: formattedDate, // Формат YYYY-MM-DD
+                     time_messages: formattedTime, // Формат HH:mm:ss
+                     sender: user?.login || '',
                      receiver: login,
                      text_messages: message,
                   }, ...prev.items]

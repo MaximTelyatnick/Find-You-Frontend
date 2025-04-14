@@ -583,6 +583,16 @@
     }
     .avatar-modal .admin-accounts-get__files {
         margin: 10px 0 0 0;
+        -webkit-box-orient: vertical;
+        -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-box-align: start;
+        -ms-flex-align: start;
+        align-items: start;
+    }
+    .avatar-modal .admin-accounts-get__files > * {
+        width: 100%;
     }
     .avatar-modal img {
         width: 125px;

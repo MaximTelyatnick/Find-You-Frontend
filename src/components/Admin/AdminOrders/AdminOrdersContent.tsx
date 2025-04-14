@@ -10,6 +10,7 @@ import AdminOrdersItem from "../AdminOrdersItem"
 import Pagination from "../../UX/Pagination"
 import { useSearchParams } from "react-router-dom"
 import SendMessageModal from "../../UX/modals/SendMessageModal"
+import { format, startOfDay } from 'date-fns'
 
 const AdminOrdersContent = () => {
    const storedUser = localStorage.getItem('user');
@@ -53,38 +54,39 @@ const AdminOrdersContent = () => {
 
    // Функция для обработки изменения диапазона дат
    const handleDateRangeChange = (update: [Date | null, Date | null]) => {
-      // Корректируем даты, чтобы исправить проблему с -1 днем
-      const adjustedDates: [Date | null, Date | null] = [
-         update[0] ? new Date(update[0].getTime()) : null,
-         update[1] ? new Date(update[1].getTime()) : null
-      ];
-
-      setDateRange(adjustedDates);
+      setDateRange(update);
    };
 
    useEffect(() => {
       getOrders()
    }, [page])
 
+   // Исправленная версия обработки изменения диапазона дат
    useEffect(() => {
       if (dateRange.length && dateRange[0] && dateRange[1]) {
-         getOrders(`&start_date=${new Date(dateRange[0]).toLocaleDateString()}&end_date=${new Date(dateRange[1]).toLocaleDateString()}`)
+         // Используем функции format и startOfDay из date-fns для корректного форматирования
+         const formatDateCorrectly = (date: Date | null): string => {
+            if (!date) return '';
+            return format(startOfDay(date), 'dd.MM.yyyy');
+         };
+
+         getOrders(`&start_date=${formatDateCorrectly(dateRange[0])}&end_date=${formatDateCorrectly(dateRange[1])}`);
       }
    }, [dateRange])
 
    // Получаем даты заказов для подсветки
    useEffect(() => {
       if (result.items && result.items.data) {
-         // Извлекаем даты из заказов для подсветки в календаре
+         // Извлекаем даты из заказов для подсветки в календаре и нормализуем их
          const dates = result.items.data
             .filter(order => order.created_at)
-            .map(order => new Date(order.created_at));
+            .map(order => startOfDay(new Date(order.created_at)));
 
          setHighlightedDates(dates);
       }
    }, [result.items]);
 
-   // Кастомные заголовки для выбора месяца и года
+   // Кастомные заголовки для выбора месяца и года с расширенным диапазоном годов
    const renderCustomHeader = ({
       date,
       changeYear,
@@ -94,7 +96,9 @@ const AdminOrdersContent = () => {
       prevMonthButtonDisabled,
       nextMonthButtonDisabled
    }: any) => {
-      const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i);
+      // Расширенный диапазон годов с 2000 до 2100
+      const years = Array.from({ length: 101 }, (_, i) => 2000 + i);
+
       const months = [
          "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
          "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"

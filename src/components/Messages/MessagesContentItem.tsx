@@ -17,11 +17,44 @@ const MessagesContentItem = ({ id, date_messages, time_messages, text_messages, 
       }
    }
 
+   // Форматирование даты с проверкой корректности
+   const formatDate = (dateString: string): string => {
+      try {
+         // Проверка, что дата валидна
+         const date = dayjs(dateString);
+         if (date.isValid()) {
+            return date.format("DD.MM.YYYY");
+         }
+         return "Некорректная дата";
+      } catch (error) {
+         return "Некорректная дата";
+      }
+   }
+
+   // Форматирование времени с проверкой корректности
+   const formatTime = (timeString: string): string => {
+      try {
+         // Проверим, является ли timeString полной датой со временем
+         if (timeString.includes('T') || timeString.includes('-')) {
+            return dayjs(timeString).format("HH:mm");
+         }
+
+         // Если это только время в формате HH:mm:ss
+         if (timeString && timeString.length >= 5) {
+            return timeString.slice(0, 5);
+         }
+
+         return "00:00";
+      } catch (error) {
+         return "00:00";
+      }
+   }
+
    return (
       <div className="messages-table-item">
          <ReadMessageModal responseHandler={responseHandler} isOpen={isOpenRead} setIsOpen={setIsOpenRead} id={id} date_messages={date_messages} time_messages={time_messages} text_messages={text_messages} sender={sender} receiver={receiver}>
             <div className="messages-table-item__title"><p>
-               {sender == user?.login ? <svg width="25" height="25" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+               {sender === user?.login ? <svg width="25" height="25" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <g clipPath="url(#clip0_3_3)">
                      <path d="M58.3333 11.6667C59.805 11.6662 61.2225 12.222 62.3016 13.2227C63.3807 14.2234 64.0417 15.595 64.1521 17.0625L64.1667 17.5V52.5C64.1671 53.9717 63.6113 55.3892 62.6106 56.4683C61.61 57.5474 60.2384 58.2084 58.7708 58.3188L58.3333 58.3333H11.6667C10.195 58.3338 8.77751 57.778 7.6984 56.7773C6.61929 55.7766 5.95829 54.405 5.84792 52.9375L5.83333 52.5V49.5833H11.6667V52.5H58.3333V21.6242L38.0917 41.8658C37.3261 42.6313 36.3038 43.0858 35.2225 43.1413C34.1413 43.1967 33.0779 42.8494 32.2379 42.1662L31.9054 41.8658L11.6667 21.6242V23.3333H5.83333V17.5C5.83287 16.0283 6.38869 14.6108 7.38937 13.5317C8.39005 12.4526 9.76163 11.7916 11.2292 11.6812L11.6667 11.6667H58.3333ZM17.5 37.9167C18.2736 37.9167 19.0154 38.224 19.5624 38.7709C20.1094 39.3179 20.4167 40.0598 20.4167 40.8333C20.4167 41.6069 20.1094 42.3487 19.5624 42.8957C19.0154 43.4427 18.2736 43.75 17.5 43.75H2.91667C2.14312 43.75 1.40125 43.4427 0.854272 42.8957C0.307291 42.3487 0 41.6069 0 40.8333C0 40.0598 0.307291 39.3179 0.854272 38.7709C1.40125 38.224 2.14312 37.9167 2.91667 37.9167H17.5ZM54.2092 17.5H15.7908L35 36.7092L54.2092 17.5ZM14.5833 29.1667C15.3267 29.1675 16.0418 29.4521 16.5823 29.9625C17.1229 30.4728 17.4482 31.1703 17.4918 31.9124C17.5353 32.6545 17.2939 33.3853 16.8167 33.9553C16.3396 34.5254 15.6628 34.8918 14.9246 34.9796L14.5833 35H5.83333C5.08993 34.9992 4.37491 34.7145 3.83434 34.2042C3.29378 33.6939 2.96848 32.9964 2.92491 32.2543C2.88135 31.5121 3.1228 30.7814 3.59994 30.2113C4.07708 29.6412 4.75389 29.2749 5.49208 29.1871L5.83333 29.1667H14.5833Z" fill="black" />
                   </g>
@@ -39,7 +72,9 @@ const MessagesContentItem = ({ id, date_messages, time_messages, text_messages, 
             </div>
          </ReadMessageModal>
          <div className="messages-table-item__author"><p>{sender}</p></div>
-         <div className="messages-table-item__date"><p>{dayjs(date_messages).format("DD.MM.YYYY") + " " + time_messages.slice(0, 5)}</p></div>
+         <div className="messages-table-item__date">
+            <p>{formatDate(date_messages) + " " + formatTime(time_messages)}</p>
+         </div>
          <div className="messages-table-item__checkbox"><input type="checkbox" checked={[...selected].includes(id) && true} onChange={selectHandler} /></div>
       </div>
    )
