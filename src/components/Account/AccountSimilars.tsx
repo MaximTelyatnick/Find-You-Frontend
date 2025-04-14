@@ -45,7 +45,12 @@ const AccountSimilars = ({ account, tags }: IAccountAll) => {
 
          <Title>Похожие страницы</Title>
          <div className="account__items" >
-            {!result.error && result.items ? result.items.map(item => {
+            {!result.error && result.items ? result.items.filter(item => {
+               if (!item.date_of_create) return false
+               if (new Date(item.date_of_create) > new Date()) return false
+
+               return true
+            }).map(item => {
                if (item.id == account.id) {
                   return
                } else {

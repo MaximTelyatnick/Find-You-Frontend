@@ -39,7 +39,6 @@ const AdminAccountsEditSocial = ({ social_name, id, text, setAccountSocials }: I
          if (item.id == id) {
             item.text = textInput
          }
-
          return item
       }))
    }, [textInput])
@@ -51,7 +50,7 @@ const AdminAccountsEditSocial = ({ social_name, id, text, setAccountSocials }: I
          </svg>
          <select defaultValue={social_name} onChange={(e) => { changeAccountSocialsHandler(id, e.target.value) }}>
             {socialsTypes.map(item => (
-               <option value={item.name}>{item.name}</option>
+               <option key={item.id} value={item.name}>{item.name}</option>
             ))}
          </select>
          <input type="text" placeholder={`Контакты от ${social_name}`} value={textInput} onChange={(e) => { setTextInput(e.target.value) }} />
