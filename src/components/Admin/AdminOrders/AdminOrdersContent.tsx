@@ -29,6 +29,8 @@ const AdminOrdersContent = () => {
    const [isOpenSend, setIsOpenSend] = useState<boolean>(false);
    const [responseLogin, setResponseLogin] = useState<string>('');
    const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
+   const [lastClickTime, setLastClickTime] = useState<number>(0);
+   const [isSingleDateMode, setIsSingleDateMode] = useState<boolean>(false);
 
    const openSendMessageModal = (login: string) => {
       setResponseLogin(login);
@@ -52,27 +54,57 @@ const AdminOrdersContent = () => {
       await fetchData('get', apiUrl, setResult)
    }
 
-   // Функция для обработки изменения диапазона дат
-   const handleDateRangeChange = (update: [Date | null, Date | null]) => {
-      setDateRange(update);
+   // Функция для обработки клика на дату
+   const handleDateChange = (date: Date | null) => {
+      const now = new Date().getTime();
+
+      // Если прошло менее 300мс между кликами, считаем это двойным кликом
+      if (now - lastClickTime < 300) {
+         // Двойной клик - выбираем только одну дату
+         setDateRange([date, date]);
+         setIsSingleDateMode(true);
+      } else {
+         // Одиночный клик - стандартная логика выбора диапазона
+         if (!startDate || isSingleDateMode || (startDate && endDate)) {
+            // Новое начало диапазона
+            setDateRange([date, null]);
+            setIsSingleDateMode(false);
+         } else {
+            // Выбор конца диапазона
+            // Убедимся, что диапазон идет в правильном порядке (от раннего к позднему)
+            if (startDate && date && startDate > date) {
+               setDateRange([date, startDate]);
+            } else {
+               setDateRange([startDate, date]);
+            }
+         }
+      }
+
+      setLastClickTime(now);
    };
 
    useEffect(() => {
       getOrders()
    }, [page])
 
-   // Исправленная версия обработки изменения диапазона дат
+   // Обработка изменения диапазона дат
    useEffect(() => {
-      if (dateRange.length && dateRange[0] && dateRange[1]) {
-         // Используем функции format и startOfDay из date-fns для корректного форматирования
+      if (dateRange[0]) {
+         // Форматируем даты для API запроса
          const formatDateCorrectly = (date: Date | null): string => {
             if (!date) return '';
-            return format(startOfDay(date), 'dd.MM.yyyy');
+            return format(date, 'dd.MM.yyyy');
          };
 
-         getOrders(`&start_date=${formatDateCorrectly(dateRange[0])}&end_date=${formatDateCorrectly(dateRange[1])}`);
+         if (isSingleDateMode && dateRange[0] && dateRange[1] && dateRange[0].getTime() === dateRange[1].getTime()) {
+            // Режим одной даты - для бэкенда нужно отправить одинаковые start_date и end_date
+            getOrders(`&start_date=${formatDateCorrectly(dateRange[0])}&end_date=${formatDateCorrectly(dateRange[0])}`);
+         } else if (dateRange[0] && dateRange[1]) {
+            // Режим диапазона дат
+            getOrders(`&start_date=${formatDateCorrectly(dateRange[0])}&end_date=${formatDateCorrectly(dateRange[1])}`);
+         }
       }
-   }, [dateRange])
+   }, [dateRange, isSingleDateMode])
 
    // Получаем даты заказов для подсветки
    useEffect(() => {
@@ -189,17 +221,23 @@ const AdminOrdersContent = () => {
             <div className="admin-order__datepicker">
                <DatePicker
                   selected={startDate}
-                  onChange={handleDateRangeChange}
+                  onChange={handleDateChange}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="Выберите дату"
                   locale={ru}
                   startDate={startDate}
                   endDate={endDate}
-                  selectsRange
                   inline
                   highlightDates={highlightedDates}
                   renderCustomHeader={renderCustomHeader}
                />
+               <div className="datepicker-hint">
+                  <small>
+                     {isSingleDateMode
+                        ? "Выбрана одна дата. Нажмите на другую дату для диапазона."
+                        : "Двойной клик для выбора одной даты, или выберите диапазон."}
+                  </small>
+               </div>
             </div>
          </div>
          <div className="admin-order__items">
