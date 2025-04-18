@@ -16,8 +16,6 @@ const Footer = () => {
    const [error, setError] = useState<boolean>(false);
    const [sections, setSections] = useState<IAdminSections | null>(null);
 
-   // Добавляем состояния для отслеживания загрузки всех дат
-   const [allDatesLoading, setAllDatesLoading] = useState<boolean>(false);
    const [allDatesError, setAllDatesError] = useState<boolean>(false);
 
    // Функция для обработки изменения диапазона дат
@@ -27,7 +25,6 @@ const Footer = () => {
 
    // Функция для получения всех дат аккаунтов для подсветки
    const getAllAccountDates = async () => {
-      setAllDatesLoading(true);
       setAllDatesError(false);
 
       try {
@@ -49,8 +46,6 @@ const Footer = () => {
       } catch (error) {
          console.error("Ошибка при загрузке дат аккаунтов:", error);
          setAllDatesError(true);
-      } finally {
-         setAllDatesLoading(false);
       }
    };
 
