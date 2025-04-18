@@ -18,7 +18,7 @@ const LoginModal = ({ isOpen, setIsOpen, children }: IModal) => {
 
    const loginHandler = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      setError('');  // Сбрасываем ошибку перед отправкой запроса
+      setError(''); // Сбрасываем ошибку перед отправкой запроса
 
       try {
          const response = await axios.post('http://167.86.84.197:5000/login', {
@@ -27,14 +27,30 @@ const LoginModal = ({ isOpen, setIsOpen, children }: IModal) => {
          });
 
          if (response.data.token) {
+            // Сохраняем данные в localStorage
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
-            navigate('')
-            setIsOpen(false);
-         }
 
+            // Создаем событие для оповещения других компонентов об изменении localStorage
+            window.dispatchEvent(new Event('storage-updated'));
+
+            // Перенаправляем на нужную страницу
+            // Если пользователь админ или модер, сразу отправляем на админ-панель
+            if (response.data.user.role === 'admin' || response.data.user.role === 'moder') {
+               navigate('/admin');
+            } else {
+               navigate('');
+            }
+
+            // Закрываем модальное окно
+            setIsOpen(false);
+
+            // Сбрасываем поля формы
+            setLogin('');
+            setPassword('');
+         }
       } catch (err) {
-         setError('Неверный логин или пароль'); // Показываем ошибку, если что-то пошло не так
+         setError('Неверный логин или пароль');
       }
    }
 

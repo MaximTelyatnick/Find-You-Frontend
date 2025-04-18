@@ -28,7 +28,12 @@ const AdminOrdersContent = () => {
    const page = Number(searchParams.get("page")) || 1;
    const [isOpenSend, setIsOpenSend] = useState<boolean>(false);
    const [responseLogin, setResponseLogin] = useState<string>('');
+
+   // Состояние для хранения всех дат заказов для подсветки
    const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
+   // Состояние для отслеживания загрузки всех дат
+   const [allDatesLoading, setAllDatesLoading] = useState<boolean>(false);
+   const [allDatesError, setAllDatesError] = useState<boolean>(false);
 
    const openSendMessageModal = (login: string) => {
       setResponseLogin(login);
@@ -42,6 +47,7 @@ const AdminOrdersContent = () => {
       setFilter(str)
    }
 
+   // Функция для получения заказов с фильтрами и пагинацией
    const getOrders = async (url?: string) => {
       let finalUrl = apiUrl;
 
@@ -58,10 +64,42 @@ const AdminOrdersContent = () => {
       await fetchData('get', finalUrl, setResult)
    }
 
+   // Функция для получения всех дат заказов для подсветки
+   const getAllOrderDates = async () => {
+      setAllDatesLoading(true);
+      setAllDatesError(false);
+
+      try {
+         const response = await fetch(`http://167.86.84.197:5000/get-all-order-dates?user_id=${user?.id}`);
+
+         if (!response.ok) {
+            throw new Error('Ошибка при получении дат заказов');
+         }
+
+         const data = await response.json();
+
+         if (data.dates && Array.isArray(data.dates)) {
+            // Преобразуем строки дат в объекты Date для подсветки
+            const dates = data.dates.map((dateStr: any) => startOfDay(new Date(dateStr)));
+            setHighlightedDates(dates);
+         }
+      } catch (error) {
+         console.error('Ошибка при получении дат заказов:', error);
+         setAllDatesError(true);
+      } finally {
+         setAllDatesLoading(false);
+      }
+   };
+
    // Функция для обработки изменения диапазона дат
    const handleDateRangeChange = (update: [Date | null, Date | null]) => {
       setDateRange(update);
    };
+
+   // При первой загрузке компонента загружаем все даты для подсветки
+   useEffect(() => {
+      getAllOrderDates();
+   }, []);
 
    // Загружаем заказы при изменении страницы
    useEffect(() => {
@@ -90,18 +128,6 @@ const AdminOrdersContent = () => {
          getOrders(`&start_date=${formatDateForUrl(startDate)}&end_date=${formatDateForUrl(endDate)}`);
       }
    }, [dateRange]);
-
-   // Получаем даты заказов для подсветки
-   useEffect(() => {
-      if (result.items && result.items.data) {
-         // Извлекаем даты из заказов для подсветки в календаре и нормализуем их
-         const dates = result.items.data
-            .filter(order => order.created_at)
-            .map(order => startOfDay(new Date(order.created_at)));
-
-         setHighlightedDates(dates);
-      }
-   }, [result.items]);
 
    // Кастомные заголовки для выбора месяца и года с расширенным диапазоном годов
    const renderCustomHeader = ({
@@ -173,7 +199,7 @@ const AdminOrdersContent = () => {
    return (
       <div className="admin-order">
          <Title classes='pt'>Заказы</Title>
-         {result.loading && <div className="loader">
+         {(result.loading || allDatesLoading) && <div className="loader">
             <div className="loader__circle"></div>
          </div>}
          <div className="admin-order__header">
@@ -217,6 +243,7 @@ const AdminOrdersContent = () => {
                   highlightDates={highlightedDates}
                   renderCustomHeader={renderCustomHeader}
                />
+               {allDatesError && <p className="datepicker-error">Ошибка загрузки дат</p>}
             </div>
          </div>
          <div className="admin-order__items">

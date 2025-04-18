@@ -5,6 +5,7 @@ import IUser from "../../types/IUser"
 
 const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar) => {
    const apiUrlAddRole = `http://167.86.84.197:5000/add-role`
+   const apiUrlResetSession = `http://167.86.84.197:5000/reset-session`
    const [role, setRole] = useState<string>('user')
    const [error, setError] = useState<string>('')
    const [success, setSuccess] = useState<string>('')
@@ -13,7 +14,7 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
    const storedUser = localStorage.getItem('user');
    const currentUser: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
-   // Нам нужно получить текущего выбранного пользователя, а не использовать setSelected
+   // Получаем текущего выбранного пользователя
    useEffect(() => {
       if (userId) {
          // Получаем информацию о выбранном пользователе через API
@@ -57,11 +58,18 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
             return;
          }
 
+         // 1. Меняем роль пользователя
          const res = await axios.post(apiUrlAddRole, {
             user_id: userId,
             role_name: role,
          })
 
+         // 2. Сбрасываем сессию пользователя, чтобы заставить его перелогиниться
+         await axios.post(apiUrlResetSession, {
+            user_id: userId
+         });
+
+         // 3. Обновляем UI
          setResult((prev: IAdminUser[]) => prev.map(item => {
             if (item.id == userId) {
                return { ...item, role: res.data.data ? res.data.data.name : 'Пользователь' };
@@ -71,7 +79,6 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
 
          // Обновить выбранного пользователя
          const updatedRole = res.data.data ? res.data.data.name : 'Пользователь';
-         // Здесь используем правильно функцию setSelected для обновления состояния
          setSelected((prev: IAdminUser[]) => {
             return prev.map(user => {
                if (user.id === userId) {
@@ -81,7 +88,7 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
             });
          });
 
-         setSuccess('Роль успешно задана');
+         setSuccess('Роль успешно задана. Пользователь будет вынужден перелогиниться.');
       } catch (error) {
          setError('Что-то пошло не так при смене роли, попробуйте ещё раз!');
       }

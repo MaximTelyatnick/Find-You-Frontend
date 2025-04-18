@@ -74,7 +74,7 @@ const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {seccess && <p style={{ color: 'green' }}>{seccess}</p>}
             <p>Дата добавления: <span style={{ color: '#e36f6f' }}>{account.date_of_create
-               ? dayjs(account.date_of_create).format("DD.MM.YYYY: HH-mm")
+               ? dayjs(account.date_of_create).format("DD.MM.YYYY")
                : "Не указана"}</span> / Город: <span style={{ color: '#e36f6f' }}>{
                   city.name_ru
                }</span> / Закладки

@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IAdminSections } from '../../types/Admin';
 import axios from 'axios';
-import { IAccount } from "../../types/IAccounts";
 import { format, startOfDay } from 'date-fns';
 
 const Footer = () => {
@@ -17,37 +16,50 @@ const Footer = () => {
    const [error, setError] = useState<boolean>(false);
    const [sections, setSections] = useState<IAdminSections | null>(null);
 
+   // Добавляем состояния для отслеживания загрузки всех дат
+   const [allDatesLoading, setAllDatesLoading] = useState<boolean>(false);
+   const [allDatesError, setAllDatesError] = useState<boolean>(false);
+
    // Функция для обработки изменения диапазона дат
    const handleDateRangeChange = (update: [Date | null, Date | null]) => {
       setDateRange(update);
    };
 
-   // Загружаем даты создания аккаунтов для подсветки
-   useEffect(() => {
-      const fetchAccountDates = async () => {
-         try {
-            const response = await axios.get('http://167.86.84.197:5000/accounts');
-            if (response.data && response.data.accounts) {
-               const dates = response.data.accounts.filter((item: IAccount) => {
-                  if (!item.date_of_create) return false;
-                  if (new Date(item.date_of_create) > new Date()) return false;
+   // Функция для получения всех дат аккаунтов для подсветки
+   const getAllAccountDates = async () => {
+      setAllDatesLoading(true);
+      setAllDatesError(false);
 
-                  return true;
-               }).map((account: any) => {
-                  // Нормализуем дату, убирая время
-                  return startOfDay(new Date(account.date_of_create));
-               });
-               setHighlightedDates(dates);
-            }
-         } catch (error) {
-            console.error("Ошибка при загрузке дат аккаунтов:", error);
+      try {
+         const response = await axios.get('http://167.86.84.197:5000/get-all-account-dates');
+
+         if (response.data && response.data.dates) {
+            // Преобразуем строки дат в объекты Date для подсветки
+            const dates = response.data.dates.map((dateStr: string) => {
+               // Нормализуем дату, убирая время
+               return startOfDay(new Date(dateStr));
+            });
+
+            // Фильтруем недействительные даты (даты в будущем)
+            const now = new Date();
+            const validDates = dates.filter((date: Date) => date <= now);
+
+            setHighlightedDates(validDates);
          }
-      };
+      } catch (error) {
+         console.error("Ошибка при загрузке дат аккаунтов:", error);
+         setAllDatesError(true);
+      } finally {
+         setAllDatesLoading(false);
+      }
+   };
 
-      fetchAccountDates();
+   // При первой загрузке компонента получаем все даты для подсветки
+   useEffect(() => {
+      getAllAccountDates();
    }, []);
 
-   // Обновляем URL при изменении диапазона дат - исправленная версия
+   // Обновляем URL при изменении диапазона дат
    useEffect(() => {
       if (startDate && endDate) {
          // Используем функцию format из date-fns для правильного форматирования даты
@@ -168,6 +180,11 @@ const Footer = () => {
                   <p className="footer-text">{error && "Произошла ошибка при получении описания"}</p>
                </div>
                <div className="footer__calendar">
+                  {allDatesLoading && (
+                     <div className="calendar-loader">
+                        <div className="loader__circle"></div>
+                     </div>
+                  )}
                   <DatePicker
                      selected={startDate}
                      onChange={handleDateRangeChange}
@@ -181,6 +198,9 @@ const Footer = () => {
                      highlightDates={highlightedDates}
                      renderCustomHeader={renderCustomHeader}
                   />
+                  {allDatesError && (
+                     <p className="datepicker-error">Ошибка загрузки дат</p>
+                  )}
                </div>
             </div>
          </div>
