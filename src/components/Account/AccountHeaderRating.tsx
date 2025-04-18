@@ -2,7 +2,7 @@ import axios from "axios";
 import { IRating, IRatingProps } from "../../types/IAccounts";
 import { useParams } from "react-router-dom";
 import IUser from "../../types/IUser";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const AccountHeaderRating = ({ rating, setSeccess, setError }: IRatingProps) => {
    const apiUrl: string = 'http://167.86.84.197:5000/set-rate'
@@ -11,11 +11,15 @@ const AccountHeaderRating = ({ rating, setSeccess, setError }: IRatingProps) => 
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const [ratingState, setRatingState] = useState<IRating[]>(rating)
 
+   useEffect(() => {
+      setRatingState(rating);
+   }, [rating]);
+
    const calculateAverageRating = (ratings: IRating[]): string => {
       if (ratings.length === 0) return '0'; // если нет рейтингов, возвращаем 0
 
       const totalRating = ratings.reduce((accum, rating) => accum + rating.rate, 0);
-      return (totalRating / ratings.length).toFixed(1); // округляем до 2 знаков после запятой
+      return (totalRating / ratings.length).toFixed(1); // округляем до 1 знака после запятой
    };
 
    const sendRatingHandler = async (i: number) => {
