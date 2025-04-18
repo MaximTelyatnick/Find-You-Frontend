@@ -17,7 +17,7 @@ const MessagesContent = () => {
       error: false,
       loading: false,
    });
-   const [filter, setFilter] = useState<string>('');
+   const [filter, setFilter] = useState<string>('incoming');
    const [selected, setSelected] = useState<number[]>([]);
    const [seccess, setSeccess] = useState<string>('');
    const [error, setError] = useState<string>('');

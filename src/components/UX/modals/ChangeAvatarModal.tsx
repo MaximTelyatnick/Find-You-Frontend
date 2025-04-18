@@ -61,10 +61,14 @@ const ChangeAvatarModal = ({ isOpen, setIsOpen, children }: IModal) => {
          });
 
          if (res.data && res.data.id) {
-            // Обновляем данные пользователя в состоянии и локальном хранилище
+            // Сохраняем все оригинальные данные пользователя,
+            // перезаписывая только обновленные поля из ответа
             const updatedUser = {
                ...user,
-               ...res.data
+               ...res.data,
+               // Если в ответе есть особые поля, которые сервер не возвращает, 
+               // но они должны быть сохранены из текущих данных пользователя
+               role: user.role  // Сохраняем роль, если она есть в текущих данных
             };
 
             localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -81,9 +85,12 @@ const ChangeAvatarModal = ({ isOpen, setIsOpen, children }: IModal) => {
          } else {
             throw new Error('Некорректный ответ от сервера');
          }
-      } catch (error) {
+      } catch (error: any) {
          console.error("Ошибка при обновлении фото:", error);
-         setError('Ошибка при обновлении фото, попробуйте ещё раз!');
+         const errorMessage = error.response?.data?.message
+            ? `Ошибка: ${error.response.data.message}`
+            : 'Ошибка при обновлении фото, попробуйте ещё раз!';
+         setError(errorMessage);
       } finally {
          setIsLoading(false);
       }
