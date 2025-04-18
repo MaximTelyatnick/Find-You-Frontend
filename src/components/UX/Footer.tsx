@@ -180,11 +180,6 @@ const Footer = () => {
                   <p className="footer-text">{error && "Произошла ошибка при получении описания"}</p>
                </div>
                <div className="footer__calendar">
-                  {allDatesLoading && (
-                     <div className="calendar-loader">
-                        <div className="loader__circle"></div>
-                     </div>
-                  )}
                   <DatePicker
                      selected={startDate}
                      onChange={handleDateRangeChange}
