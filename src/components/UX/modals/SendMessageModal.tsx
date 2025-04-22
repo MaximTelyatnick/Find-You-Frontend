@@ -58,18 +58,25 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
          setSeccess('Сообщение успешно отправлено');
 
          // Получаем дату и время с сервера в UTC
-         const { date_messages, time_messages } = response.data;
+         const now = new Date();
+         // Получаем UTC дату
+         const year = now.getUTCFullYear();
+         const month = String(now.getUTCMonth() + 1).padStart(2, '0');
+         const day = String(now.getUTCDate()).padStart(2, '0');
 
-         // Добавляем сообщение в список - сохраняем оригинальный формат с сервера,
-         // а форматирование происходит в компоненте отображения
+         // Получаем UTC время
+         const hours = String(now.getUTCHours()).padStart(2, '0');
+         const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+         const seconds = String(now.getUTCSeconds()).padStart(2, '0');
+
          setResult && setResult((prev: IMessageState) => {
             if (prev.items) {
                return {
                   ...prev,
                   items: [{
                      id: response.data.id || Date.now(),
-                     date_messages: date_messages,
-                     time_messages: time_messages,
+                     date_messages: `${year}-${month}-${day}`,
+                     time_messages: `${hours}:${minutes}:${seconds}`,
                      sender: user?.login || '',
                      receiver: login,
                      text_messages: message,
