@@ -1,14 +1,8 @@
-import dayjs from "dayjs";
 import { IModalRead } from "../../../types/IModal";
 import IUser from "../../../types/IUser";
 import { useEffect } from "react";
 import axios from "axios";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-
-// Расширяем возможности dayjs плагинами для работы с часовыми поясами
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import { convertUtcToLocal } from "../../../utils/DateUtils";
 
 const ReadMessageModal = ({
    isOpen,
@@ -25,6 +19,7 @@ const ReadMessageModal = ({
 }: IModalRead) => {
    const storedUser = localStorage.getItem('user');
    let user: IUser = storedUser ? JSON.parse(storedUser) : null;
+
    const openModal = () => {
       setIsOpen(true);
       // Помечаем сообщение как прочитанное при открытии модального окна
@@ -32,6 +27,7 @@ const ReadMessageModal = ({
          markAsRead();
       }
    };
+
    // Помечаем сообщение как прочитанное также при первом рендере, если модальное окно открыто
    useEffect(() => {
       if (isOpen && receiver === user?.login) {
@@ -41,7 +37,7 @@ const ReadMessageModal = ({
 
    const markAsRead = async () => {
       try {
-         await axios.post('http://167.86.84.197:5000/mark-as-read', {
+         await axios.post('http://localhost:5000/mark-as-read', {
             message_id: id,
             user_id: user?.id
          });
@@ -61,24 +57,7 @@ const ReadMessageModal = ({
       responseHandler(sender); // Передаем отправителя в функцию ответа
    };
 
-   // Исправлено форматирование даты с учетом часового пояса
-   // Внутри компонента ReadMessageModal
-   const formatDateTime = (date: string, time: string) => {
-      try {
-         // Явное указание, что дата/время хранятся в UTC
-         const serverDateTime = `${date}T${time}.000Z`;
-         // Создаем объект dayjs и конвертируем в локальное время
-         const localDate = dayjs(serverDateTime);
-
-         if (localDate.isValid()) {
-            return localDate.format("DD.MM.YYYY HH:mm");
-         }
-         return `${date} ${time.slice(0, 5)}`;
-      } catch (error) {
-         console.error("Ошибка форматирования даты:", error);
-         return `${date} ${time.slice(0, 5)}`;
-      }
-   };
+   const formattedDateTime = convertUtcToLocal(date_messages, time_messages);
 
    return (
       <>
@@ -97,7 +76,7 @@ const ReadMessageModal = ({
                            <p className="modal-read-header__to">To: <span>{receiver}</span></p>
                         </div>
                         <div className="modal-read-header__date">
-                           <p>Дата отправки:<br /><span>{formatDateTime(date_messages, time_messages)}</span></p>
+                           <p>Дата отправки:<br /><span>{formattedDateTime}</span></p>
                         </div>
                      </div>
                      <div className="modal-read__main">

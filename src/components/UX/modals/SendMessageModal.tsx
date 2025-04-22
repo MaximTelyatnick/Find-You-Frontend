@@ -3,13 +3,6 @@ import { IModalSend } from '../../../types/IModal';
 import axios from 'axios';
 import IUser from '../../../types/IUser';
 import { IMessageState } from '../../../types/IMessage';
-import dayjs from 'dayjs';
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-
-// Расширяем возможности dayjs плагинами для работы с часовыми поясами
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogin, setResponseLogin }: IModalSend) => {
    const [message, setMessage] = useState<string>("");
@@ -55,12 +48,7 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
       }
 
       try {
-         // Используем UTC даты для отправки на сервер
-         const now = new Date();
-         const isoString = now.toISOString();
-         const formattedDate = isoString.split('T')[0]; // YYYY-MM-DD
-         const formattedTime = isoString.split('T')[1].split('.')[0]; // HH:MM:SS
-
+         // Отправляем сообщение на сервер
          const response = await axios.post('http://localhost:5000/send-messages', {
             text_messages: message,
             user_from_id: user?.id,
@@ -69,19 +57,23 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
 
          setSeccess('Сообщение успешно отправлено');
 
-         // Добавляем сообщение в список с правильным форматированием даты и времени
-         // Используем ответ сервера для обновления состояния
+         // Получаем дату и время с сервера в UTC
+         const { date_messages, time_messages } = response.data;
+
+         // Добавляем сообщение в список - сохраняем оригинальный формат с сервера,
+         // а форматирование происходит в компоненте отображения
          setResult && setResult((prev: IMessageState) => {
             if (prev.items) {
                return {
                   ...prev,
                   items: [{
-                     id: Date.now(),
-                     date_messages: response.data.date_messages || formattedDate,
-                     time_messages: response.data.time_messages || formattedTime,
+                     id: response.data.id || Date.now(),
+                     date_messages: date_messages,
+                     time_messages: time_messages,
                      sender: user?.login || '',
                      receiver: login,
                      text_messages: message,
+                     is_read: false
                   }, ...prev.items]
                }
             }
@@ -90,8 +82,6 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
 
          // Очищаем поле сообщения после отправки
          setMessage('');
-         // Не очищаем поле логина после отправки, 
-         // оно очистится при закрытии модального окна
       } catch (err: any) {
          if (err.response && err.response.status === 404) {
             setError('Получатель не найден!');

@@ -15,7 +15,7 @@ const AdminUsersContentItems = ({ users, setUsers, setUsersSelected }: IAdminUse
    const getUsersHandler = async () => {
       setError('')
 
-      let apiUrlAccouts = `http://167.86.84.197:5000/users?page=${page}`;
+      let apiUrlAccouts = `http://localhost:5000/users?page=${page}`;
       if (search) {
          apiUrlAccouts += `&login=${search}`
       }

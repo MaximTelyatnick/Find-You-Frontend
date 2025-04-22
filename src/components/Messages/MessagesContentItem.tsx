@@ -1,14 +1,8 @@
-import dayjs from "dayjs";
 import { IMessageItemProps } from "../../types/IMessage";
 import IUser from "../../types/IUser";
 import { useState } from "react";
 import ReadMessageModal from "../UX/modals/ReadMessageModal";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
-
-// Расширяем возможности dayjs плагинами для работы с часовыми поясами
-dayjs.extend(utc);
-dayjs.extend(timezone);
+import { convertUtcToLocal } from "../../utils/DateUtils";
 
 const MessagesContentItem = ({
    id,
@@ -32,7 +26,7 @@ const MessagesContentItem = ({
       if (e.target.checked) {
          !selected.includes(id) && setSelected((prev: number[]) => [...prev, id])
       } else {
-         selected.includes(id) && setSelected((prev: number[]) => prev.filter(item => item !== id))
+         selected.includes(id) && setSelected((prev: number[]) => prev.filter(item => item != id))
       }
    }
 
@@ -44,24 +38,8 @@ const MessagesContentItem = ({
       }
    };
 
-   // Исправлено форматирование даты для корректного отображения в пользовательском часовом поясе
-   // Внутри компонента MessagesContentItem
-   const formatFullDateTime = (dateString: string, timeString: string): string => {
-      try {
-         // Явное указание, что дата/время хранятся в UTC
-         const serverDateTime = `${dateString}T${timeString}.000Z`;
-         // Создаем объект dayjs и конвертируем в локальное время
-         const dateTime = dayjs(serverDateTime);
-
-         if (dateTime.isValid()) {
-            return dateTime.format("DD.MM.YYYY HH:mm");
-         }
-         return "Некорректная дата/время";
-      } catch (error) {
-         console.error("Ошибка форматирования даты:", error);
-         return "Некорректная дата/время";
-      }
-   };
+   // Используем унифицированную функцию форматирования даты
+   const formattedDateTime = convertUtcToLocal(date_messages, time_messages);
 
    return (
       <div className={`messages-table-item ${!messageRead && receiver === user?.login ? 'unread-message' : ''}`}>
@@ -105,7 +83,7 @@ const MessagesContentItem = ({
          </ReadMessageModal>
          <div className="messages-table-item__author"><p>{sender}</p></div>
          <div className="messages-table-item__date">
-            <p>{formatFullDateTime(date_messages, time_messages)}</p>
+            <p>{formattedDateTime}</p>
          </div>
          <div className="messages-table-item__checkbox">
             <input type="checkbox" checked={[...selected].includes(id) && true} onChange={selectHandler} />

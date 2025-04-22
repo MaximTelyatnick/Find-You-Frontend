@@ -7,8 +7,8 @@ import { useNavigate } from "react-router-dom";
 import DOMPurify from 'dompurify';
 
 const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, setResult }: AccountReplyProps) => {
-   const apiUrlAdd: string = 'http://167.86.84.197:5000/add-comment';
-   const apiUrlUpdate: string = 'http://167.86.84.197:5000/update-comment';
+   const apiUrlAdd: string = 'http://localhost:5000/add-comment';
+   const apiUrlUpdate: string = 'http://localhost:5000/update-comment';
    const [comment, setComment] = useState<string>(replyComment ? replyComment.text : editComment ? editComment.text : "");
    const [error, setError] = useState<boolean>(false);
    const [success, setSuccess] = useState<boolean>(false);

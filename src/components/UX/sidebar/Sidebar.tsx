@@ -38,7 +38,7 @@ const Sidebar = () => {
    // Загрузка данных о закладках
    const getIsFav = async (userId: number) => {
       try {
-         const apiUrlCheck = `http://167.86.84.197:5000/favorites?users_id=${userId}`;
+         const apiUrlCheck = `http://localhost:5000/favorites?users_id=${userId}`;
          const result = await axios.get(apiUrlCheck);
          setFavQnt(result.data.length);
       } catch (error) {
@@ -50,7 +50,7 @@ const Sidebar = () => {
    // Загрузка сообщений
    const getMessages = async (userId: number) => {
       try {
-         const apiUrlGetMessages = `http://167.86.84.197:5000/unread-count?user_id=${userId}`;
+         const apiUrlGetMessages = `http://localhost:5000/unread-count?user_id=${userId}`;
          const result = await axios.get(apiUrlGetMessages);
          setMessagesQnt(result.data.unread_count);
       } catch (error) {
