@@ -3,6 +3,7 @@ import { IAdminReportsState } from "../../../types/Admin"
 import fetchData from "../../../services/fetchData"
 import Title from "../../UX/Title"
 import AdminReportsItem from "../AdminReportsItem"
+import IUser from "../../../types/IUser"
 
 const AdminReportsContent = () => {
    const apiUrl = `http://167.86.84.197:5000/reports`
@@ -12,6 +13,8 @@ const AdminReportsContent = () => {
       loading: false,
       error: false,
    })
+   const storedUser = localStorage.getItem('user');
+   const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
    const getReports = async (url: string) => {
       await fetchData('get', url, setResult)
@@ -20,6 +23,10 @@ const AdminReportsContent = () => {
    useEffect(() => {
       getReports(apiUrl)
    }, [])
+
+   if (user?.role != 'admin' && user?.role != 'moder') {
+      return
+   }
 
    return (
       <div className="admin-reports">

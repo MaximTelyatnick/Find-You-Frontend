@@ -259,14 +259,40 @@ const AdminAccountsEditItem = ({
       });
    };
 
-   const formatDateForInput = (dateStr: string): string => {
-      if (!dateStr) return '';
-      try {
-         return new Date(dateStr).toISOString().slice(0, 16);
-      } catch (error) {
-         return '';
-      }
-   }
+   // Преобразует дату в формат для input с учетом часового пояса пользователя
+   const formatDateForInput = (dateString: string) => {
+      if (!dateString) return '';
+
+      // Создаем объект Date из строки даты
+      const date = new Date(dateString);
+
+      // Проверка на валидность даты
+      if (isNaN(date.getTime())) return '';
+
+      // Получаем год, месяц, день, часы и минуты с учетом местного часового пояса
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      // Форматируем в строку YYYY-MM-DDTHH:MM
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+   };
+
+   // Функция для получения даты в будущем с учетом часового пояса
+   const getFutureDate = (yearsAhead = 10) => {
+      const date = new Date();
+      date.setFullYear(date.getFullYear() + yearsAhead);
+
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+   };
 
    return (
       <>
@@ -370,7 +396,13 @@ const AdminAccountsEditItem = ({
 
                   <div className="admin-accounts-get__time">
                      <p>Указать дату создания :</p>
-                     <input type="datetime-local" placeholder="Дата создания / публикации" value={formatDateForInput(accountDate)} onChange={(e) => { setAccountDate(e.target.value) }} />
+                     <input
+                        type="datetime-local"
+                        placeholder="Дата создания / публикации"
+                        value={formatDateForInput(accountDate)}
+                        onChange={(e) => { setAccountDate(e.target.value) }}
+                        max={getFutureDate(10)}
+                     />
                      <button className="btn btn-info" onClick={() => { updateDate('save') }}>Сохранить</button>
                      <button className="admin-accounts-get__reset" onClick={() => { updateDate('reset') }}>Сбросить дату</button>
                   </div>

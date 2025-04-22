@@ -6,7 +6,6 @@ import SidebarItems from "./SidebarItems";
 import IUser from "../../../types/IUser";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import IMessage from "../../../types/IMessage";
 import LoginModal from "../modals/LoginModal";
 import { transformPhotoAvatar } from "../../../utils/transformPhoto";
 import ChangeAvatarModal from "../modals/ChangeAvatarModal";
@@ -51,10 +50,9 @@ const Sidebar = () => {
    // Загрузка сообщений
    const getMessages = async (userId: number) => {
       try {
-         const apiUrlGetMessages = `http://167.86.84.197:5000/get-messages?user_id=${userId}`;
+         const apiUrlGetMessages = `http://167.86.84.197:5000/unread-count?user_id=${userId}`;
          const result = await axios.get(apiUrlGetMessages);
-         const filtredArr = result.data.filter((item: IMessage) => item.sender !== user?.login);
-         setMessagesQnt(filtredArr.length);
+         setMessagesQnt(result.data.unread_count);
       } catch (error) {
          console.error("Ошибка при загрузке сообщений:", error);
          setMessagesQnt(0);

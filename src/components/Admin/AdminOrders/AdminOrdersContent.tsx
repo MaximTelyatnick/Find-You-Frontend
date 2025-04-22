@@ -196,6 +196,10 @@ const AdminOrdersContent = () => {
       );
    };
 
+   if (user?.role != 'admin' && user?.role != 'moder') {
+      return
+   }
+
    return (
       <div className="admin-order">
          <Title classes='pt'>Заказы</Title>

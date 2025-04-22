@@ -1,30 +1,46 @@
-import { useNavigate } from "react-router-dom"
-import { IHomeAccount } from "../../types/IAccounts"
-import transformPhoto from "../../utils/transformPhoto"
-import axios from "axios"
-import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom";
+import { IHomeAccount } from "../../types/IAccounts";
+import transformPhoto from "../../utils/transformPhoto";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const HomeContentItem = ({ id, photo }: IHomeAccount) => {
-   const navigate = useNavigate()
-   const apiUrlGet = 'http://167.86.84.197:5000/account'
-   const [video, setVideo] = useState<string[]>([])
+   const navigate = useNavigate();
+   const apiUrlGet = 'http://167.86.84.197:5000/account';
+   const apiUrlAddView = 'http://167.86.84.197:5000/add-view';
+   const [video, setVideo] = useState<string[]>([]);
 
-   const clickHandler = () => {
-      navigate(`/${id}`)
-   }
+   // Получаем данные текущего пользователя из localStorage для передачи user_id (если есть)
+   const storedUser = localStorage.getItem('user');
+   const user = storedUser ? JSON.parse(storedUser) : null;
+
+   const clickHandler = async () => {
+      try {
+         // Добавляем просмотр с указанием ID пользователя, если он авторизован
+         await axios.post(apiUrlAddView, {
+            accounts_id: id,
+            user_id: user?.id || null
+         });
+      } catch (error) {
+         console.error("Ошибка при добавлении просмотра:", error);
+      } finally {
+         // В любом случае переходим на страницу аккаунта
+         navigate(`/${id}`);
+      }
+   };
 
    const getAccountHandler = async () => {
       try {
-         const result = await axios.get(`${apiUrlGet}?id=${id}`)
-
-         setVideo(result.data.files.filter((item: string) => item.includes('.mp4')))
+         const result = await axios.get(`${apiUrlGet}?id=${id}`);
+         setVideo(result.data.files.filter((item: string) => item.includes('.mp4')));
       } catch (error) {
+         console.error("Ошибка при получении данных аккаунта:", error);
       }
-   }
+   };
 
    useEffect(() => {
-      getAccountHandler()
-   }, [])
+      getAccountHandler();
+   }, []);
 
    return (
       <div className="account-item" style={{ cursor: 'pointer' }} onClick={clickHandler}>
@@ -35,7 +51,7 @@ const HomeContentItem = ({ id, photo }: IHomeAccount) => {
             VIDEO
          </div>}
       </div>
-   )
-}
+   );
+};
 
-export default HomeContentItem
+export default HomeContentItem;

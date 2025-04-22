@@ -22,6 +22,7 @@ const MessagesContent = () => {
    const [seccess, setSeccess] = useState<string>('');
    const [error, setError] = useState<string>('');
    const [responseLogin, setResponseLogin] = useState<string>('');
+   const [unreadCount, setUnreadCount] = useState<number>(0);
 
    const selectFilterHandler = (filterName: string): void => {
       setFilter(filterName);
@@ -43,6 +44,12 @@ const MessagesContent = () => {
          selected.forEach(item => {
             setResult(prev => {
                if (prev.items) {
+                  // Уменьшаем счетчик непрочитанных, если удаляем непрочитанное сообщение
+                  const deletedMessage = prev.items.find(prevItem => prevItem.id === item);
+                  if (deletedMessage && !deletedMessage.is_read && deletedMessage.receiver === user.login) {
+                     setUnreadCount(current => Math.max(0, current - 1));
+                  }
+
                   return {
                      ...prev,
                      items: [...prev.items.filter(prevItem => prevItem.id != item)]
@@ -71,6 +78,8 @@ const MessagesContent = () => {
             return item.sender === user.login; // Отправленные - где текущий пользователь отправитель
          } else if (filter === 'incoming') {
             return item.receiver === user.login; // Входящие - где текущий пользователь получатель
+         } else if (filter === 'unread') {
+            return item.receiver === user.login && !item.is_read; // Непрочитанные - входящие и не прочитанные
          }
          return false;
       });
@@ -94,9 +103,37 @@ const MessagesContent = () => {
       }, 10);
    };
 
+   // Обработчик для отметки сообщения как прочитанное
+   const handleMessageRead = (messageId: number) => {
+      setResult(prev => {
+         if (prev.items) {
+            const updatedItems = prev.items.map(item => {
+               if (item.id === messageId && !item.is_read) {
+                  // Обновляем счетчик непрочитанных сообщений
+                  setUnreadCount(current => Math.max(0, current - 1));
+                  return { ...item, is_read: true };
+               }
+               return item;
+            });
+            return { ...prev, items: updatedItems };
+         }
+         return prev;
+      });
+   };
+
    useEffect(() => {
       fetchData('get', apiUrl, setResult);
    }, []);
+
+   // Подсчитываем непрочитанные сообщения при получении данных
+   useEffect(() => {
+      if (result.items) {
+         const unreadMessages = result.items.filter(
+            item => item.receiver === user.login && !item.is_read
+         );
+         setUnreadCount(unreadMessages.length);
+      }
+   }, [result.items]);
 
    // Получаем отфильтрованные сообщения для отображения
    const filteredMessages = getFilteredMessages();
@@ -110,8 +147,24 @@ const MessagesContent = () => {
          {seccess && <p style={{ color: 'green' }}>{seccess}</p>}
          <div className="messages__actions">
             <div className="messages__buttons">
-               <div className="btn messages__button" onClick={() => { selectFilterHandler('incoming') }}>Входящие сообщения</div>
-               <div className="btn messages__button" onClick={() => { selectFilterHandler('sent') }}>Отправленные сообщения</div>
+               <div
+                  className={`btn messages__button ${filter === 'incoming' ? 'active' : ''}`}
+                  onClick={() => { selectFilterHandler('incoming') }}
+               >
+                  Входящие сообщения {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
+               </div>
+               <div
+                  className={`btn messages__button ${filter === 'unread' ? 'active' : ''}`}
+                  onClick={() => { selectFilterHandler('unread') }}
+               >
+                  Непрочитанные {unreadCount > 0 && <span className="unread-badge">{unreadCount}</span>}
+               </div>
+               <div
+                  className={`btn messages__button ${filter === 'sent' ? 'active' : ''}`}
+                  onClick={() => { selectFilterHandler('sent') }}
+               >
+                  Отправленные сообщения
+               </div>
                <SendMessageModal
                   responseLogin={responseLogin}
                   setResponseLogin={setResponseLogin}
@@ -149,6 +202,7 @@ const MessagesContent = () => {
             {filteredMessages.map(item => (
                <MessagesContentItem
                   responseHandler={responseHandler}
+                  onMessageRead={handleMessageRead}
                   {...item}
                   selected={selected}
                   setSelected={setSelected}

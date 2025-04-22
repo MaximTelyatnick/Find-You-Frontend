@@ -79,6 +79,7 @@ export interface IAccount {
       data: number[]; // Массив байтов
    } | null; // для поля BYTEA, которое может хранить бинарные данные
    check_video: number; // по умолчанию значение 0
+   views: number;
    city_id?: number | null; // внешний ключ, может быть null
 }
 

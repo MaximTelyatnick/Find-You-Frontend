@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import transformPhoto from "../../../utils/transformPhoto"
 import AdminUsersToolbar from "../AdminUsersToolbar"
+import IUser from "../../../types/IUser"
 
 const AdminUsersContent = () => {
    const [login, setLogin] = useState<string>('')
@@ -15,6 +16,8 @@ const AdminUsersContent = () => {
    const [error, setError] = useState<string>('');
    const [success, setSuccess] = useState<string>('');
    const apiUrlDelete = 'http://167.86.84.197:5000/users-delete'
+   const storedUser = localStorage.getItem('user');
+   const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
    const submitSearchHandler = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault()
@@ -41,6 +44,10 @@ const AdminUsersContent = () => {
       } catch (error) {
          setError('Ошибка при удалении аккаунтов, попробуйте ещё раз!')
       }
+   }
+
+   if (user?.role != 'admin' && user?.role != 'moder') {
+      return
    }
 
    return (

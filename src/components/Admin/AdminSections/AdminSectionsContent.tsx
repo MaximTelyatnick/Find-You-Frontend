@@ -3,6 +3,7 @@ import axios from "axios"
 import { ISection } from "../../../types/Admin"
 import Title from "../../UX/Title"
 import AdminSectionsItem from "../AdminSectionsItem"
+import IUser from "../../../types/IUser"
 
 const AdminSectionsContent = () => {
    const [sections, setSections] = useState<ISection[]>([])
@@ -10,6 +11,8 @@ const AdminSectionsContent = () => {
    const [dropdownPage, setDropdownPage] = useState<boolean>(false);
    const [error, setError] = useState<string>('')
    const [success, setSuccess] = useState<string>('')
+   const storedUser = localStorage.getItem('user');
+   const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
    const setPageHandler = (page: string) => {
       setPage(page)
@@ -61,7 +64,9 @@ const AdminSectionsContent = () => {
       }
    };
 
-
+   if (user?.role != 'admin' && user?.role != 'moder') {
+      return
+   }
 
    return (
       <div className="admin-section">

@@ -5,6 +5,7 @@ export default interface IMessage {
    text_messages: string;
    sender: string;   // Логин отправителя
    receiver: string; // Логин получателя
+   is_read: boolean
 }
 
 export interface IMessageState {
@@ -17,4 +18,5 @@ export interface IMessageItemProps extends IMessage {
    selected: number[];
    setSelected: Function;
    responseHandler: Function;
+   onMessageRead: Function
 }

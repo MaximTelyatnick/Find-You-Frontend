@@ -1414,19 +1414,12 @@
         -o-transition: background 0.2s !important;
         transition: background 0.2s !important;
     }
-    .messages__button:nth-child(1) {
+    .modal-block .messages__button {
         background-color: #79c0ad;
         color: #fff;
-    }
-    .modal-block .messages__button {
-        background-color: #e36f6f;
-        color: #fff;
-    }
-    .messages__button:nth-child(1):hover {
-        background-color: #e36f6f;
     }
     .modal-block .messages__button:hover {
-        background-color: #79c0ad;
+        background-color: #e36f6f;
     }
     .messages-table-item:nth-child(even) {
         background-color: rgba(227, 111, 111, 0.05);
@@ -2592,6 +2585,13 @@
         }
         .account-gallery__videos .account-gallery__item {
             width: 100%;
+        }
+        .account-header {
+            flex-direction: column;
+            align-items: start;
+        }
+        .account-header-rate__nums {
+            text-align-last: left;
         }
     }
     

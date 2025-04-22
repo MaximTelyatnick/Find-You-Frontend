@@ -2,10 +2,10 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { IAdminUser, IAdminUserToolbar } from "../../types/Admin"
 import IUser from "../../types/IUser"
+import { refreshUserData } from "../../utils/userSessionChecker"
 
 const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar) => {
    const apiUrlAddRole = `http://167.86.84.197:5000/add-role`
-   const apiUrlResetSession = `http://167.86.84.197:5000/reset-session`
    const [role, setRole] = useState<string>('user')
    const [error, setError] = useState<string>('')
    const [success, setSuccess] = useState<string>('')
@@ -64,11 +64,6 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
             role_name: role,
          })
 
-         // 2. Сбрасываем сессию пользователя, чтобы заставить его перелогиниться
-         await axios.post(apiUrlResetSession, {
-            user_id: userId
-         });
-
          // 3. Обновляем UI
          setResult((prev: IAdminUser[]) => prev.map(item => {
             if (item.id == userId) {
@@ -87,6 +82,12 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
                return user;
             });
          });
+
+         // Проверяем, не меняет ли админ свою собственную роль
+         if (currentUser && currentUser.id === userId) {
+            // Обновляем данные текущего пользователя без перезахода
+            refreshUserData();
+         }
 
          setSuccess('Роль успешно задана. Пользователь будет вынужден перелогиниться.');
       } catch (error) {

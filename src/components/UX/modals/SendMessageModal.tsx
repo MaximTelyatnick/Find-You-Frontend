@@ -4,6 +4,12 @@ import axios from 'axios';
 import IUser from '../../../types/IUser';
 import { IMessageState } from '../../../types/IMessage';
 import dayjs from 'dayjs';
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+// Расширяем возможности dayjs плагинами для работы с часовыми поясами
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogin, setResponseLogin }: IModalSend) => {
    const [message, setMessage] = useState<string>("");
@@ -49,7 +55,9 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
       }
 
       try {
+         // Используем UTC даты для отправки на сервер
          const now = new Date();
+         // Создаем форматированные для сервера строки
          const formattedDate = dayjs(now).format('YYYY-MM-DD');
          const formattedTime = dayjs(now).format('HH:mm:ss');
 
@@ -68,8 +76,8 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
                   ...prev,
                   items: [{
                      id: Date.now(),
-                     date_messages: formattedDate, // Формат YYYY-MM-DD
-                     time_messages: formattedTime, // Формат HH:mm:ss
+                     date_messages: formattedDate,
+                     time_messages: formattedTime,
                      sender: user?.login || '',
                      receiver: login,
                      text_messages: message,

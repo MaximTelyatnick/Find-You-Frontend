@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ICommentProps, IAccountState, IComment } from "../../types/IAccounts"
 import IUser from "../../types/IUser";
 import axios from "axios";
+import DOMPurify from 'dompurify';
 
 const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, children, onAction, setResult }: ICommentProps) => {
    const [dropdownEdit, setDropdownEdit] = useState<boolean>(false)
@@ -15,6 +16,14 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
    const [removeErrorMessage, setRemoveErrorMessage] = useState<boolean>(false)
    const [seccess, setSeccess] = useState<boolean>(false)
    const [showReplies, setShowReplies] = useState<boolean>(false)
+
+   const sanitizeText = (text: string) => {
+      // Очищаем HTML от потенциально опасных элементов и атрибутов
+      return DOMPurify.sanitize(text, {
+         ALLOWED_TAGS: ['p', 'b', 'i', 'u', 'strong', 'em', 'br'],
+         ALLOWED_ATTR: []
+      });
+   };
 
    const removeComment = async (id: number) => {
       try {
@@ -102,6 +111,9 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
       setDropdownReport(false)
    }
 
+   // Безопасное отображение HTML-содержимого комментария
+   const safeText = sanitizeText(text);
+
    return (
       <>
          <div className="comment__item" >
@@ -110,7 +122,7 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
                {errorMessage && <p style={{ color: 'red' }}>Вы уже отправили жалобу на этот коментарий</p>}
                {seccess && <p style={{ color: 'green' }}>Ваша жалоба будет рассмотрена в ближайшее время</p>}
                <strong>{author_nickname}</strong>
-               <div>{text}</div>
+               <div dangerouslySetInnerHTML={{ __html: safeText }}></div>
                <p>{date.toLocaleString("ru-RU", {
                   year: "numeric",
                   month: "2-digit",

@@ -11,6 +11,7 @@ export interface IModalRead extends IMessage {
    setIsOpen: Function
    children: React.ReactNode
    responseHandler: Function
+   onMessageRead: Function
 }
 
 export interface IModalSend extends IModal {

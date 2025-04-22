@@ -23,13 +23,42 @@ import AdminReports from "./pages/AdminReports";
 import AdminUsers from "./pages/AdminUsers";
 import AdminAccounts from "./pages/AdminAccounts";
 import AdminSections from "./pages/AdminSections";
+import { useEffect } from "react";
+import { startSessionChecker, stopSessionChecker } from "./utils/userSessionChecker";
+import UserUpdateListener from "./components/Admin/UserUpdateListener";
 
 
 const App = () => {
    useSecurityRestrictions(); // Вызываем хук внутри компонента
 
+   // Запускаем проверку сессии при монтировании приложения
+   useEffect(() => {
+      // Проверяем, авторизован ли пользователь
+      const token = localStorage.getItem('token');
+      if (token) {
+         // Запускаем проверку сессии
+         startSessionChecker();
+      }
+
+      // Слушаем события входа
+      const handleStorageUpdated = () => {
+         // Запускаем проверку сессии при входе в систему
+         startSessionChecker();
+      };
+
+      // Добавляем слушатель события
+      window.addEventListener('storage-updated', handleStorageUpdated);
+
+      // Очищаем слушатель и останавливаем проверку при размонтировании
+      return () => {
+         window.removeEventListener('storage-updated', handleStorageUpdated);
+         stopSessionChecker();
+      };
+   }, []);
+
    return (
       <BrowserRouter>
+         <UserUpdateListener />
          <Routes>
             <Route path="/" element={<Home />} />
             <Route path="access" element={<Access />} />

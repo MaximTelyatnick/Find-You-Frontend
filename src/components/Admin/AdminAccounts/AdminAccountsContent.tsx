@@ -3,6 +3,7 @@ import axios from "axios";
 import { IComment } from "../../../types/IAccounts";
 import Title from "../../UX/Title";
 import AdminAccountsEdit from "../AdminAccountsEdit";
+import IUser from "../../../types/IUser";
 
 const AdminAccountsContent = () => {
    const apiUrlUpload = 'http://167.86.84.197:5000/upload-file'
@@ -10,6 +11,8 @@ const AdminAccountsContent = () => {
    const [loading, setLoading] = useState<boolean>(false);
    const [success, setSuccess] = useState<boolean>(false);
    const [error, setError] = useState<string | null>(null);
+   const storedUser = localStorage.getItem('user');
+   const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFile = event.target.files?.[0];
@@ -53,6 +56,10 @@ const AdminAccountsContent = () => {
             </div>
          </div>
       ))
+   }
+
+   if (user?.role != 'admin' && user?.role != 'moder') {
+      return
    }
 
    return (
