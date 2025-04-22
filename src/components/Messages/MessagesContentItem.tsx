@@ -45,11 +45,12 @@ const MessagesContentItem = ({
    };
 
    // Исправлено форматирование даты для корректного отображения в пользовательском часовом поясе
+   // Внутри компонента MessagesContentItem
    const formatFullDateTime = (dateString: string, timeString: string): string => {
       try {
-         // Создаем UTC дату из полученных с сервера значений
-         const serverDateTime = `${dateString}T${timeString}`;
-         // Создаем объект даты, который будет автоматически преобразован в локальное время пользователя
+         // Явное указание, что дата/время хранятся в UTC
+         const serverDateTime = `${dateString}T${timeString}.000Z`;
+         // Создаем объект dayjs и конвертируем в локальное время
          const dateTime = dayjs(serverDateTime);
 
          if (dateTime.isValid()) {
@@ -57,6 +58,7 @@ const MessagesContentItem = ({
          }
          return "Некорректная дата/время";
       } catch (error) {
+         console.error("Ошибка форматирования даты:", error);
          return "Некорректная дата/время";
       }
    };

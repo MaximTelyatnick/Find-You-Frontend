@@ -57,11 +57,11 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
       try {
          // Используем UTC даты для отправки на сервер
          const now = new Date();
-         // Создаем форматированные для сервера строки
-         const formattedDate = dayjs(now).format('YYYY-MM-DD');
-         const formattedTime = dayjs(now).format('HH:mm:ss');
+         const isoString = now.toISOString();
+         const formattedDate = isoString.split('T')[0]; // YYYY-MM-DD
+         const formattedTime = isoString.split('T')[1].split('.')[0]; // HH:MM:SS
 
-         await axios.post('http://167.86.84.197:5000/send-messages', {
+         const response = await axios.post('http://localhost:5000/send-messages', {
             text_messages: message,
             user_from_id: user?.id,
             user_to_login: login
@@ -70,14 +70,15 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
          setSeccess('Сообщение успешно отправлено');
 
          // Добавляем сообщение в список с правильным форматированием даты и времени
+         // Используем ответ сервера для обновления состояния
          setResult && setResult((prev: IMessageState) => {
             if (prev.items) {
                return {
                   ...prev,
                   items: [{
                      id: Date.now(),
-                     date_messages: formattedDate,
-                     time_messages: formattedTime,
+                     date_messages: response.data.date_messages || formattedDate,
+                     time_messages: response.data.time_messages || formattedTime,
                      sender: user?.login || '',
                      receiver: login,
                      text_messages: message,

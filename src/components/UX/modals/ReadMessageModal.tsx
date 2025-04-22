@@ -62,11 +62,12 @@ const ReadMessageModal = ({
    };
 
    // Исправлено форматирование даты с учетом часового пояса
+   // Внутри компонента ReadMessageModal
    const formatDateTime = (date: string, time: string) => {
       try {
-         // Создаем полную дату из компонентов
-         const serverDateTime = `${date}T${time}`;
-         // Конвертируем в локальный формат
+         // Явное указание, что дата/время хранятся в UTC
+         const serverDateTime = `${date}T${time}.000Z`;
+         // Создаем объект dayjs и конвертируем в локальное время
          const localDate = dayjs(serverDateTime);
 
          if (localDate.isValid()) {
@@ -74,6 +75,7 @@ const ReadMessageModal = ({
          }
          return `${date} ${time.slice(0, 5)}`;
       } catch (error) {
+         console.error("Ошибка форматирования даты:", error);
          return `${date} ${time.slice(0, 5)}`;
       }
    };
