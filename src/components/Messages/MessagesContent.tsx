@@ -25,6 +25,9 @@ const MessagesContent = () => {
    const [responseLogin, setResponseLogin] = useState<string>('');
    const [unreadCount, setUnreadCount] = useState<number>(0);
 
+   // Состояние для отслеживания активно просматриваемого сообщения
+   const [activeMessageId, setActiveMessageId] = useState<number | null>(null);
+
    const selectFilterHandler = (filterName: string): void => {
       setFilter(filterName);
       setSelected([]);
@@ -68,22 +71,27 @@ const MessagesContent = () => {
       }
    };
 
-   // Исправленная логика фильтрации для правильного определения всех сообщений
+   // Логика фильтрации
    const getFilteredMessages = () => {
       if (!result.items) return [];
 
-      return result.items.filter(item => {
+      // Если есть активное сообщение в режиме unread, добавляем его к фильтрованным результатам
+      let filteredItems = result.items.filter(item => {
          if (!filter) return true;
 
          if (filter === 'sent') {
-            return item.sender === user.login; // Отправленные - где текущий пользователь отправитель
+            return item.sender === user.login;
          } else if (filter === 'incoming') {
-            return item.receiver === user.login; // Входящие - где текущий пользователь получатель
+            return item.receiver === user.login;
          } else if (filter === 'unread') {
-            return item.receiver === user.login && !item.is_read; // Непрочитанные - входящие и не прочитанные
+            // В режиме непрочитанных также показываем активное сообщение, даже если оно уже прочитано
+            return (item.receiver === user.login && !item.is_read) ||
+               (activeMessageId === item.id && filter === 'unread');
          }
          return false;
       });
+
+      return filteredItems;
    };
 
    const selectAllMessages = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,6 +114,9 @@ const MessagesContent = () => {
 
    // Обработчик для отметки сообщения как прочитанное
    const handleMessageRead = (messageId: number) => {
+      // Сохраняем ID активного сообщения
+      setActiveMessageId(messageId);
+
       setResult(prev => {
          if (prev.items) {
             const updatedItems = prev.items.map(item => {
@@ -120,6 +131,12 @@ const MessagesContent = () => {
          }
          return prev;
       });
+   };
+
+   // Обработчик закрытия модального окна сообщения
+   const handleModalClose = () => {
+      // Сбрасываем ID активного сообщения при закрытии модального окна
+      setActiveMessageId(null);
    };
 
    useEffect(() => {
@@ -204,6 +221,7 @@ const MessagesContent = () => {
                <MessagesContentItem
                   responseHandler={responseHandler}
                   onMessageRead={handleMessageRead}
+                  onModalClose={handleModalClose}
                   {...item}
                   selected={selected}
                   setSelected={setSelected}

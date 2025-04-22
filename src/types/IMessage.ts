@@ -18,5 +18,6 @@ export interface IMessageItemProps extends IMessage {
    selected: number[];
    setSelected: Function;
    responseHandler: Function;
-   onMessageRead: Function
+   onMessageRead?: (messageId: number) => void;
+   onModalClose?: () => void; // Новое свойство для обработки закрытия модального окна
 }

@@ -12,6 +12,7 @@ export interface IModalRead extends IMessage {
    children: React.ReactNode
    responseHandler: Function
    onMessageRead: Function
+   onModalClose?: () => void; // Новое свойство для обработки закрытия модального окна
 }
 
 export interface IModalSend extends IModal {

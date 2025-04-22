@@ -15,7 +15,8 @@ const MessagesContentItem = ({
    selected,
    setSelected,
    responseHandler,
-   onMessageRead
+   onMessageRead,
+   onModalClose
 }: IMessageItemProps) => {
    const [isOpenRead, setIsOpenRead] = useState<boolean>(false);
    const [messageRead, setMessageRead] = useState<boolean>(is_read);
@@ -38,6 +39,14 @@ const MessagesContentItem = ({
       }
    };
 
+   // Обработчик закрытия модального окна
+   const handleModalClose = () => {
+      setIsOpenRead(false);
+      if (onModalClose) {
+         onModalClose();
+      }
+   };
+
    // Используем унифицированную функцию форматирования даты
    const formattedDateTime = convertUtcToLocal(date_messages, time_messages);
 
@@ -54,6 +63,7 @@ const MessagesContentItem = ({
             sender={sender}
             receiver={receiver}
             onMessageRead={handleMessageRead}
+            onModalClose={handleModalClose}
             is_read={is_read}
          >
             <div className="messages-table-item__title">
