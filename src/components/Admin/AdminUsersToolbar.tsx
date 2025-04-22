@@ -89,7 +89,7 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
             refreshUserData();
          }
 
-         setSuccess('Роль успешно задана. Пользователь будет вынужден перелогиниться.');
+         setSuccess('Роль успешно задана.');
       } catch (error) {
          setError('Что-то пошло не так при смене роли, попробуйте ещё раз!');
       }
