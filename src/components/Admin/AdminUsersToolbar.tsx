@@ -5,7 +5,7 @@ import IUser from "../../types/IUser"
 import { refreshUserData } from "../../utils/userSessionChecker"
 
 const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar) => {
-   const apiUrlAddRole = `http://localhost:5000/add-role`
+   const apiUrlAddRole = `http://167.86.84.197:5000/add-role`
    const [role, setRole] = useState<string>('user')
    const [error, setError] = useState<string>('')
    const [success, setSuccess] = useState<string>('')
@@ -20,7 +20,7 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
          // Получаем информацию о выбранном пользователе через API
          const fetchUserInfo = async () => {
             try {
-               const response = await axios.get(`http://localhost:5000/get-role?user_id=${userId}`);
+               const response = await axios.get(`http://167.86.84.197:5000/get-role?user_id=${userId}`);
                const selectedUser = response.data;
 
                // Если текущий пользователь - модератор и выбранный пользователь модератор или админ
@@ -48,7 +48,7 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
          setSuccess('')
 
          // Получаем актуальную информацию о пользователе перед изменением роли
-         const userResponse = await axios.get(`http://localhost:5000/get-role?user_id=${userId}`);
+         const userResponse = await axios.get(`http://167.86.84.197:5000/get-role?user_id=${userId}`);
          const selectedUser = userResponse.data;
 
          // Дополнительная проверка прав перед отправкой запроса

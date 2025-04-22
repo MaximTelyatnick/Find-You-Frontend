@@ -49,7 +49,7 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
 
       try {
          // Отправляем сообщение на сервер
-         const response = await axios.post('http://localhost:5000/send-messages', {
+         const response = await axios.post('http://167.86.84.197:5000/send-messages', {
             text_messages: message,
             user_from_id: user?.id,
             user_to_login: login
