@@ -1,11 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { IHomeAccount } from "../../types/IAccounts";
 import transformPhoto from "../../utils/transformPhoto";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
 const HomeContentItem = ({ id, photo }: IHomeAccount) => {
-   const navigate = useNavigate();
    const apiUrlGet = 'http://167.86.84.197:5000/account';
    const apiUrlAddView = 'http://167.86.84.197:5000/add-view';
    const [video, setVideo] = useState<string[]>([]);
@@ -23,9 +22,6 @@ const HomeContentItem = ({ id, photo }: IHomeAccount) => {
          });
       } catch (error) {
          console.error("Ошибка при добавлении просмотра:", error);
-      } finally {
-         // В любом случае переходим на страницу аккаунта
-         navigate(`/${id}`);
       }
    };
 
@@ -44,12 +40,14 @@ const HomeContentItem = ({ id, photo }: IHomeAccount) => {
 
    return (
       <div className="account-item" style={{ cursor: 'pointer' }} onClick={clickHandler}>
-         {typeof photo == 'string' ? <img src={`${photo}`} /> :
-            photo && photo.data ? <img src={transformPhoto(photo)} /> :
-               <img src='/images/blog_image.jpg' />}
-         {!!video.length && <div className="account-item__icon">
-            VIDEO
-         </div>}
+         <Link to={`/${id}`}>
+            {typeof photo == 'string' ? <img src={`${photo}`} /> :
+               photo && photo.data ? <img src={transformPhoto(photo)} /> :
+                  <img src='/images/blog_image.jpg' />}
+            {!!video.length && <div className="account-item__icon">
+               VIDEO
+            </div>}
+         </Link>
       </div>
    );
 };

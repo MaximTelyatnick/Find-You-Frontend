@@ -2,7 +2,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { ru } from "date-fns/locale";
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { IAdminSections } from '../../types/Admin';
 import axios from 'axios';
 import { format, startOfDay } from 'date-fns';
@@ -159,17 +159,29 @@ const Footer = () => {
          <div className='footer__container layout-container'>
             <div className='footer__row'>
                <div className="footer__main">
-                  <a onClick={() => navigate('/')}><img src='/images/logoFooter.png' className='logo' alt="Логотип" /></a>
+                  <Link to="/">
+                     <img src='/images/logoFooter.png' className='logo' alt="Логотип" />
+                  </Link>
                   <ul className="footer-links">
-                     <li onClick={() => { navigate('/') }}>Главная</li>
+                     <li>
+                        <Link to="/">Главная</Link>
+                     </li>
                      <li>·</li>
-                     <li onClick={() => { navigate('/cities') }}>Города</li>
+                     <li>
+                        <Link to="/cities">Города</Link>
+                     </li>
                      <li>·</li>
-                     <li onClick={() => { navigate('/tags') }}>Облако тегов</li>
+                     <li>
+                        <Link to="/tags">Облако тегов</Link>
+                     </li>
                      <li>·</li>
-                     <li onClick={() => { navigate('/referral') }}>Реферальная система</li>
+                     <li>
+                        <Link to="/referral">Реферальная система</Link>
+                     </li>
                      <li>·</li>
-                     <li onClick={() => { navigate('/refusual') }}>Отказ от ответственности</li>
+                     <li>
+                        <Link to="/refusual">Отказ от ответственности</Link>
+                     </li>
                   </ul>
                   <p className="footer-text">{sections && sections.sections[0].content}</p>
                   <p className="footer-text">{error && "Произошла ошибка при получении описания"}</p>
