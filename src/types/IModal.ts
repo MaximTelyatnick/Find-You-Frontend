@@ -16,7 +16,6 @@ export interface IModalRead extends IMessage {
 }
 
 export interface IModalSend extends IModal {
-   setResult?: Function
    responseLogin: string
    setResponseLogin: Function
 }

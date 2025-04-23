@@ -32,10 +32,18 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
       '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧'
    ];
 
-   // Color options
-   const colors = [
-      '#000000', '#ff0000', '#0000ff', '#008000', '#800080',
-      '#ffa500', '#a52a2a', '#808080', '#800000', '#008080'
+   // Color options with corresponding class names
+   const colorOptions = [
+      { value: '#000000', class: 'text-black' },
+      { value: '#ff0000', class: 'text-red' },
+      { value: '#0000ff', class: 'text-blue' },
+      { value: '#008000', class: 'text-green' },
+      { value: '#800080', class: 'text-purple' },
+      { value: '#ffa500', class: 'text-orange' },
+      { value: '#a52a2a', class: 'text-brown' },
+      { value: '#808080', class: 'text-gray' },
+      { value: '#800000', class: 'text-maroon' },
+      { value: '#008080', class: 'text-teal' }
    ];
 
    useEffect(() => {
@@ -99,14 +107,12 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
    };
 
    const sanitizeComment = (text: string) => {
-      // Очищаем HTML от потенциально опасных элементов и атрибутов
       return DOMPurify.sanitize(text, {
          ALLOWED_TAGS: ['p', 'b', 'i', 'u', 's', 'strong', 'em', 'br', 'h1', 'h2', 'h3', 'blockquote', 'pre', 'code', 'ol', 'ul', 'li', 'span'],
-         ALLOWED_ATTR: ['style'],
+         ALLOWED_ATTR: ['class'], // Changed from 'style' to 'class'
          ADD_ATTR: ['target'],
          FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-         // Strict URL checking for preventing XSS via URLs
+         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'style'],
          ALLOW_DATA_ATTR: false
       });
    };
@@ -117,6 +123,8 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
 
       // Очистка комментария от потенциально опасного кода
       const sanitizedComment = sanitizeComment(comment);
+      console.log(comment, sanitizedComment);
+
 
       try {
          if (replyComment || !editComment) {
@@ -258,8 +266,8 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
       }, 0);
    };
 
-   // Применение цвета к выделенному тексту
-   const applyColor = (color: string) => {
+   // Применение цвета к выделенному тексту через классы вместо инлайн стилей
+   const applyColor = (colorOption: { value: string, class: string }) => {
       const textarea = document.getElementById('comment-textarea') as HTMLTextAreaElement;
       if (!textarea) return;
 
@@ -269,7 +277,8 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
 
       if (selectedText.length === 0) return;
 
-      const coloredText = `<span style="color: ${color}">${selectedText}</span>`;
+      // Используем классы вместо инлайн стилей
+      const coloredText = `<span class="${colorOption.class}">${selectedText}</span>`;
       const newText = comment.substring(0, start) + coloredText + comment.substring(end);
       setComment(newText);
       setShowColorPicker(false);
@@ -349,14 +358,14 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
 
                      {showColorPicker && (
                         <div className="color-picker" ref={colorPickerRef}>
-                           {colors.map((color, index) => (
+                           {colorOptions.map((colorOption, index) => (
                               <button
                                  key={index}
                                  type="button"
-                                 onClick={() => applyColor(color)}
+                                 onClick={() => applyColor(colorOption)}
                                  className="color-item"
-                                 style={{ backgroundColor: color }}
-                                 title={color}
+                                 style={{ backgroundColor: colorOption.value }}
+                                 title={colorOption.value}
                               />
                            ))}
                         </div>
@@ -620,6 +629,18 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
             .text-muted {
                color: #6c757d;
             }
+            
+            /* Text color classes */
+            .text-black { color: #000000; }
+            .text-red { color: #ff0000; }
+            .text-blue { color: #0000ff; }
+            .text-green { color: #008000; }
+            .text-purple { color: #800080; }
+            .text-orange { color: #ffa500; }
+            .text-brown { color: #a52a2a; }
+            .text-gray { color: #808080; }
+            .text-maroon { color: #800000; }
+            .text-teal { color: #008080; }
          `}</style>
          </form>
       </div>

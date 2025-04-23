@@ -2,28 +2,21 @@ import { useState } from "react";
 import { ICommentProps, IAccountState, IComment } from "../../types/IAccounts"
 import IUser from "../../types/IUser";
 import axios from "axios";
-import DOMPurify from 'dompurify';
+import { convertUtcToLocal } from "../../utils/DateUtils";
 
-const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, children, onAction, setResult }: ICommentProps) => {
+const AccountCommenItem = ({ id, user_id, text, date_comment, time_comment, author_nickname, children, onAction, setResult }: ICommentProps) => {
    const [dropdownEdit, setDropdownEdit] = useState<boolean>(false)
    const [dropdownReport, setDropdownReport] = useState<boolean>(false)
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
-   const date = new Date
    const apiUrlRemove: string = 'http://167.86.84.197:5000/delete-comment';
    const apiUrlAdd: string = 'http://167.86.84.197:5000/add-reports';
    const [errorMessage, setErrorMessage] = useState<boolean>(false)
    const [removeErrorMessage, setRemoveErrorMessage] = useState<boolean>(false)
    const [seccess, setSeccess] = useState<boolean>(false)
-   const [showReplies, setShowReplies] = useState<boolean>(false)
 
-   const sanitizeText = (text: string) => {
-      // Очищаем HTML от потенциально опасных элементов и атрибутов
-      return DOMPurify.sanitize(text, {
-         ALLOWED_TAGS: ['p', 'b', 'i', 'u', 'strong', 'em', 'br'],
-         ALLOWED_ATTR: []
-      });
-   };
+   // Format the date and time from UTC to local time
+   const formattedDateTime = convertUtcToLocal(date_comment, time_comment);
 
    const removeComment = async (id: number) => {
       try {
@@ -33,10 +26,10 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
 
          const removeNestedComment = (comments: IComment[]): IComment[] => {
             return comments
-               .filter(comment => comment.id !== id) // Удаляем сам комментарий
+               .filter(comment => comment.id !== id)
                .map(comment => ({
                   ...comment,
-                  children: comment.children ? removeNestedComment(comment.children) : [] // Рекурсивно очищаем вложенные ответы
+                  children: comment.children ? removeNestedComment(comment.children) : []
                }));
          };
 
@@ -72,22 +65,6 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
       }
    }
 
-   const showRepliesHandler = (e: React.MouseEvent<HTMLElement>) => {
-      const parentElement = e.currentTarget.closest('.comment__item')
-      const nextElement = parentElement?.nextElementSibling as HTMLElement | null;
-
-      if (nextElement) {
-         setShowReplies(prev => {
-            if (!prev) {
-               nextElement.classList.add('active');
-            } else {
-               nextElement.classList.remove('active');
-            }
-            return !prev; // Переключаем состояние
-         });
-      }
-   };
-
    const actionHandler = (action: string) => {
       switch (action) {
          case 'Спам':
@@ -111,9 +88,6 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
       setDropdownReport(false)
    }
 
-   // Безопасное отображение HTML-содержимого комментария
-   const safeText = sanitizeText(text);
-
    return (
       <>
          <div className="comment__item" >
@@ -122,12 +96,8 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
                {errorMessage && <p style={{ color: 'red' }}>Вы уже отправили жалобу на этот коментарий</p>}
                {seccess && <p style={{ color: 'green' }}>Ваша жалоба будет рассмотрена в ближайшее время</p>}
                <strong>{author_nickname}</strong>
-               <div dangerouslySetInnerHTML={{ __html: safeText }}></div>
-               <p>{date.toLocaleString("ru-RU", {
-                  year: "numeric",
-                  month: "2-digit",
-                  day: "2-digit"
-               })} {time_comment} <span
+               <div className="comment-content" dangerouslySetInnerHTML={{ __html: text }}></div>
+               <p>{formattedDateTime} <span
                   style={{
                      color: "#e36f6f",
                      display: "inline-block",
@@ -135,14 +105,8 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
                   }}
                   onClick={() => { onAction({ author_nickname, text, parent_id: id, }, 'reply') }}
                >
-                     Цитата❞
-                  </span></p>
-               {children.length > 0 && !showReplies && <p onClick={(e) => { showRepliesHandler(e) }} style={{ cursor: 'pointer' }}>Показать ответы <svg width="15" height="10" viewBox="0 0 28 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1.5 1L14 13.5L26.5 1" stroke="grey" strokeWidth="2" />
-               </svg></p>}
-               {showReplies && <p onClick={(e) => { showRepliesHandler(e) }} style={{ cursor: 'pointer' }}>Скрыть ответы <svg width="15" height="10" viewBox="0 0 28 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M26.5 14.5L14 2L1.5 14.5" stroke="black" strokeWidth="2" />
-               </svg></p>}
+                  Цитата❞
+               </span></p>
             </div>
             <div>
                {
@@ -193,7 +157,7 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
             </div>
          </div>
          {children.length > 0 && (
-            <div className="comment__reply">
+            <div className="comment__reply active">
                {children.map((childComment) => (
                   <AccountCommenItem
                      {...childComment}
@@ -204,6 +168,25 @@ const AccountCommenItem = ({ id, user_id, text, time_comment, author_nickname, c
                ))}
             </div>
          )}
+
+         {/* Add CSS for text color classes */}
+         <style>{`
+            .comment-content {
+               word-wrap: break-word;
+               overflow-wrap: break-word;
+            }
+            /* Text color classes */
+            .text-black { color: #000000 !important; }
+            .text-red { color: #ff0000 !important; }
+            .text-blue { color: #0000ff !important; }
+            .text-green { color: #008000 !important; }
+            .text-purple { color: #800080 !important; }
+            .text-orange { color: #ffa500 !important; }
+            .text-brown { color: #a52a2a !important; }
+            .text-gray { color: #808080 !important; }
+            .text-maroon { color: #800000 !important; }
+            .text-teal { color: #008080 !important; }
+         `}</style>
       </>
    )
 }

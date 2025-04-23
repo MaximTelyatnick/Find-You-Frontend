@@ -161,7 +161,15 @@ const AdminAccountsEditItem = ({
             let value: string | null | undefined = undefined;
 
             if (action == 'save') {
-               value = accountDate;
+               // Убедимся, что дата отправляется в ISO формате, сохраняя часы и минуты
+               if (accountDate) {
+                  // Преобразуем строку в объект Date
+                  const date = new Date(accountDate);
+                  // Сохраняем в ISO формате, чтобы сохранить часы и минуты
+                  value = date.toISOString();
+               } else {
+                  value = null;
+               }
             } else if (action == 'reset') {
                value = null;
             }
@@ -325,7 +333,7 @@ const AdminAccountsEditItem = ({
             <p className="admin-accounts-edit__date">Дата создания: <br />
                <span>
                   {account.date_of_create
-                     ? dayjs(account.date_of_create).format("DD.MM.YYYY: HH-mm")
+                     ? dayjs(account.date_of_create).format("DD.MM.YYYY HH:mm")
                      : "Не указана"}
                </span>
             </p>

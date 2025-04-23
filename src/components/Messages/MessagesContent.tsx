@@ -1,42 +1,46 @@
 import { useEffect, useState } from "react";
-import fetchData from "../../services/fetchData";
+import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 import { IMessageState } from "../../types/IMessage";
 import IUser from "../../types/IUser";
 import MessagesContentItem from "./MessagesContentItem";
-import axios from "axios";
 import SendMessageModal from "../UX/modals/SendMessageModal";
+import Pagination from "../UX/Pagination";
 
 const MessagesContent = () => {
+   const [searchParams, setSearchParams] = useSearchParams();
+   const page = Number(searchParams.get("page")) || 1;
+   const filter = searchParams.get("filter") || 'incoming';
+
    const [isOpenSend, setIsOpenSend] = useState<boolean>(false);
    const storedUser = localStorage.getItem('user');
    let user: IUser = storedUser ? JSON.parse(storedUser) : null;
-   const apiUrl = `http://167.86.84.197:5000/get-messages?user_id=${user?.id}`;
-   const apiUrlDelete = `http://167.86.84.197:5000/delete-messages`;
+
    const [result, setResult] = useState<IMessageState>({
       items: null,
       error: false,
       loading: false,
    });
 
-   const [filter, setFilter] = useState<string>('incoming');
    const [selected, setSelected] = useState<number[]>([]);
    const [seccess, setSeccess] = useState<string>('');
    const [error, setError] = useState<string>('');
    const [responseLogin, setResponseLogin] = useState<string>('');
    const [unreadCount, setUnreadCount] = useState<number>(0);
+   const [totalPages, setTotalPages] = useState<number>(1);
 
-   // Состояние для отслеживания активно просматриваемого сообщения
-   const [activeMessageId, setActiveMessageId] = useState<number | null>(null);
-
+   // Обновленный метод для изменения фильтра
    const selectFilterHandler = (filterName: string): void => {
-      setFilter(filterName);
       setSelected([]);
+      // Обновляем URL с новым фильтром и сбрасываем страницу на первую
+      setSearchParams({ filter: filterName, page: "1" });
    };
 
    const deleteHandler = async () => {
       try {
          setError('');
          setSeccess('');
+         const apiUrlDelete = `http://167.86.84.197:5000/delete-messages`;
 
          await axios.delete(apiUrlDelete, {
             data: {
@@ -45,59 +49,45 @@ const MessagesContent = () => {
             }
          });
 
-         selected.forEach(item => {
-            setResult(prev => {
-               if (prev.items) {
-                  // Уменьшаем счетчик непрочитанных, если удаляем непрочитанное сообщение
-                  const deletedMessage = prev.items.find(prevItem => prevItem.id === item);
-                  if (deletedMessage && !deletedMessage.is_read && deletedMessage.receiver === user.login) {
-                     setUnreadCount(current => Math.max(0, current - 1));
-                  }
-
-                  return {
-                     ...prev,
-                     items: [...prev.items.filter(prevItem => prevItem.id != item)]
-                  };
-               } else {
-                  return prev;
-               }
-            });
-         });
-
          setSeccess('Сообщения успешно удалены');
          setSelected([]);
+
+         // Обновляем список сообщений после удаления
+         fetchMessages();
       } catch (error) {
          setError('Что-то пошло не так, попробуйте ещё раз!');
+         console.error("Ошибка при удалении:", error);
       }
    };
 
-   // Логика фильтрации
-   const getFilteredMessages = () => {
-      if (!result.items) return [];
+   // Обновленная функция для загрузки сообщений с учетом фильтра
+   const fetchMessages = async () => {
+      try {
+         setResult(prev => ({ ...prev, loading: true, error: false }));
+         const apiUrl = `http://167.86.84.197:5000/get-messages?user_id=${user?.id}&page=${page}&filter=${filter}`;
 
-      // Если есть активное сообщение в режиме unread, добавляем его к фильтрованным результатам
-      let filteredItems = result.items.filter(item => {
-         if (!filter) return true;
+         const response = await axios.get(apiUrl);
 
-         if (filter === 'sent') {
-            return item.sender === user.login;
-         } else if (filter === 'incoming') {
-            return item.receiver === user.login;
-         } else if (filter === 'unread') {
-            // В режиме непрочитанных также показываем активное сообщение, даже если оно уже прочитано
-            return (item.receiver === user.login && !item.is_read) ||
-               (activeMessageId === item.id && filter === 'unread');
-         }
-         return false;
-      });
+         setResult({
+            items: response.data.messages,
+            error: false,
+            loading: false,
+         });
 
-      return filteredItems;
+         setTotalPages(response.data.totalPages || 1);
+         setUnreadCount(response.data.unreadCount || 0);
+      } catch (error) {
+         setResult({
+            items: null,
+            error: true,
+            loading: false,
+         });
+      }
    };
 
    const selectAllMessages = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.checked) {
-         // Используем уже отфильтрованные сообщения для выбора всех
-         const idsArr = getFilteredMessages().map(item => item.id);
+      if (e.target.checked && result.items) {
+         const idsArr = result.items.map(item => item.id);
          setSelected(idsArr);
       } else {
          setSelected([]);
@@ -106,55 +96,57 @@ const MessagesContent = () => {
 
    const responseHandler = (login: string) => {
       setResponseLogin(login);
-      // Сначала устанавливаем логин, затем открываем модальное окно
       setTimeout(() => {
          setIsOpenSend(true);
       }, 10);
    };
 
    // Обработчик для отметки сообщения как прочитанное
-   const handleMessageRead = (messageId: number) => {
-      // Сохраняем ID активного сообщения
-      setActiveMessageId(messageId);
+   const handleMessageRead = async (messageId: number) => {
+      try {
+         // Отправляем запрос на сервер для отметки сообщения как прочитанное
+         await axios.post('http://167.86.84.197:5000/mark-as-read', {
+            message_id: messageId,
+            user_id: user.id
+         });
 
-      setResult(prev => {
-         if (prev.items) {
-            const updatedItems = prev.items.map(item => {
-               if (item.id === messageId && !item.is_read) {
-                  // Обновляем счетчик непрочитанных сообщений
-                  setUnreadCount(current => Math.max(0, current - 1));
-                  return { ...item, is_read: true };
-               }
-               return item;
-            });
-            return { ...prev, items: updatedItems };
-         }
-         return prev;
-      });
-   };
+         // Обновляем локальное состояние сообщения
+         setResult(prev => {
+            if (prev.items) {
+               const updatedItems = prev.items.map(item => {
+                  if (item.id === messageId && !item.is_read) {
+                     return { ...item, is_read: true };
+                  }
+                  return item;
+               });
+               return { ...prev, items: updatedItems };
+            }
+            return prev;
+         });
 
-   // Обработчик закрытия модального окна сообщения
-   const handleModalClose = () => {
-      // Сбрасываем ID активного сообщения при закрытии модального окна
-      setActiveMessageId(null);
-   };
-
-   useEffect(() => {
-      fetchData('get', apiUrl, setResult);
-   }, []);
-
-   // Подсчитываем непрочитанные сообщения при получении данных
-   useEffect(() => {
-      if (result.items) {
-         const unreadMessages = result.items.filter(
-            item => item.receiver === user.login && !item.is_read
-         );
-         setUnreadCount(unreadMessages.length);
+         // Обновляем счетчик непрочитанных после успешной отметки
+         fetchUnreadCount();
+      } catch (error) {
+         console.error("Ошибка при отметке сообщения как прочитанное:", error);
       }
-   }, [result.items]);
+   };
 
-   // Получаем отфильтрованные сообщения для отображения
-   const filteredMessages = getFilteredMessages();
+   // Отдельная функция для получения количества непрочитанных сообщений
+   const fetchUnreadCount = async () => {
+      try {
+         const response = await axios.get(`http://167.86.84.197:5000/unread-count?user_id=${user?.id}`);
+         setUnreadCount(response.data.unread_count);
+      } catch (error) {
+         console.error("Ошибка при получении количества непрочитанных:", error);
+      }
+   };
+
+   // useEffect для загрузки сообщений при изменении страницы или фильтра
+   useEffect(() => {
+      if (user?.id) {
+         fetchMessages();
+      }
+   }, [page, filter, user?.id]);
 
    return (
       <>
@@ -186,18 +178,25 @@ const MessagesContent = () => {
                <SendMessageModal
                   responseLogin={responseLogin}
                   setResponseLogin={setResponseLogin}
-                  setResult={setResult}
                   isOpen={isOpenSend}
                   setIsOpen={setIsOpenSend}
                >
                   <div className="btn messages__button">Отправить сообщения</div>
                </SendMessageModal>
+               {selected.length > 0 && (
+                  <div className="delete-action">
+                     <div
+                        onClick={deleteHandler}
+                        title="Удалить выбранные сообщения"
+                     >
+                        <svg width="30" height="30" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                           <path d="M55.4166 11.6667H45.2083L42.2916 8.75H27.7083L24.7916 11.6667H14.5833V17.5H55.4166M17.5 55.4167C17.5 56.9638 18.1146 58.4475 19.2085 59.5415C20.3025 60.6354 21.7862 61.25 23.3333 61.25H46.6666C48.2137 61.25 49.6975 60.6354 50.7914 59.5415C51.8854 58.4475 52.5 56.9638 52.5 55.4167V20.4167H17.5V55.4167Z" fill="#E36F6F" />
+                        </svg>
+                     </div>
+                  </div>
+               )}
             </div>
-            {selected.length > 0 && (
-               <svg onClick={deleteHandler} width="30" height="30" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M55.4166 11.6667H45.2083L42.2916 8.75H27.7083L24.7916 11.6667H14.5833V17.5H55.4166M17.5 55.4167C17.5 56.9638 18.1146 58.4475 19.2085 59.5415C20.3025 60.6354 21.7862 61.25 23.3333 61.25H46.6666C48.2137 61.25 49.6975 60.6354 50.7914 59.5415C51.8854 58.4475 52.5 56.9638 52.5 55.4167V20.4167H17.5V55.4167Z" fill="#E36F6F" />
-               </svg>
-            )}
+
          </div>
 
          <hr />
@@ -211,24 +210,47 @@ const MessagesContent = () => {
                   <input
                      type="checkbox"
                      onChange={selectAllMessages}
-                     checked={selected.length > 0 && filteredMessages.length > 0 &&
-                        selected.length === filteredMessages.length}
+                     checked={
+                        !!(
+                           selected.length > 0 &&
+                           result.items &&
+                           result.items.length > 0 &&
+                           selected.length === result.items.length
+                        )
+                     }
                   />
                </div>
             </div>
             {result.error && <p style={{ color: 'red' }}>Что-то пошло не так, попробуйте ещё раз!</p>}
-            {filteredMessages.map(item => (
-               <MessagesContentItem
-                  responseHandler={responseHandler}
-                  onMessageRead={handleMessageRead}
-                  onModalClose={handleModalClose}
-                  {...item}
-                  selected={selected}
-                  setSelected={setSelected}
-                  key={item.id}
-               />
-            ))}
+            {result.items && result.items.length > 0 ? (
+               result.items.map(item => (
+                  <MessagesContentItem
+                     responseHandler={responseHandler}
+                     onMessageRead={handleMessageRead}
+                     onModalClose={() => { }}
+                     {...item}
+                     selected={selected}
+                     setSelected={setSelected}
+                     key={item.id}
+                  />
+               ))
+            ) : (
+               <div className="no-messages">
+                  <p>Сообщений не найдено</p>
+               </div>
+            )}
          </div>
+
+         <Pagination
+            totalPages={totalPages}
+            page={page}
+            itemsLength={result.items ? result.items.length : 0}
+            cityId={0}
+            tagIds={[]}
+            search=""
+            visiblePages={5}
+            type="messages"
+         />
       </>
    );
 };

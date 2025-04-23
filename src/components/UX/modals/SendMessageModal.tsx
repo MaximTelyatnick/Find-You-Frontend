@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { IModalSend } from '../../../types/IModal';
 import axios from 'axios';
 import IUser from '../../../types/IUser';
-import { IMessageState } from '../../../types/IMessage';
 
-const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogin, setResponseLogin }: IModalSend) => {
+const SendMessageModal = ({ isOpen, setIsOpen, children, responseLogin, setResponseLogin }: IModalSend) => {
    const [message, setMessage] = useState<string>("");
    const [login, setLogin] = useState<string>("");
    const storedUser = localStorage.getItem('user');
@@ -49,43 +48,13 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, setResult, responseLogi
 
       try {
          // Отправляем сообщение на сервер
-         const response = await axios.post('http://167.86.84.197:5000/send-messages', {
+         await axios.post('http://167.86.84.197:5000/send-messages', {
             text_messages: message,
             user_from_id: user?.id,
             user_to_login: login
          });
 
          setSeccess('Сообщение успешно отправлено');
-
-         // Получаем дату и время с сервера в UTC
-         const now = new Date();
-         // Получаем UTC дату
-         const year = now.getUTCFullYear();
-         const month = String(now.getUTCMonth() + 1).padStart(2, '0');
-         const day = String(now.getUTCDate()).padStart(2, '0');
-
-         // Получаем UTC время
-         const hours = String(now.getUTCHours()).padStart(2, '0');
-         const minutes = String(now.getUTCMinutes()).padStart(2, '0');
-         const seconds = String(now.getUTCSeconds()).padStart(2, '0');
-
-         setResult && setResult((prev: IMessageState) => {
-            if (prev.items) {
-               return {
-                  ...prev,
-                  items: [{
-                     id: response.data.id || Date.now(),
-                     date_messages: `${year}-${month}-${day}`,
-                     time_messages: `${hours}:${minutes}:${seconds}`,
-                     sender: user?.login || '',
-                     receiver: login,
-                     text_messages: message,
-                     is_read: false
-                  }, ...prev.items]
-               }
-            }
-            return prev
-         });
 
          // Очищаем поле сообщения после отправки
          setMessage('');

@@ -30,9 +30,12 @@ const AdminUsersContent = () => {
          setError('')
          setSuccess('')
 
+         // Отправляем только массив ID вместо полных объектов
+         const userIds = usersSelected.map(user => user.id);
+
          await axios.delete(apiUrlDelete, {
             data: {
-               users: usersSelected,
+               userIds: userIds, // Используем только ID вместо полных объектов
             }
          })
 
@@ -42,12 +45,13 @@ const AdminUsersContent = () => {
          })
          setUsersSelected([])
       } catch (error) {
+         console.error('Ошибка удаления:', error);
          setError('Ошибка при удалении аккаунтов, попробуйте ещё раз!')
       }
    }
 
    if (user?.role != 'admin' && user?.role != 'moder') {
-      return
+      return null;
    }
 
    return (
@@ -82,7 +86,6 @@ const AdminUsersContent = () => {
          </div>
          <AdminUsersContentItems users={users} setUsers={setUsers} setUsersSelected={setUsersSelected} />
       </div>
-
    )
 }
 

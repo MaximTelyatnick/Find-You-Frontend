@@ -1,6 +1,6 @@
 import { IMessageItemProps } from "../../types/IMessage";
 import IUser from "../../types/IUser";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ReadMessageModal from "../UX/modals/ReadMessageModal";
 import { convertUtcToLocal } from "../../utils/DateUtils";
 
@@ -23,20 +23,28 @@ const MessagesContentItem = ({
    const storedUser = localStorage.getItem('user');
    let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
+   // Синхронизируем локальное состояние с props
+   useEffect(() => {
+      setMessageRead(is_read);
+   }, [is_read]);
+
    const selectHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.checked) {
          !selected.includes(id) && setSelected((prev: number[]) => [...prev, id])
       } else {
-         selected.includes(id) && setSelected((prev: number[]) => prev.filter(item => item != id))
+         selected.includes(id) && setSelected((prev: number[]) => prev.filter(item => item !== id))
       }
    }
 
    // Обработчик прочтения сообщения
-   const handleMessageRead = (messageId: number) => {
-      setMessageRead(true);
-      if (onMessageRead) {
-         onMessageRead(messageId);
+   const handleMessageRead = () => {
+      if (!messageRead && receiver === user?.login) {
+         setMessageRead(true);
+         if (onMessageRead) {
+            onMessageRead(id);
+         }
       }
+      setIsOpenRead(true);
    };
 
    // Обработчик закрытия модального окна
@@ -64,9 +72,9 @@ const MessagesContentItem = ({
             receiver={receiver}
             onMessageRead={handleMessageRead}
             onModalClose={handleModalClose}
-            is_read={is_read}
+            is_read={messageRead}
          >
-            <div className="messages-table-item__title">
+            <div className="messages-table-item__title" onClick={handleMessageRead}>
                <p>
                   {sender === user?.login ?
                      <svg width="25" height="25" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -96,7 +104,12 @@ const MessagesContentItem = ({
             <p>{formattedDateTime}</p>
          </div>
          <div className="messages-table-item__checkbox">
-            <input type="checkbox" checked={[...selected].includes(id) && true} onChange={selectHandler} />
+            <input
+               type="checkbox"
+               checked={selected.includes(id)}
+               onChange={selectHandler}
+               aria-label={`Выбрать сообщение от ${sender}`}
+            />
          </div>
       </div>
    )

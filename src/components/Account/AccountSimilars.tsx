@@ -35,7 +35,7 @@ const AccountSimilars = ({ account, tags }: IAccountAll) => {
 
    useEffect(() => {
       getData()
-   }, [])
+   }, [account])
 
    return (
       <div style={{ padding: '40px 0 0 0' }}>
@@ -50,7 +50,7 @@ const AccountSimilars = ({ account, tags }: IAccountAll) => {
                if (new Date(item.date_of_create) > new Date()) return false
 
                return true
-            }).map(item => {
+            }).slice(0, 4).map(item => {
                if (item.id == account.id) {
                   return
                } else {
