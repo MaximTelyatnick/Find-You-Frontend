@@ -24,7 +24,7 @@ const Header = ({ activeLink }: { activeLink?: string }) => {
                         <Link to="/Tags">Тэги</Link>
                      </li>
                      <li className={activeLink === 'Orders' ? 'active' : ''}>
-                        <Link to="/Orders">Заказы</Link>
+                        <Link to="/Order">Заказы</Link>
                      </li>
                      <li className={activeLink === 'Delete' ? 'active' : ''}>
                         <Link to="/Delete">Удаление</Link>
