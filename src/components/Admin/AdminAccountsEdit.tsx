@@ -28,7 +28,7 @@ const AdminAccountsEdit = () => {
       setError('')
       setSuccess('')
 
-      let apiUrlAccouts = `http://167.86.84.197:5000/accounts?page=${page}&limit=20`;
+      let apiUrlAccouts = `http://167.86.84.197:5000/accounts?page=${page}&limit=20&admin_mode=true`;
       if (searchInput) apiUrlAccouts += `&search=${searchInput}`;
 
       try {

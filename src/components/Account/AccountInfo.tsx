@@ -20,34 +20,52 @@ const AccountInfo = ({ account, city, socials, files }: IAccountAll) => {
       // Удаляем символ @ из начала значения, если он есть
       const valueWithoutAt = socialValue.startsWith('@') ? socialValue.substring(1) : socialValue;
 
+      // Функция для форматирования названия социальной сети
+      const formatSocialName = (name: string) => {
+         if (name.toLowerCase() === 'vkontakte') return 'Вконтакте';
+         if (name.toLowerCase() === 'phone') return 'Номер телефона';
+         return name;
+      };
+
       switch (socialName.toLowerCase()) {
          case 'telegram':
             return {
                href: `https://t.me/${valueWithoutAt}`,
-               text: socialValue
+               text: socialValue,
+               displayName: formatSocialName(socialName)
             };
          case 'vkontakte':
             // Обработка для ID формата (id12345) и имен пользователей
             if (valueWithoutAt.startsWith('id') && /^\d+$/.test(valueWithoutAt.substring(2))) {
                return {
                   href: `https://vk.com/${valueWithoutAt}`,
-                  text: socialValue
+                  text: socialValue,
+                  displayName: formatSocialName(socialName)
                };
             }
             return {
                href: `https://vk.com/${valueWithoutAt}`,
-               text: socialValue
+               text: socialValue,
+               displayName: formatSocialName(socialName)
             };
          case 'instagram':
             return {
                href: `https://instagram.com/${valueWithoutAt}`,
-               text: socialValue
+               text: socialValue,
+               displayName: formatSocialName(socialName)
+            };
+         case 'phone':
+            return {
+               href: null,
+               text: socialValue,
+               displayName: formatSocialName(socialName)
             };
          default:
             // Для остальных соц. сетей возвращаем просто текст
             return {
                href: null,
-               text: socialValue
+               text: socialValue,
+               displayName: formatSocialName(socialName)
             };
       }
    };
@@ -62,31 +80,31 @@ const AccountInfo = ({ account, city, socials, files }: IAccountAll) => {
             </div>
          </div>
          <div className="span7">
-            <h3 className="account-info__title">{account.name}</h3>
-            <ul className="account-info__menu">
-               <li className="list-group-item">Возраст: {
+            <div className="account-info__menu">
+               <h5 className="list-group-item account-info__title">{account.name}</h5>
+               <div className="list-group-item">Возраст: {
                   account.date_of_birth ? calculateAge(account.date_of_birth) : '-'
-               }</li>
-               <li className="list-group-item">Город: {
+               }</div>
+               <div className="list-group-item">Город: {
                   city.name_ru
-               }</li>
+               }</div>
                {
                   socials.map(item => {
                      const socialLink = getSocialLink(item.social_name, item.text);
                      return (
-                        <li className="list-group-item" key={item.id}>
-                           {item.social_name}: {
+                        <div className="list-group-item" key={item.id}>
+                           {socialLink.displayName}: {
                               socialLink.href ?
                                  <a href={socialLink.href} target="_blank" rel="noopener noreferrer">
                                     {socialLink.text}
                                  </a> :
                                  socialLink.text
                            }
-                        </li>
+                        </div>
                      );
                   })
                }
-            </ul>
+            </div>
          </div>
       </div>
    )

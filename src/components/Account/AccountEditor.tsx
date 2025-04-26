@@ -14,7 +14,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
    const [success, setSuccess] = useState<boolean>(false);
    const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
    const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
-   const [previewMode, setPreviewMode] = useState<boolean>(false);
+   const [activeColor, setActiveColor] = useState<string>("text-black");
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const navigate = useNavigate();
@@ -22,6 +22,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
    const colorPickerRef = useRef<HTMLDivElement>(null);
    const emojiButtonRef = useRef<HTMLButtonElement>(null);
    const colorButtonRef = useRef<HTMLButtonElement>(null);
+   const editorRef = useRef<HTMLDivElement>(null);
 
    // Emoji list
    const emojis = [
@@ -46,10 +47,44 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
       { value: '#008080', class: 'text-teal' }
    ];
 
+   // Исправление: обновляем и state, и contentEditable когда меняется editComment
    useEffect(() => {
-      const editText = editComment ? editComment.text : '';
-      setComment(editText);
+      if (editComment) {
+         setComment(editComment.text);
+         // Устанавливаем содержимое редактора при изменении комментария
+         if (editorRef.current) {
+            editorRef.current.innerHTML = sanitizeComment(editComment.text);
+         }
+      }
    }, [editComment]);
+
+   // Начальная инициализация редактора
+   useEffect(() => {
+      if (editorRef.current) {
+         // Проверяем, есть ли начальное содержимое
+         const initialContent = replyComment ? replyComment.text :
+            editComment ? editComment.text :
+               "Комментарий...";
+         editorRef.current.innerHTML = sanitizeComment(initialContent);
+
+         // Если это новый комментарий, а не редактирование
+         if (!editComment && !replyComment) {
+            // Добавляем обработчик фокуса для очистки placeholder
+            const handleFocus = () => {
+               if (editorRef.current && editorRef.current.innerHTML === "Комментарий...") {
+                  editorRef.current.innerHTML = "";
+               }
+            };
+
+            editorRef.current.addEventListener('focus', handleFocus);
+            return () => {
+               if (editorRef.current) {
+                  editorRef.current.removeEventListener('focus', handleFocus);
+               }
+            };
+         }
+      }
+   }, []);
 
    // Close emoji and color pickers when clicking outside
    useEffect(() => {
@@ -121,10 +156,9 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
       e.preventDefault();
       setError(false);
 
-      // Очистка комментария от потенциально опасного кода
-      const sanitizedComment = sanitizeComment(comment);
-      console.log(comment, sanitizedComment);
-
+      // Получаем HTML из contentEditable и сохраняем в комментарий
+      const editorContent = editorRef.current?.innerHTML || '';
+      const sanitizedComment = sanitizeComment(editorContent);
 
       try {
          if (replyComment || !editComment) {
@@ -169,8 +203,9 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
             });
             cancelAction('reply');
          } else {
+            // Исправленный запрос на обновление комментария
             await axios.put(apiUrlUpdate, {
-               comment_id: editComment.parent_id,
+               comment_id: editComment.parent_id, // Используем id комментария
                text: sanitizedComment,
             });
 
@@ -200,99 +235,93 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
       }
    };
 
-   // Обработчик изменения содержимого редактора
-   const handleEditorChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      setComment(e.target.value);
+   // Обработчик изменений в contentEditable
+   const handleEditorChange = () => {
+      if (editorRef.current) {
+         // Сохраняем HTML контент при каждом изменении
+         setComment(editorRef.current.innerHTML);
+      }
    };
 
-   // Добавление форматирования текста
+   // Получение текущего выделения
+   const getSelection = (): { selectedText: string, range: Range } | null => {
+      const selection = document.getSelection();
+      if (!selection || selection.rangeCount === 0) return null;
+
+      const range = selection.getRangeAt(0);
+      const selectedText = range.toString();
+
+      // Проверяем, что выделение находится внутри нашего редактора
+      if (!editorRef.current?.contains(range.commonAncestorContainer)) return null;
+
+      return { selectedText, range };
+   };
+
+   // Применение форматирования к тексту
    const handleFormat = (format: string) => {
-      const textarea = document.getElementById('comment-textarea') as HTMLTextAreaElement;
-      if (!textarea) return;
+      if (!editorRef.current) return;
+      editorRef.current.focus();
 
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selectedText = comment.substring(start, end);
-      let formattedText = '';
-      let tagStart = '';
-      let tagEnd = '';
-
-      switch (format) {
-         case 'bold':
-            tagStart = '<b>';
-            tagEnd = '</b>';
-            break;
-         case 'italic':
-            tagStart = '<i>';
-            tagEnd = '</i>';
-            break;
-         case 'underline':
-            tagStart = '<u>';
-            tagEnd = '</u>';
-            break;
-         case 'strikethrough':
-            tagStart = '<s>';
-            tagEnd = '</s>';
-            break;
-         default:
-            return;
-      }
-
-      formattedText = tagStart + selectedText + tagEnd;
-      const newText = comment.substring(0, start) + formattedText + comment.substring(end);
-      setComment(newText);
-
-      // Восстанавливаем фокус после изменения
-      setTimeout(() => {
-         textarea.focus();
-         textarea.setSelectionRange(start + formattedText.length, start + formattedText.length);
-      }, 0);
+      document.execCommand(format, false);
+      handleEditorChange();
    };
 
    // Вставка смайлика
    const insertEmoji = (emoji: string) => {
-      const textarea = document.getElementById('comment-textarea') as HTMLTextAreaElement;
-      if (!textarea) return;
+      if (!editorRef.current) return;
+      editorRef.current.focus();
 
-      const start = textarea.selectionStart;
-      const newText = comment.substring(0, start) + emoji + comment.substring(start);
-      setComment(newText);
+      document.execCommand('insertText', false, emoji);
       setShowEmojiPicker(false);
-
-      // Восстанавливаем фокус после изменения
-      setTimeout(() => {
-         textarea.focus();
-         textarea.setSelectionRange(start + emoji.length, start + emoji.length);
-      }, 0);
+      handleEditorChange();
    };
 
-   // Применение цвета к выделенному тексту через классы вместо инлайн стилей
+   // Установка цвета для печати и выделенного текста
    const applyColor = (colorOption: { value: string, class: string }) => {
-      const textarea = document.getElementById('comment-textarea') as HTMLTextAreaElement;
-      if (!textarea) return;
+      if (!editorRef.current) return;
+      editorRef.current.focus();
 
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const selectedText = comment.substring(start, end);
-
-      if (selectedText.length === 0) return;
-
-      // Используем классы вместо инлайн стилей
-      const coloredText = `<span class="${colorOption.class}">${selectedText}</span>`;
-      const newText = comment.substring(0, start) + coloredText + comment.substring(end);
-      setComment(newText);
+      // Установка активного цвета для последующего ввода
+      setActiveColor(colorOption.class);
       setShowColorPicker(false);
 
-      // Восстанавливаем фокус после изменения
-      setTimeout(() => {
-         textarea.focus();
-         textarea.setSelectionRange(start + coloredText.length, start + coloredText.length);
-      }, 0);
+      // Применение цвета к выделенному тексту, если есть выделение
+      const selection = getSelection();
+      if (selection && selection.selectedText.length > 0) {
+         // Удаляем выделение
+         document.execCommand('delete', false);
+
+         // Вставляем отформатированный текст
+         const formattedText = `<span class="${colorOption.class}">${selection.selectedText}</span>`;
+         document.execCommand('insertHTML', false, formattedText);
+      }
+
+      handleEditorChange();
    };
 
-   // Переключение между режимами редактирования и предпросмотра
-   const togglePreviewMode = () => {
-      setPreviewMode(!previewMode);
+   // ИСПРАВЛЕНИЕ: Обработчик ввода символов - с улучшенной поддержкой пробелов
+   const handleBeforeInput = (e: React.FormEvent<HTMLDivElement>) => {
+      // Получаем информацию о вводимом тексте
+      const inputEvent = e.nativeEvent as InputEvent;
+      const inputData = inputEvent.data;
+
+      // Если текущий цвет не черный (т.е. применяется активный цвет)
+      if (activeColor !== 'text-black' && inputData !== null) {
+         e.preventDefault();
+
+         // Специальная обработка для пробелов
+         let formattedText;
+         if (inputData === ' ') {
+            // Для пробела просто вставляем его внутри span-элемента текущего цвета
+            formattedText = `<span class="${activeColor}">&nbsp;</span>`;
+         } else {
+            formattedText = `<span class="${activeColor}">${inputData}</span>`;
+         }
+
+         // Вставляем отформатированный текст
+         document.execCommand('insertHTML', false, formattedText);
+         handleEditorChange();
+      }
    };
 
    return (
@@ -310,7 +339,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                   <button type="button" onClick={() => handleFormat('underline')} className="toolbar-btn" title="Подчеркнутый">
                      <span className="format-icon">U</span>
                   </button>
-                  <button type="button" onClick={() => handleFormat('strikethrough')} className="toolbar-btn" title="Зачеркнутый">
+                  <button type="button" onClick={() => handleFormat('strikeThrough')} className="toolbar-btn" title="Зачеркнутый">
                      <span className="format-icon">S</span>
                   </button>
 
@@ -349,7 +378,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                      <button
                         type="button"
                         onClick={() => setShowColorPicker(!showColorPicker)}
-                        className="toolbar-btn color-btn"
+                        className={`toolbar-btn color-btn ${activeColor}`}
                         title="Цвет текста"
                         ref={colorButtonRef}
                      >
@@ -363,7 +392,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                                  key={index}
                                  type="button"
                                  onClick={() => applyColor(colorOption)}
-                                 className="color-item"
+                                 className={`color-item ${activeColor === colorOption.class ? 'active' : ''}`}
                                  style={{ backgroundColor: colorOption.value }}
                                  title={colorOption.value}
                               />
@@ -371,35 +400,17 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                         </div>
                      )}
                   </div>
-
-                  <div className="toolbar-divider"></div>
-
-                  {/* Preview Toggle Button */}
-                  <button
-                     type="button"
-                     onClick={togglePreviewMode}
-                     className={`toolbar-btn preview-btn ${previewMode ? 'active' : ''}`}
-                     title={previewMode ? "Режим редактирования" : "Предпросмотр"}
-                  >
-                     <span className="preview-icon">{previewMode ? "✎" : "👁"}</span>
-                  </button>
                </div>
 
-               {!previewMode ? (
-                  <textarea
-                     id="comment-textarea"
-                     value={comment}
-                     onChange={handleEditorChange}
-                     className="comment-textarea"
-                     placeholder="Комментарий..."
-                     rows={6}
-                  ></textarea>
-               ) : (
-                  <div
-                     className="comment-preview"
-                     dangerouslySetInnerHTML={{ __html: sanitizeComment(comment) || '<p class="placeholder">Предпросмотр комментария...</p>' }}
-                  ></div>
-               )}
+               {/* Rich Text Editor с contentEditable вместо textarea */}
+               <div
+                  ref={editorRef}
+                  contentEditable
+                  className="rich-text-editor"
+                  onInput={handleEditorChange}
+                  onBeforeInput={handleBeforeInput}
+                  suppressContentEditableWarning={true}
+               ></div>
 
                {error && <div className="error-message">Произошла ошибка при отправке комментария.</div>}
                {success && <div className="success-message">Комментарий успешно отправлен.</div>}
@@ -475,31 +486,20 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                margin: 0 8px;
             }
             
-            .comment-textarea {
+            .rich-text-editor {
                width: 100%;
                min-height: 150px;
                padding: 12px;
                border: none;
-               resize: vertical;
                font-family: Arial, sans-serif;
                font-size: 14px;
                outline: none;
+               overflow: auto;
             }
             
-            .comment-preview {
-               width: 100%;
-               min-height: 150px;
-               padding: 12px;
-               border: none;
-               font-family: Arial, sans-serif;
-               font-size: 14px;
-               background-color: #fff;
-               overflow-y: auto;
-            }
-            
-            .comment-preview .placeholder {
+            .rich-text-editor:empty:before {
+               content: "Комментарий...";
                color: #aaa;
-               font-style: italic;
             }
             
             .comment-editor__rules {
@@ -533,15 +533,19 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
             .color-icon {
                font-size: 16px;
                font-weight: bold;
-               text-decoration: underline;
-               background: linear-gradient(90deg, red, blue);
-               -webkit-background-clip: text;
-               color: transparent;
             }
             
-            .preview-icon {
-               font-size: 16px;
-            }
+            /* Кнопка цвета показывает текущий активный цвет */
+            .color-btn.text-black .color-icon { color: #000000; }
+            .color-btn.text-red .color-icon { color: #ff0000; }
+            .color-btn.text-blue .color-icon { color: #0000ff; }
+            .color-btn.text-green .color-icon { color: #008000; }
+            .color-btn.text-purple .color-icon { color: #800080; }
+            .color-btn.text-orange .color-icon { color: #ffa500; }
+            .color-btn.text-brown .color-icon { color: #a52a2a; }
+            .color-btn.text-gray .color-icon { color: #808080; }
+            .color-btn.text-maroon .color-icon { color: #800000; }
+            .color-btn.text-teal .color-icon { color: #008080; }
             
             /* Dropdown styles */
             .dropdown-container {
@@ -597,6 +601,11 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                border-radius: 50%;
                cursor: pointer;
                margin: 2px;
+            }
+            
+            .color-item.active {
+               transform: scale(1.2);
+               box-shadow: 0 0 5px rgba(0,0,0,0.5);
             }
             
             .color-item:hover {

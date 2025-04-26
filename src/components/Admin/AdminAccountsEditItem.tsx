@@ -2,7 +2,7 @@ import dayjs from "dayjs"
 import { IHomeAccount } from "../../types/IAccounts"
 import { useNavigate } from "react-router-dom"
 import transformPhoto from "../../utils/transformPhoto"
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import axios from "axios"
 import AdminAccountsEditSocial from "./AdminAccountsEditSocial"
 import { IAdminAccountAll } from "../../types/Admin"
@@ -41,6 +41,21 @@ const AdminAccountsEditItem = ({
    const [accountSocials, setAccountSocials] = useState<any[]>([])
    const [accountDate, setAccountDate] = useState<string>('')
    const [accountPhoto, setAccountPhoto] = useState<File | null>(null)
+   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+
+   // Ref для input файла
+   const fileInputRef = useRef<HTMLInputElement>(null)
+
+   // Обновление предпросмотра при изменении accountPhoto
+   useEffect(() => {
+      if (accountPhoto) {
+         const objectUrl = URL.createObjectURL(accountPhoto)
+         setPhotoPreview(objectUrl)
+
+         // Очистка URL объекта при размонтировании
+         return () => URL.revokeObjectURL(objectUrl)
+      }
+   }, [accountPhoto])
 
    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const checked = event.target.checked;
@@ -87,7 +102,7 @@ const AdminAccountsEditItem = ({
          return;
       }
 
-      const allowedTypes = ["image/jpeg", "video/mp4"];
+      const allowedTypes = ["image/jpeg", "image/jpg", "video/mp4"];
       const file = selectedFiles[0];
 
       if (!allowedTypes.includes(file.type)) {
@@ -96,6 +111,14 @@ const AdminAccountsEditItem = ({
       }
 
       setAccountPhoto(file);
+      // Предпросмотр устанавливается через useEffect
+   };
+
+   // Функция для программного вызова диалога выбора файла
+   const triggerFileInput = () => {
+      if (fileInputRef.current) {
+         fileInputRef.current.click();
+      }
    };
 
    const saveHandlerPhoto = async () => {
@@ -118,7 +141,6 @@ const AdminAccountsEditItem = ({
                   "Content-Type": "multipart/form-data",
                },
             });
-            setAccountPhoto(null);
             setSuccess('Фото успешно обновленно');
          } catch (error) {
             setError('Ошибка при обновлении фото, попробуйте ещё раз!');
@@ -244,7 +266,7 @@ const AdminAccountsEditItem = ({
          return;
       }
 
-      const allowedTypes = ["image/jpeg", "video/mp4"];
+      const allowedTypes = ["image/jpeg", "image/jpg", "video/mp4"];
       const newFileUrls: File[] = [];
 
       for (const file of selectedFiles) {
@@ -415,14 +437,29 @@ const AdminAccountsEditItem = ({
                      <button className="admin-accounts-get__reset" onClick={() => { updateDate('reset') }}>Сбросить дату</button>
                   </div>
 
-                  <div className="admin-accounts-get__photo">
-                     {accountPhoto ? <img src={URL.createObjectURL(accountPhoto)} /> :
-                        accountDetail.account.photo ? <img src={transformPhoto(accountDetail.account.photo)} /> :
-                           <img src="public/images/blog_image.jpg" />}
+                  <div className="admin-accounts-get__photo" onClick={triggerFileInput} style={{ cursor: 'pointer' }}>
+                     {photoPreview ?
+                        <img src={photoPreview} alt="Предпросмотр аватара" /> :
+                        accountDetail.account.photo ?
+                           <img src={transformPhoto(accountDetail.account.photo)} alt="Аватар аккаунта" /> :
+                           <img src="/images/blog_image.jpg" alt="Заглушка" />
+                     }
                   </div>
                   <div className="admin-accounts-get__files">
-                     <input type="file" accept=".jpg" onChange={handleFileChange} />
-                     <button className="btn btn-info" onClick={saveHandlerPhoto}>Сохранить</button>
+                     <input
+                        type="file"
+                        accept=".jpg,.jpeg"
+                        onChange={handleFileChange}
+                        ref={fileInputRef}
+                        style={{ display: 'block', marginBottom: '10px' }}
+                     />
+                     <button
+                        className="btn btn-info"
+                        onClick={saveHandlerPhoto}
+                        disabled={!accountPhoto}
+                     >
+                        Сохранить
+                     </button>
                   </div>
                </div>
             </div>

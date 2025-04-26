@@ -750,11 +750,22 @@
         height: 20px;
     }
     
-    .account-info__title {
-        margin: 0 0 10px 0;
-    }
     .account-info__menu {
-        margin: 0 0 0 15px;
+        padding: 0 10px;
+        background: #f0f0f0;
+    }
+    .account-info__menu .list-group-item {
+        padding: 5px 0;
+        font-size: 16px;
+    }
+    .account-info__menu .list-group-item {
+        border-bottom: 1px dotted #000;
+    }
+    .account-info__menu .list-group-item:last-child {
+        border-bottom: 0px;
+    }
+    .account-info__title {
+        padding: 10px 0 !important;
     }
     
     .account-gallery {
@@ -1541,6 +1552,68 @@
         cursor: pointer;
         text-decoration: underline;
         width: fit-content;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+    
+    .modal-confirm {
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        width: 500px;
+        max-width: 90%;
+    }
+    
+    .modal-confirm h3 {
+        margin-top: 0;
+        margin-bottom: 15px;
+    }
+    
+    .delete-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin: 20px 0;
+    }
+    
+    .delete-options label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+    
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .btn-cancel {
+        background-color: #e2e2e2;
+        color: #333;
+    }
+    
+    .btn-dangerous {
+        background-color: #e67c73;
+        color: white;
+        transition: background-color 0.3s !important;
+    }
+    .btn-dangerous:hover {
+        color: #fff;
+        background-color: #5B9A8B;
     }
     
     .form__content label{

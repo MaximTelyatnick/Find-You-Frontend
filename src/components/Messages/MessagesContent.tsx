@@ -28,6 +28,10 @@ const MessagesContent = () => {
    const [responseLogin, setResponseLogin] = useState<string>('');
    const [unreadCount, setUnreadCount] = useState<number>(0);
    const [totalPages, setTotalPages] = useState<number>(1);
+   // Новое состояние для модального окна подтверждения удаления
+   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+   // Тип удаления: 'local' (по умолчанию) или 'global'
+   const [deleteType, setDeleteType] = useState<'local' | 'global'>('local');
 
    // Обновленный метод для изменения фильтра
    const selectFilterHandler = (filterName: string): void => {
@@ -40,7 +44,11 @@ const MessagesContent = () => {
       try {
          setError('');
          setSeccess('');
-         const apiUrlDelete = `http://167.86.84.197:5000/delete-messages`;
+
+         // Выбираем соответствующий API URL в зависимости от типа удаления
+         const apiUrlDelete = deleteType === 'local'
+            ? `http://167.86.84.197:5000/delete-messages`
+            : `http://167.86.84.197:5000/delete-messages-global`;
 
          await axios.delete(apiUrlDelete, {
             data: {
@@ -49,15 +57,26 @@ const MessagesContent = () => {
             }
          });
 
-         setSeccess('Сообщения успешно удалены');
+         // Устанавливаем сообщение об успехе в зависимости от типа удаления
+         setSeccess(deleteType === 'local'
+            ? 'Сообщения успешно скрыты'
+            : 'Сообщения успешно удалены глобально');
+
          setSelected([]);
+         setShowDeleteConfirm(false);
 
          // Обновляем список сообщений после удаления
          fetchMessages();
-      } catch (error) {
-         setError('Что-то пошло не так, попробуйте ещё раз!');
+      } catch (error: any) {
+         const errorMessage = error.response?.data?.error || 'Что-то пошло не так, попробуйте ещё раз!';
+         setError(errorMessage);
          console.error("Ошибка при удалении:", error);
       }
+   };
+
+   // Обработчик открытия модального окна подтверждения удаления
+   const openDeleteConfirmation = () => {
+      setShowDeleteConfirm(true);
    };
 
    // Обновленная функция для загрузки сообщений с учетом фильтра
@@ -186,7 +205,7 @@ const MessagesContent = () => {
                {selected.length > 0 && (
                   <div className="delete-action">
                      <div
-                        onClick={deleteHandler}
+                        onClick={openDeleteConfirmation}
                         title="Удалить выбранные сообщения"
                      >
                         <svg width="30" height="30" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -251,6 +270,53 @@ const MessagesContent = () => {
             visiblePages={5}
             type="messages"
          />
+
+         {/* Модальное окно подтверждения удаления */}
+         {showDeleteConfirm && (
+            <div className="modal-overlay">
+               <div className="modal-confirm">
+                  <h3>Подтверждение удаления</h3>
+                  <p>Выберите тип удаления:</p>
+
+                  <div className="delete-options">
+                     <label>
+                        <input
+                           type="radio"
+                           name="deleteType"
+                           checked={deleteType === 'local'}
+                           onChange={() => setDeleteType('local')}
+                        />
+                        Скрыть для меня (сообщения останутся видимыми для других пользователей)
+                     </label>
+
+                     <label>
+                        <input
+                           type="radio"
+                           name="deleteType"
+                           checked={deleteType === 'global'}
+                           onChange={() => setDeleteType('global')}
+                        />
+                        Удалить глобально (сообщения будут удалены для всех пользователей)
+                     </label>
+                  </div>
+
+                  <div className="modal-actions">
+                     <button
+                        className="btn btn-cancel"
+                        onClick={() => setShowDeleteConfirm(false)}
+                     >
+                        Отмена
+                     </button>
+                     <button
+                        className="btn btn-dangerous"
+                        onClick={deleteHandler}
+                     >
+                        {deleteType === 'local' ? 'Скрыть' : 'Удалить глобально'}
+                     </button>
+                  </div>
+               </div>
+            </div>
+         )}
       </>
    );
 };

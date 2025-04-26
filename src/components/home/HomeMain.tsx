@@ -37,6 +37,8 @@ const HomeMain = ({ pageNumber, cityId, tagIds, search, dateRange }: {
       error: false
    });
 
+   console.log(result.items);
+
    const fetchData = async () => {
       try {
          setResult(prev => ({ ...prev, loading: true }));

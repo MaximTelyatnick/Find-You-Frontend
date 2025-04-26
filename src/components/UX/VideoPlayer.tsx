@@ -7,6 +7,7 @@ export const VideoPlayer = ({ src }: { src: string }) => {
    const playerRef = useRef<any>(null);
    const playerIdRef = useRef<string>(`video-player-${Math.random().toString(36).substring(2, 9)}`);
    const styleIdRef = useRef<string>(`video-style-${Math.random().toString(36).substring(2, 9)}`);
+   const inactivityTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
    const videoJsOptions = {
       autoplay: false,
@@ -80,6 +81,54 @@ export const VideoPlayer = ({ src }: { src: string }) => {
             player.on('timeupdate', updateTimeDisplay);
             player.on('loadedmetadata', updateTimeDisplay);
          }
+
+         // Setup control bar auto-hide functionality
+         setupControlBarAutoHide(player);
+      });
+   };
+
+   // Function to handle auto-hiding of control bar
+   const setupControlBarAutoHide = (player: any) => {
+      const controlBar = player.controlBar.el();
+      const playerContainer = player.el();
+      const inactivityTimeout = 3000; // 3 seconds of inactivity before hiding controls
+
+      // Function to hide control bar
+      const hideControlBar = () => {
+         controlBar.classList.add('vjs-control-bar-hidden');
+      };
+
+      // Function to show control bar
+      const showControlBar = () => {
+         controlBar.classList.remove('vjs-control-bar-hidden');
+         resetInactivityTimer();
+      };
+
+      // Reset timer when user interacts
+      const resetInactivityTimer = () => {
+         if (inactivityTimeoutRef.current) {
+            clearTimeout(inactivityTimeoutRef.current);
+         }
+         inactivityTimeoutRef.current = setTimeout(hideControlBar, inactivityTimeout);
+      };
+
+      // Add event listeners for mouse movement and controls
+      playerContainer.addEventListener('mousemove', showControlBar);
+      playerContainer.addEventListener('click', showControlBar);
+      playerContainer.addEventListener('touchstart', showControlBar);
+
+      // Add events for when video is playing to reset timer
+      player.on('play', resetInactivityTimer);
+      player.on('pause', showControlBar);
+
+      // Initial setup - show controls, then hide after inactivity
+      showControlBar();
+
+      // Clear timer on disposal
+      player.on('dispose', () => {
+         if (inactivityTimeoutRef.current) {
+            clearTimeout(inactivityTimeoutRef.current);
+         }
       });
    };
 
@@ -101,34 +150,30 @@ export const VideoPlayer = ({ src }: { src: string }) => {
                display: flex !important;
                visibility: visible !important;
                opacity: 1 !important;
-               transition: opacity 0.2s ease;
+               transition: opacity 0.3s ease, visibility 0.3s ease;
             }
             
-            /* Update this part in your CSS */
-            /* Remove this part that hides the time elements */
-            /*
-            .video-js.vjs-youtube-like .vjs-current-time-display,
-            .video-js.vjs-youtube-like .vjs-duration-display,
-            .video-js.vjs-youtube-like .vjs-time-divider {
-               display: none !important;
+            /* Стиль для скрытой панели управления */
+            .video-js.vjs-youtube-like .vjs-control-bar.vjs-control-bar-hidden {
+               opacity: 0 !important;
+               visibility: hidden !important;
             }
-            */
-
+            
             /* Add this to style the custom time display */
             /* Make sure the time display is visible */
             .video-js.vjs-youtube-like .vjs-time-control {
-            display: flex !important;
-            align-items: center;
-            padding: 0 5px;
-            font-size: 13px;
-            color: #ffffff;
-            min-width: 100px;
-            text-align: center;
+               display: flex !important;
+               align-items: center;
+               padding: 0 5px;
+               font-size: 13px;
+               color: #ffffff;
+               min-width: 100px;
+               text-align: center;
             }
 
             /* Ensure the time elements inside are visible */
             .video-js.vjs-youtube-like .vjs-time-control span {
-            display: inline !important;
+               display: inline !important;
             }
             
             /* Стиль для полоски прогресса */
@@ -208,6 +253,11 @@ export const VideoPlayer = ({ src }: { src: string }) => {
 
    useEffect(() => {
       return () => {
+         // Clear inactivity timeout on component unmount
+         if (inactivityTimeoutRef.current) {
+            clearTimeout(inactivityTimeoutRef.current);
+         }
+
          const styleElement = document.getElementById(styleIdRef.current);
          if (styleElement) {
             document.head.removeChild(styleElement);

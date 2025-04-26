@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 const useSecurityRestrictions = () => {
    useEffect(() => {
+      // Блокировка PrintScreen
       const disablePrintScreen = (e: KeyboardEvent) => {
          if (e.key === "PrintScreen") {
             e.preventDefault();
@@ -10,11 +11,32 @@ const useSecurityRestrictions = () => {
          }
       };
 
+      // Запрет контекстного меню с проверкой разрешенных элементов
       const disableRightClickOnImages = (event: MouseEvent) => {
-         event.preventDefault();
-         return
+         const target = event.target as HTMLElement;
+         const currentElement = target.closest('*');
+
+         // Проверяем, является ли элемент или его родители одним из разрешенных
+         const isAllowedElement =
+            // Проверка на футер
+            currentElement?.closest('.footer') ||
+            // Проверка на хедер
+            currentElement?.closest('.navbar') ||
+            currentElement?.closest('.jumbotron-mob') ||
+            // Проверка на элемент аккаунта
+            currentElement?.closest('.account-item');
+
+         // Если это не разрешенный элемент, предотвращаем контекстное меню
+         if (!isAllowedElement) {
+            event.preventDefault();
+            return false;
+         }
+
+         // Для разрешенных элементов позволяем контекстное меню
+         return true;
       };
 
+      // Блокировка комбинаций клавиш
       const disableShortcutKeys = (e: KeyboardEvent) => {
          if (
             (e.ctrlKey && e.shiftKey && e.key === "S") || // Ctrl + Shift + S
@@ -27,10 +49,12 @@ const useSecurityRestrictions = () => {
          }
       };
 
+      // Добавляем обработчики событий
       document.addEventListener("keydown", disablePrintScreen);
       document.addEventListener("keydown", disableShortcutKeys);
       document.addEventListener("contextmenu", disableRightClickOnImages);
 
+      // Очистка при размонтировании
       return () => {
          document.removeEventListener("keydown", disablePrintScreen);
          document.removeEventListener("keydown", disableShortcutKeys);
@@ -39,4 +63,4 @@ const useSecurityRestrictions = () => {
    }, []);
 };
 
-export default useSecurityRestrictions
+export default useSecurityRestrictions;
