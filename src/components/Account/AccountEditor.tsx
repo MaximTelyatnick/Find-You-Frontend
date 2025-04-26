@@ -9,7 +9,6 @@ import DOMPurify from 'dompurify';
 const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, setResult }: AccountReplyProps) => {
    const apiUrlAdd: string = 'http://167.86.84.197:5000/add-comment';
    const apiUrlUpdate: string = 'http://167.86.84.197:5000/update-comment';
-   const [comment, setComment] = useState<string>(replyComment ? replyComment.text : editComment ? editComment.text : "");
    const [error, setError] = useState<boolean>(false);
    const [success, setSuccess] = useState<boolean>(false);
    const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
@@ -50,7 +49,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
    // Исправление: обновляем и state, и contentEditable когда меняется editComment
    useEffect(() => {
       if (editComment) {
-         setComment(editComment.text);
          // Устанавливаем содержимое редактора при изменении комментария
          if (editorRef.current) {
             editorRef.current.innerHTML = sanitizeComment(editComment.text);
@@ -227,7 +225,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
          }
 
          setSuccess(true);
-         setComment('');
          navigate(0);
       } catch (error) {
          setError(true);
@@ -237,10 +234,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
 
    // Обработчик изменений в contentEditable
    const handleEditorChange = () => {
-      if (editorRef.current) {
-         // Сохраняем HTML контент при каждом изменении
-         setComment(editorRef.current.innerHTML);
-      }
    };
 
    // Получение текущего выделения
