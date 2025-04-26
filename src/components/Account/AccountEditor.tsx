@@ -232,10 +232,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
       }
    };
 
-   // Обработчик изменений в contentEditable
-   const handleEditorChange = () => {
-   };
-
    // Получение текущего выделения
    const getSelection = (): { selectedText: string, range: Range } | null => {
       const selection = document.getSelection();
@@ -254,19 +250,15 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
    const handleFormat = (format: string) => {
       if (!editorRef.current) return;
       editorRef.current.focus();
-
       document.execCommand(format, false);
-      handleEditorChange();
    };
 
    // Вставка смайлика
    const insertEmoji = (emoji: string) => {
       if (!editorRef.current) return;
       editorRef.current.focus();
-
       document.execCommand('insertText', false, emoji);
       setShowEmojiPicker(false);
-      handleEditorChange();
    };
 
    // Установка цвета для печати и выделенного текста
@@ -288,8 +280,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
          const formattedText = `<span class="${colorOption.class}">${selection.selectedText}</span>`;
          document.execCommand('insertHTML', false, formattedText);
       }
-
-      handleEditorChange();
    };
 
    // ИСПРАВЛЕНИЕ: Обработчик ввода символов - с улучшенной поддержкой пробелов
@@ -313,7 +303,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
 
          // Вставляем отформатированный текст
          document.execCommand('insertHTML', false, formattedText);
-         handleEditorChange();
       }
    };
 
@@ -400,7 +389,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                   ref={editorRef}
                   contentEditable
                   className="rich-text-editor"
-                  onInput={handleEditorChange}
                   onBeforeInput={handleBeforeInput}
                   suppressContentEditableWarning={true}
                ></div>
