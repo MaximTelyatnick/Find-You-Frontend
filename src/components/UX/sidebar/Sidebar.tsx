@@ -9,6 +9,7 @@ import axios from "axios";
 import LoginModal from "../modals/LoginModal";
 import { transformPhotoAvatar } from "../../../utils/transformPhoto";
 import ChangeAvatarModal from "../modals/ChangeAvatarModal";
+import SendMessageModal from "../modals/SendMessageModal";
 
 const Sidebar = () => {
    const navigate = useNavigate();
@@ -18,6 +19,8 @@ const Sidebar = () => {
    const [userCheck, setUserCheck] = useState<boolean>(false);
    const [favQnt, setFavQnt] = useState<number>(0);
    const [messagesQnt, setMessagesQnt] = useState<number>(0);
+   const [responseLogin, setResponseLogin] = useState<string>('admin')
+   const [isOpen, setIsOpen] = useState<boolean>(false);
 
    // Загрузка данных пользователя из localStorage
    const loadUserData = () => {
@@ -170,12 +173,6 @@ const Sidebar = () => {
             </div> :
             <div className="sidebar__user">
                <p>Вы не авторизованы на <br />сайте, доступ к архиву <br />закрыт. </p>
-               <p>
-                  <svg xmlns="http://www.w3.org/2000/svg" height="10" width="10" viewBox="0 0 512 512">
-                     <path fill="#018303" d="M320 96L192 96 144.6 24.9C137.5 14.2 145.1 0 157.9 0L354.1 0c12.8 0 20.4 14.2 13.3 24.9L320 96zM192 128l128 0c3.8 2.5 8.1 5.3 13 8.4C389.7 172.7 512 250.9 512 416c0 53-43 96-96 96L96 512c-53 0-96-43-96-96C0 250.9 122.3 172.7 179 136.4c4.8-3.1 9.2-5.9 13-8.4z"></path>
-                  </svg>
-                  <a style={{ color: "#f47a6d" }} href="#" onClick={() => { setIsOpenLogin(true) }}>Проверь аккаунт</a>
-               </p>
                <LoginModal isOpen={isOpenLogin} setIsOpen={setIsOpenLogin}><button className="btn btn-info">Вход</button></LoginModal>
             </div>
          }
@@ -185,14 +182,18 @@ const Sidebar = () => {
 
          <br />
          <SidebarItems />
+         <button onClick={() => { navigate('/?page=1&sort_by_rating=true') }} className="btn btn-info sidebar__filter">Весь топ страниц</button>
 
          <div>
             <p>
-               Все вопросы, проблемные платежи, удаление аккаунтов, предложения по сайту задавайте в Telegram:
+               Все вопросы, проблемные платежи, удаление аккаунтов, предложения по сайту задавайте администраторам:
             </p>
             <form style={{ margin: 0 }} action="https://t.me/sergio_karin" target="_blank">
-               <button type="submit" className="btn btn-info">Написать</button>
+
             </form>
+            <SendMessageModal isOpen={isOpen} setIsOpen={setIsOpen} responseLogin={responseLogin} setResponseLogin={setResponseLogin}>
+               <button className="btn btn-info">Написать</button>
+            </SendMessageModal>
          </div>
       </div>
    );

@@ -3,15 +3,40 @@ import Sidebar from "../UX/sidebar/Sidebar"
 import Title from "../UX/Title"
 import UpButton from "../UX/UpButton"
 import DeleteContent from "./DeleteContent"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import IUser from "../../types/IUser"
 import LoginModal from "../UX/modals/LoginModal"
+import { IAdminSections } from "../../types/Admin"
+import axios from "axios"
+import distributeImagesByLayout from "../../utils/sectionSetting"
+import Layout from "../UX/Layout"
 
 const DeleteMain = () => {
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const navigate = useNavigate()
    const [isOpenLogin, setIsOpenLogin] = useState<boolean>(false);
+
+   const apiUrl = `http://167.86.84.197:5000/sections?page_name=Удаление`
+   const [error, setError] = useState<boolean>(false)
+
+   const [sections, setSections] = useState<IAdminSections | null>(null)
+
+   const getSections = async () => {
+      try {
+         setError(false)
+
+         const response = await axios.get(apiUrl)
+
+         setSections(response.data)
+      } catch (error) {
+         setError(true)
+      }
+   }
+
+   useEffect(() => {
+      getSections()
+   }, [])
 
    const navigateHandler = (to: string) => {
       navigate(`/${to}`)
@@ -26,6 +51,10 @@ const DeleteMain = () => {
                   <div id="dle-content">
                      {user ? <>
                         <Title classes='pt'>Подать Заявку на удаление</Title>
+                        {error && <p>Произошла ошибка при загрузке страницы, попробуйте ещё раз!</p>}
+                        {sections && distributeImagesByLayout(sections?.images, sections?.sections).map((section) => (
+                           <Layout key={section.id} layoutId={section.layout_id} text={section.content} urls={section.images} publicComponent={true} />
+                        ))}
                         <DeleteContent />
                      </> : <div className="account-warning">
                         <div className="account-warning__text fav__warning">

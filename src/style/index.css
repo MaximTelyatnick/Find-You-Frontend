@@ -482,6 +482,9 @@
     .sidebar button {
         margin: 0;
     }
+    .sidebar__filter {
+        margin: 10px 0 !important;
+    }
     
     .galleryModal {
         background-color: rgba(0, 0, 0, 0.8);
@@ -765,7 +768,8 @@
         border-bottom: 0px;
     }
     .account-info__title {
-        padding: 10px 0 !important;
+        padding: 20px 0 !important;
+        font-size: x-large !important;
     }
     
     .account-gallery {

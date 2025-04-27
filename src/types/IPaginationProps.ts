@@ -7,4 +7,5 @@ export default interface IPaginationProps {
    tagIds?: number[];
    search?: string;
    type?: string;
+   sortByRating?: boolean;
 }

@@ -102,6 +102,12 @@ const AdminSectionsContent = () => {
                   <button className="admin-section-dropdown__option btn" onClick={() => { setPageHandler('Футер') }}>
                      Футер
                   </button>
+                  <button className="admin-section-dropdown__option btn" onClick={() => { setPageHandler('Заказы') }}>
+                     Заказы
+                  </button>
+                  <button className="admin-section-dropdown__option btn" onClick={() => { setPageHandler('Удаление') }}>
+                     Удаление
+                  </button>
                </div>
             </div>
             {sections.map((item) => (

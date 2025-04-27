@@ -1,10 +1,9 @@
 import IPaginationProp from "../../types/IPaginationProps"
 import { useNavigate, useSearchParams } from "react-router-dom";
 
-const Pagination = ({ itemsLength, page, totalPages, cityId, tagIds, search, visiblePages, type }: IPaginationProp) => {
+const Pagination = ({ itemsLength, page, totalPages, cityId, tagIds, search, sortByRating, visiblePages, type }: IPaginationProp) => {
    const navigate = useNavigate();
    const [searchParams] = useSearchParams();
-
    // Получаем текущий фильтр из URL, если он есть
    const filter = searchParams.get("filter") || "";
 
@@ -34,7 +33,8 @@ const Pagination = ({ itemsLength, page, totalPages, cityId, tagIds, search, vis
       if (filter) query += `&filter=${filter}`;
       if (cityId) query += `&city_id=${cityId}`;
       if (tagIds && tagIds.length > 0) query += `&tag_id=${tagIds.join(",")}`;
-      if (search) query += `&${type == 'users' ? 'login' : 'search'}=${search}`
+      if (search) query += `&${type == 'users' ? 'login' : 'search'}=${search}`;
+      if (sortByRating) query += `&sort_by_rating=true`;
 
       navigate(query);
    };

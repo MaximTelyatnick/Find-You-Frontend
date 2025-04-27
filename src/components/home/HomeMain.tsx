@@ -7,27 +7,28 @@ import HomeContent from "./HomeContent";
 import axios from "axios";
 import { IAccountsState } from "../../types/IAccounts";
 
-const HomeMain = ({ pageNumber, cityId, tagIds, search, dateRange }: {
+const HomeMain = ({ pageNumber, cityId, tagIds, search, dateRange, sortByRating }: {
    pageNumber: number,
    cityId?: number,
    tagIds?: number[],
    search?: string,
-   dateRange?: [Date, Date]
+   dateRange?: [Date, Date],
+   sortByRating?: boolean
 }) => {
    const [totalPages, setTotalPages] = useState<number>(1);
    const visiblePages: number = 5;
 
    let apiUrl = `http://167.86.84.197:5000/accounts?page=${pageNumber}`;
-
    if (cityId) apiUrl += `&city_id=${cityId}`;
    if (tagIds && tagIds.length > 0) apiUrl += `&tag_id=${tagIds.join(",")}`;
    if (search) apiUrl += `&search=${search}`;
+   if (sortByRating) apiUrl += `&sort_by_rating=true`;
+
    if (dateRange && dateRange.length === 2) {
       const formattedDates = dateRange.map(date => {
          const parsedDate = date instanceof Date ? date : new Date(date);
          return parsedDate.toLocaleDateString('en-CA'); // YYYY-MM-DD
       });
-
       apiUrl += `&date_range=${encodeURIComponent(JSON.stringify(formattedDates))}`;
    }
 
@@ -42,11 +43,8 @@ const HomeMain = ({ pageNumber, cityId, tagIds, search, dateRange }: {
    const fetchData = async () => {
       try {
          setResult(prev => ({ ...prev, loading: true }));
-
          const response = await axios.get(apiUrl);
-
          setTotalPages(response.data.totalPages || 1);
-
          setResult({
             items: response.data.accounts,
             loading: false,
@@ -71,10 +69,25 @@ const HomeMain = ({ pageNumber, cityId, tagIds, search, dateRange }: {
          <div className="layout-row">
             <div className="col-10">
                <div>
-                  <Title classes='pt'>{cityId ? 'ПО ГОРОДУ' : tagIds ? 'ПО ТЭГУ' : search ? `ПО ПОИСКУ: ${search} ${Number(search) ? 'лет' : ''}` : 'Новое'}</Title>
+                  <Title classes='pt'>
+                     {cityId ? 'ПО ГОРОДУ' :
+                        tagIds ? 'ПО ТЭГУ' :
+                           search ? `ПО ПОИСКУ: ${search} ${Number(search) ? 'лет' : ''}` :
+                              sortByRating ? 'ТОП ПО РЕЙТИНГУ' :
+                                 'Новое'}
+                  </Title>
                   <div className="row-fluid mb indexcontent">
                      <HomeContent {...result} />
-                     <Pagination itemsLength={result.items ? result.items.length : 0} page={pageNumber} totalPages={totalPages} cityId={cityId} tagIds={tagIds} search={search} visiblePages={visiblePages} />
+                     <Pagination
+                        itemsLength={result.items ? result.items.length : 0}
+                        page={pageNumber}
+                        totalPages={totalPages}
+                        cityId={cityId}
+                        tagIds={tagIds}
+                        search={search}
+                        sortByRating={sortByRating}
+                        visiblePages={visiblePages}
+                     />
                   </div>
                </div>
             </div>
