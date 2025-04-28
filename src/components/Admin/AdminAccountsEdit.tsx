@@ -4,6 +4,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { IAccount } from "../../types/IAccounts";
 import Pagination from "../UX/Pagination";
 import AdminAccountsEditItem from "./AdminAccountsEditItem";
+import ErrorModal from "../UX/modals/ErrorModal";
+import SuccessModal from "../UX/modals/SuccessModal";
 
 const AdminAccountsEdit = () => {
    const apiUrlGet = 'http://167.86.84.197:5000/account'
@@ -15,14 +17,28 @@ const AdminAccountsEdit = () => {
    const [accounts, setAccounts] = useState<IAccount[] | null>(null)
    const [accountsSelected, setAccountsSelected] = useState<number[]>([])
    const [success, setSuccess] = useState<string>('');
-   const [loading, setLoading] = useState<boolean>(false);
+   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
    const [error, setError] = useState<string>('');
+   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
+   const [loading, setLoading] = useState<boolean>(false);
    const [totalPages, setTotalPages] = useState<number>(1);
    const [searchParams] = useSearchParams();
    const page = Number(searchParams.get("page")) || 1;
    const search = searchParams.get("search") || '';
    const [searchInput, setSearchInput] = useState<string>(search);
    const navigate = useNavigate()
+
+   // Обновленный обработчик ошибок
+   const handleError = (errorMessage: string) => {
+      setError(errorMessage);
+      setIsErrorModalOpen(true);
+   };
+
+   // Обновленный обработчик успешных действий
+   const handleSuccess = (successMessage: string) => {
+      setSuccess(successMessage);
+      setIsSuccessModalOpen(true);
+   };
 
    const getAccountsHandler = async () => {
       setError('')
@@ -37,8 +53,10 @@ const AdminAccountsEdit = () => {
          setTotalPages(result.data.totalPages || 1);
 
          setAccounts(result.data.accounts)
-      } catch (error) {
-         setError('Ошибка при получении аккаунтов, попробуйте ещё раз!')
+      } catch (error: any) {
+         // Извлекаем сообщение об ошибке с сервера, если оно доступно
+         const errorMessage = error.response?.data?.message || 'Ошибка при получении аккаунтов, попробуйте ещё раз!';
+         handleError(errorMessage);
       }
    }
 
@@ -54,15 +72,17 @@ const AdminAccountsEdit = () => {
             }
          })
 
-         setSuccess('Аккаунты успешно удалены')
+         handleSuccess('Аккаунты успешно удалены');
          setLoading(false)
          accountsSelected.forEach(itemSelected => {
             setAccounts(prev => prev && prev.filter(item => item.id != itemSelected))
          })
          setAccountsSelected([])
-      } catch (error) {
+      } catch (error: any) {
          setLoading(false)
-         setError('Ошибка при удалении аккаунтов, попробуйте ещё раз!')
+         // Извлекаем сообщение об ошибке с сервера, если оно доступно
+         const errorMessage = error.response?.data?.message || 'Ошибка при удалении аккаунтов, попробуйте ещё раз!';
+         handleError(errorMessage);
       }
    }
 
@@ -75,8 +95,16 @@ const AdminAccountsEdit = () => {
          {loading && <div className="loader">
             <div className="loader__circle"></div>
          </div>}
-         {error && <p style={{ color: 'red' }}>{error}</p>}
-         {success && <p style={{ color: 'green' }}>{success}</p>}
+
+         {/* Модальные окна для ошибок и успешных сообщений */}
+         <ErrorModal isOpen={isErrorModalOpen} setIsOpen={setIsErrorModalOpen}>
+            {error}
+         </ErrorModal>
+
+         <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}>
+            {success}
+         </SuccessModal>
+
          <form className="admin-accounts-get__form" onSubmit={(e) => { e.preventDefault(); navigate(`/admin-accounts?page=1&search=${searchInput}`) }}>
             <input type="text" placeholder="Поиск..." onChange={(e) => { setSearchInput(e.target.value) }} />
             <button className="btn btn-info">Получить</button>
@@ -98,8 +126,8 @@ const AdminAccountsEdit = () => {
                   apiUrlUpdate={apiUrlUpdate}
                   apiUrlDateUpdate={apiUrlDateUpdate}
                   apiUrlAccUpdate={apiUrlAccUpdate}
-                  setError={setError}
-                  setSuccess={setSuccess}
+                  setError={handleError}  // Передаем новую функцию обработки ошибок
+                  setSuccess={handleSuccess}  // Передаем новую функцию обработки успешных действий
                />
             })}
          </div>
@@ -108,4 +136,4 @@ const AdminAccountsEdit = () => {
    )
 }
 
-export default AdminAccountsEdit
+export default AdminAccountsEdit;

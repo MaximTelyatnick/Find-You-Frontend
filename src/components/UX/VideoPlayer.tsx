@@ -231,6 +231,19 @@ export const VideoPlayer = ({ src }: { src: string }) => {
             .video-js.vjs-youtube-like .vjs-menu-content {
                background-color: rgba(0, 0, 0, 0.9);
             }
+
+                        /* Mobile responsive styles */
+            @media (max-width: 768px) {
+               .video-js.vjs-youtube-like {
+                  max-width: 100% !important;
+               }
+            }
+
+               .video-js.vjs-youtube-like.vjs-fullscreen video {
+                  width: 100% !important;
+                  height: auto !important;
+                  object-fit: contain !important;
+               }
          `;
          document.head.appendChild(styleElement);
 

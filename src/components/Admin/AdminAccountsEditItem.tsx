@@ -25,8 +25,8 @@ const AdminAccountsEditItem = ({
    apiUrlUpdate: string,
    apiUrlDateUpdate: string,
    apiUrlAccUpdate: string,
-   setError: Function,
-   setSuccess: Function
+   setError: Function, // Функция будет вызывать модальное окно
+   setSuccess: Function // Функция будет вызывать модальное окно
 }) => {
    const navigate = useNavigate()
    const [isChecked, setIsChecked] = useState<boolean>(false)
@@ -78,15 +78,19 @@ const AdminAccountsEditItem = ({
          try {
             const result = await axios.get(`${apiUrlGet}?id=${account.id}`)
             setAccountDetail(result.data);
-            setAccountName(result.data.account.name);
-            setAccountCity(result.data.city.name_ru);
-            setAccountTags(result.data.tags.map((item: any) => item.name_ru).join(", "));
-            setAccountDate(result.data.account.date_of_create);
-            setAccountSocials(result.data.socials);
+            setAccountName(result.data.account.name || '');
+            setAccountCity(result.data.city?.name_ru || '');
+            setAccountTags(result.data.tags.map((item: any) => item.name_ru).join(", ") || '');
+
+            // Убедимся, что дата корректно обрабатывается, даже если она null
+            setAccountDate(result.data.account.date_of_create || '');
+
+            setAccountSocials(result.data.socials || []);
             setIsEditing(true);
             setSuccess('Аккаунт успешно получен');
-         } catch (error) {
-            setError('Ошибка при получении аккаунта, попробуйте ещё раз!');
+         } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'Ошибка при получении аккаунта, попробуйте ещё раз!';
+            setError(errorMessage);
          } finally {
             setLoading(false);
          }
@@ -124,9 +128,6 @@ const AdminAccountsEditItem = ({
    const saveHandlerPhoto = async () => {
       if (accountDetail) {
          try {
-            setError('');
-            setSuccess('');
-
             if (!accountPhoto) {
                setError('Выберите фотку аккаунта');
                return;
@@ -142,8 +143,10 @@ const AdminAccountsEditItem = ({
                },
             });
             setSuccess('Фото успешно обновленно');
-         } catch (error) {
-            setError('Ошибка при обновлении фото, попробуйте ещё раз!');
+         } catch (error: any) {
+            // Получаем сообщение об ошибке от сервера, если оно есть
+            const errorMessage = error.response?.data?.message || 'Ошибка при обновлении фото, попробуйте ещё раз!';
+            setError(errorMessage);
          }
       }
    }
@@ -165,58 +168,48 @@ const AdminAccountsEditItem = ({
          formData.append("links", JSON.stringify(links));
 
          try {
-            setSuccess('');
             await axios.post(`${apiUrl}/account-edit-media?id=${accountDetail.account.identificator}`, formData);
-
-            setSuccess('Аккаунт успешно сохранено');
-         } catch (error) {
-            setError('Ошибка при сохранении аккаунта, попробуйте ещё раз!');
+            setSuccess('Аккаунт успешно сохранен');
+         } catch (error: any) {
+            // Получаем сообщение об ошибке от сервера, если оно есть
+            const errorMessage = error.response?.data?.message || 'Ошибка при сохранении аккаунта, попробуйте ещё раз!';
+            setError(errorMessage);
          }
       }
    }
 
    const updateDate = async (action: string) => {
-      setSuccess('');
-      setError('');
       if (accountDetail) {
          try {
-            let value: string | null | undefined = undefined;
+            let value: string | null = null;
 
-            if (action == 'save') {
+            if (action === 'save') {
                // Убедимся, что дата отправляется в ISO формате, сохраняя часы и минуты
                if (accountDate) {
                   // Преобразуем строку в объект Date
                   const date = new Date(accountDate);
                   // Сохраняем в ISO формате, чтобы сохранить часы и минуты
                   value = date.toISOString();
-               } else {
-                  value = null;
                }
-            } else if (action == 'reset') {
-               value = null;
             }
+            // Независимо от значения, делаем запрос
+            await axios.post(apiUrlDateUpdate, {
+               id: accountDetail.account.id,
+               new_date_of_create: value
+            });
 
-            if (value || value == null) {
-               await axios.post(apiUrlDateUpdate, {
-                  id: accountDetail.account.id,
-                  new_date_of_create: value
-               });
-
-               setSuccess('Дата успешно обновлена');
-            } else {
-               setError('Заполните нужные поля');
-            }
-         } catch (error) {
-            setError('Произошла ошибка при обновлении даты');
+            setSuccess('Дата успешно обновлена');
+         } catch (error: any) {
+            // Получаем сообщение об ошибке от сервера, если оно есть
+            const errorMessage = error.response?.data?.message || 'Произошла ошибка при обновлении даты';
+            setError(errorMessage);
          }
       } else {
          setError('Для начала нужно получить пользователя');
       }
-   }
+   };
 
    const updateAccInfo = async () => {
-      setSuccess('');
-      setError('');
       if (accountDetail) {
          try {
             await axios.put(apiUrlAccUpdate, {
@@ -228,8 +221,10 @@ const AdminAccountsEditItem = ({
             });
 
             setSuccess('Аккаунт успешно изменен');
-         } catch (error) {
-            setError('Произошла ошибка при обновлении данных');
+         } catch (error: any) {
+            // Получаем сообщение об ошибке от сервера, если оно есть
+            const errorMessage = error.response?.data?.message || 'Произошла ошибка при обновлении данных';
+            setError(errorMessage);
          }
       } else {
          setError('Для начала нужно получить пользователя');

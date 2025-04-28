@@ -188,9 +188,6 @@ const Sidebar = () => {
             <p>
                Все вопросы, проблемные платежи, удаление аккаунтов, предложения по сайту задавайте администраторам:
             </p>
-            <form style={{ margin: 0 }} action="https://t.me/sergio_karin" target="_blank">
-
-            </form>
             <SendMessageModal isOpen={isOpen} setIsOpen={setIsOpen} responseLogin={responseLogin} setResponseLogin={setResponseLogin}>
                <button className="btn btn-info">Написать</button>
             </SendMessageModal>

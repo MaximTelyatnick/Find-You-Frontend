@@ -10,6 +10,14 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, responseLogin, setRespo
    let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
    const [error, setError] = useState<string>('');
    const [seccess, setSeccess] = useState<string>('');
+   const [isAdminMessage, setIsAdminMessage] = useState<boolean>(false);
+
+   // Отслеживаем, если открывается окно для админа
+   useEffect(() => {
+      if (isOpen && responseLogin === 'admin') {
+         setIsAdminMessage(true);
+      }
+   }, [isOpen, responseLogin]);
 
    // Обновляем login только когда изменяется responseLogin или открывается модальное окно
    useEffect(() => {
@@ -19,33 +27,35 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, responseLogin, setRespo
    }, [responseLogin, isOpen]);
 
    const openModal = () => setIsOpen(true);
-
    const closeModal = () => {
       setSeccess('');
       setError('');
       setIsOpen(false);
-      // Очищаем логин получателя при закрытии модального окна
       setLogin('');
       setMessage('');
-      // Также сбрасываем responseLogin
-      setResponseLogin('');
+
+      // Если это было сообщение для админа, восстанавливаем значение "admin",
+      // в остальных случаях очищаем полностью
+      if (isAdminMessage) {
+         setResponseLogin('admin');
+         setIsAdminMessage(false);
+      } else {
+         setResponseLogin('');
+      }
    };
 
    const sendFormhandler = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       setError('');
       setSeccess('');
-
       if (!login.trim()) {
          setError('Введите логин получателя');
          return;
       }
-
       if (!message.trim()) {
          setError('Введите текст сообщения');
          return;
       }
-
       try {
          // Отправляем сообщение на сервер
          await axios.post('http://167.86.84.197:5000/send-messages', {
@@ -53,9 +63,7 @@ const SendMessageModal = ({ isOpen, setIsOpen, children, responseLogin, setRespo
             user_from_id: user?.id,
             user_to_login: login
          });
-
          setSeccess('Сообщение успешно отправлено');
-
          // Очищаем поле сообщения после отправки
          setMessage('');
       } catch (err: any) {

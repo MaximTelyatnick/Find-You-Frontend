@@ -46,11 +46,11 @@ const Header = ({ activeLink }: { activeLink?: string }) => {
          <div className="jumbotron-mob hidden-desktop">
             <div className="layout-container">
                <span>
-                  <Link to="/"><img src='/images/logoHeader.png' className='logo' /><h1>Check You 18+</h1></Link>
+                  <Link to="/"><img src='/images/logoHeader.png' className='logo' /></Link>
                </span>
                <div className="nav header-mobile__menu">
                   <li className={activeLink === 'Home' ? 'active' : ''}>
-                     <Link to="/Home">Главная</Link>
+                     <Link to="/">Главная</Link>
                   </li>
                   <li className={activeLink === 'Cities' ? 'active' : ''}>
                      <Link to="/Cities">Города</Link>

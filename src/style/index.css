@@ -1911,6 +1911,12 @@
     .logo {
         cursor: pointer;
     }
+    .jumbotron-mob span {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0 20px 0;
+    }
+
     .admin-accounts {
         padding: 40px 0 0 0 ;
     }
@@ -2369,8 +2375,7 @@
                     justify-content: center;
         }
         .account-item, .sidebar-items .account-item {
-            width: 300px;
-            height: 350px;
+            width: calc(33.3% - 10px);
         }
     
         .react-datepicker {
@@ -2518,8 +2523,8 @@
         }
     
         .account-gallery__item {
-            width: calc(50% - 10px);
-            height: 250px;
+            width: calc(33.3% - 10px);
+            height: 130px;
         }
     
         .comments-item {
@@ -2656,14 +2661,14 @@
         }
 
         .account-gallery__videos .account-gallery__item {
+            width: 100%;
+        }
+        .account-item, .sidebar-items .account-item {
             width: calc(50% - 10px);
         }
     }
     
     @media (max-width: 424px) {
-        .account-item, .sidebar-items .account-item {
-            width: 100%;
-        }
         .account-gallery__videos .account-gallery__item {
             width: 100%;
         }
