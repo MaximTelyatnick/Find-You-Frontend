@@ -1,13 +1,25 @@
 import IUser from "../types/IUser";
 
-const transformPhoto = (photo: { type: string; data: number[]; } | null) => {
-   if (photo) {
-      const uint8Array = new Uint8Array(photo.data);
-      const imageUrl = URL.createObjectURL(new Blob([uint8Array], { type: 'image/jpeg' }));
-
-      return imageUrl
+const transformPhoto = (photo: any): string => {
+   // If photo is already a string URL, return it directly
+   if (typeof photo === 'string') {
+      return photo;
    }
-}
+
+   // If photo is an object with data property (Buffer data)
+   if (photo && photo.data) {
+      // Convert Buffer data to base64 string
+      const base64String = btoa(
+         photo.data.reduce((data: string, byte: number) => {
+            return data + String.fromCharCode(byte);
+         }, '')
+      );
+      return `data:image/jpeg;base64,${base64String}`;
+   }
+
+   // Return default image if photo is invalid
+   return '/images/blog_image.jpg';
+};
 
 export const transformPhotoAvatar = (avatar: IUser['avatar']) => {
    // Если аватар не указан, возвращаем путь к плейсхолдеру

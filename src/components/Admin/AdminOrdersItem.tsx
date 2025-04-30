@@ -4,6 +4,8 @@ import axios from "axios";
 import { IAdminOrdersItemProps } from "../../types/Admin";
 import { IAdminOrderState } from "../../types/IOrder";
 import IUser from "../../types/IUser";
+import SuccessModal from "../UX/modals/SuccessModal";
+import ErrorModal from "../UX/modals/ErrorModal";
 
 const AdminOrdersItem = ({ id, login, text, type, created_at, status, setResult, openSendMessageModal }: IAdminOrdersItemProps) => {
    const apiUrl = 'http://167.86.84.197:5000/update-orders'
@@ -15,15 +17,15 @@ const AdminOrdersItem = ({ id, login, text, type, created_at, status, setResult,
    ]
    const [active, setActive] = useState<boolean>(false)
    const [selected, setSelecetd] = useState<number>(status)
-   const [error, setError] = useState<string>('')
-   const [seccess, setSeccess] = useState<boolean>(false)
+   const [isErrorOpen, setIsErrorOpen] = useState<boolean>(false)
+   const [isSuccessOpen, setIsSuccessOpen] = useState<boolean>(false)
+   const [errorMessage, setErrorMessage] = useState<string>('')
+   const [successMessage, setSuccessMessage] = useState<string>('')
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
    const setSelecetdHandler = async (num: number) => {
       try {
-         setError('')
-
          await axios.put(apiUrl, {
             id: id,
             status: num
@@ -41,17 +43,18 @@ const AdminOrdersItem = ({ id, login, text, type, created_at, status, setResult,
                }
                : null
          }));
-         setSeccess(true)
+
+         setSuccessMessage('Смена статуса прошла успешно');
+         setIsSuccessOpen(true);
       } catch (error) {
-         setError('Произошла ошибка при смене статуса')
+         setErrorMessage('Произошла ошибка при смене статуса');
+         setIsErrorOpen(true);
       }
       setActive(false)
    }
 
    const deleteHandler = async () => {
       try {
-         setError('')
-
          await axios.post(apiUrlDelete, {
             id: id,
             user_id: user?.id,
@@ -67,9 +70,11 @@ const AdminOrdersItem = ({ id, login, text, type, created_at, status, setResult,
                : null
          }));
 
-
+         setSuccessMessage('Заказ успешно удален');
+         setIsSuccessOpen(true);
       } catch (error) {
-         setError('Что-то пошло не так, попробуйте ещё раз!')
+         setErrorMessage('Что-то пошло не так, попробуйте ещё раз!');
+         setIsErrorOpen(true);
       }
    }
 
@@ -83,8 +88,14 @@ const AdminOrdersItem = ({ id, login, text, type, created_at, status, setResult,
 
    return (
       <div>
-         {error && <p style={{ color: 'red' }}>{error}</p>}
-         {seccess && <p style={{ color: 'green' }}>Смена статуса прошла успешно</p>}
+         <ErrorModal isOpen={isErrorOpen} setIsOpen={setIsErrorOpen}>
+            {errorMessage}
+         </ErrorModal>
+
+         <SuccessModal isOpen={isSuccessOpen} setIsOpen={setIsSuccessOpen}>
+            {successMessage}
+         </SuccessModal>
+
          <div className="admin-order-item">
             <div className="order-item__text">
                <p className="order-item__response">от: {login} <svg onClick={handleOpenSendMessage} width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

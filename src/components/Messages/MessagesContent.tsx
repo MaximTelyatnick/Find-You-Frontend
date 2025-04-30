@@ -6,6 +6,8 @@ import IUser from "../../types/IUser";
 import MessagesContentItem from "./MessagesContentItem";
 import SendMessageModal from "../UX/modals/SendMessageModal";
 import Pagination from "../UX/Pagination";
+import SuccessModal from "../UX/modals/SuccessModal";
+import ErrorModal from "../UX/modals/ErrorModal";
 
 const MessagesContent = () => {
    const [searchParams, setSearchParams] = useSearchParams();
@@ -14,7 +16,7 @@ const MessagesContent = () => {
 
    const [isOpenSend, setIsOpenSend] = useState<boolean>(false);
    const storedUser = localStorage.getItem('user');
-   let user: IUser = storedUser ? JSON.parse(storedUser) : null;
+   let user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
    const [result, setResult] = useState<IMessageState>({
       items: null,
@@ -23,67 +25,70 @@ const MessagesContent = () => {
    });
 
    const [selected, setSelected] = useState<number[]>([]);
-   const [seccess, setSeccess] = useState<string>('');
-   const [error, setError] = useState<string>('');
    const [responseLogin, setResponseLogin] = useState<string>('');
    const [unreadCount, setUnreadCount] = useState<number>(0);
    const [totalPages, setTotalPages] = useState<number>(1);
-   // Новое состояние для модального окна подтверждения удаления
    const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
-   // Тип удаления: 'local' (по умолчанию) или 'global'
    const [deleteType, setDeleteType] = useState<'local' | 'global'>('local');
 
-   // Обновленный метод для изменения фильтра
+   const [successMessage, setSuccessMessage] = useState<string>('');
+   const [errorMessage, setErrorMessage] = useState<string>('');
+   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
+
    const selectFilterHandler = (filterName: string): void => {
       setSelected([]);
-      // Обновляем URL с новым фильтром и сбрасываем страницу на первую
       setSearchParams({ filter: filterName, page: "1" });
    };
 
    const deleteHandler = async () => {
       try {
-         setError('');
-         setSeccess('');
+         setErrorMessage('');
+         setSuccessMessage('');
+         setIsErrorModalOpen(false);
+         setIsSuccessModalOpen(false);
 
-         // Выбираем соответствующий API URL в зависимости от типа удаления
          const apiUrlDelete = deleteType === 'local'
             ? `http://167.86.84.197:5000/delete-messages`
             : `http://167.86.84.197:5000/delete-messages-global`;
 
          await axios.delete(apiUrlDelete, {
             data: {
-               user_id: user.id,
+               user_id: user?.id,
                message_ids: selected,
             }
          });
 
-         // Устанавливаем сообщение об успехе в зависимости от типа удаления
-         setSeccess(deleteType === 'local'
+         const successText = deleteType === 'local'
             ? 'Сообщения успешно скрыты'
-            : 'Сообщения успешно удалены глобально');
+            : 'Сообщения успешно удалены глобально';
+
+         setSuccessMessage(successText);
+         setIsSuccessModalOpen(true);
 
          setSelected([]);
          setShowDeleteConfirm(false);
-
-         // Обновляем список сообщений после удаления
          fetchMessages();
+
       } catch (error: any) {
-         const errorMessage = error.response?.data?.error || 'Что-то пошло не так, попробуйте ещё раз!';
-         setError(errorMessage);
+         const errorText = error.response?.data?.error || 'Что-то пошло не так при удалении, попробуйте ещё раз!';
+         setErrorMessage(errorText);
+         setIsErrorModalOpen(true);
          console.error("Ошибка при удалении:", error);
+         setShowDeleteConfirm(false);
       }
    };
 
-   // Обработчик открытия модального окна подтверждения удаления
    const openDeleteConfirmation = () => {
       setShowDeleteConfirm(true);
    };
 
-   // Обновленная функция для загрузки сообщений с учетом фильтра
    const fetchMessages = async () => {
+      if (!user?.id) return;
+
       try {
          setResult(prev => ({ ...prev, loading: true, error: false }));
-         const apiUrl = `http://167.86.84.197:5000/get-messages?user_id=${user?.id}&page=${page}&filter=${filter}`;
+         const apiUrl = `http://167.86.84.197:5000/get-messages?user_id=${user.id}&page=${page}&filter=${filter}`;
 
          const response = await axios.get(apiUrl);
 
@@ -96,6 +101,7 @@ const MessagesContent = () => {
          setTotalPages(response.data.totalPages || 1);
          setUnreadCount(response.data.unreadCount || 0);
       } catch (error) {
+         console.error("Ошибка при загрузке сообщений:", error);
          setResult({
             items: null,
             error: true,
@@ -120,16 +126,15 @@ const MessagesContent = () => {
       }, 10);
    };
 
-   // Обработчик для отметки сообщения как прочитанное
    const handleMessageRead = async (messageId: number) => {
+      if (!user?.id) return;
+
       try {
-         // Отправляем запрос на сервер для отметки сообщения как прочитанное
          await axios.post('http://167.86.84.197:5000/mark-as-read', {
             message_id: messageId,
             user_id: user.id
          });
 
-         // Обновляем локальное состояние сообщения
          setResult(prev => {
             if (prev.items) {
                const updatedItems = prev.items.map(item => {
@@ -143,27 +148,28 @@ const MessagesContent = () => {
             return prev;
          });
 
-         // Обновляем счетчик непрочитанных после успешной отметки
          fetchUnreadCount();
       } catch (error) {
          console.error("Ошибка при отметке сообщения как прочитанное:", error);
+         setErrorMessage('Не удалось отметить сообщение как прочитанное.');
+         setIsErrorModalOpen(true);
       }
    };
 
-   // Отдельная функция для получения количества непрочитанных сообщений
    const fetchUnreadCount = async () => {
+      if (!user?.id) return;
       try {
-         const response = await axios.get(`http://167.86.84.197:5000/unread-count?user_id=${user?.id}`);
-         setUnreadCount(response.data.unread_count);
+         const response = await axios.get(`http://167.86.84.197:5000/unread-count?user_id=${user.id}`);
+         setUnreadCount(response.data.unread_count || 0);
       } catch (error) {
          console.error("Ошибка при получении количества непрочитанных:", error);
       }
    };
 
-   // useEffect для загрузки сообщений при изменении страницы или фильтра
    useEffect(() => {
       if (user?.id) {
          fetchMessages();
+         fetchUnreadCount();
       }
    }, [page, filter, user?.id]);
 
@@ -172,8 +178,15 @@ const MessagesContent = () => {
          {result.loading && <div className="loader">
             <div className="loader__circle"></div>
          </div>}
-         {error && <p style={{ color: 'red' }}>{error}</p>}
-         {seccess && <p style={{ color: 'green' }}>{seccess}</p>}
+
+         <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}>
+            {successMessage}
+         </SuccessModal>
+         <ErrorModal isOpen={isErrorModalOpen} setIsOpen={setIsErrorModalOpen}>
+            {errorMessage}
+         </ErrorModal>
+
+
          <div className="messages__actions">
             <div className="messages__buttons">
                <div
@@ -199,6 +212,8 @@ const MessagesContent = () => {
                   setResponseLogin={setResponseLogin}
                   isOpen={isOpenSend}
                   setIsOpen={setIsOpenSend}
+                  showSuccess={(msg) => { setSuccessMessage(msg); setIsSuccessModalOpen(true); }}
+                  showError={(msg) => { setErrorMessage(msg); setIsErrorModalOpen(true); }}
                >
                   <div className="btn messages__button">Отправить сообщения</div>
                </SendMessageModal>
@@ -207,6 +222,7 @@ const MessagesContent = () => {
                      <div
                         onClick={openDeleteConfirmation}
                         title="Удалить выбранные сообщения"
+                        style={{ cursor: 'pointer' }}
                      >
                         <svg width="30" height="30" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                            <path d="M55.4166 11.6667H45.2083L42.2916 8.75H27.7083L24.7916 11.6667H14.5833V17.5H55.4166M17.5 55.4167C17.5 56.9638 18.1146 58.4475 19.2085 59.5415C20.3025 60.6354 21.7862 61.25 23.3333 61.25H46.6666C48.2137 61.25 49.6975 60.6354 50.7914 59.5415C51.8854 58.4475 52.5 56.9638 52.5 55.4167V20.4167H17.5V55.4167Z" fill="#E36F6F" />
@@ -215,7 +231,6 @@ const MessagesContent = () => {
                   </div>
                )}
             </div>
-
          </div>
 
          <hr />
@@ -237,10 +252,12 @@ const MessagesContent = () => {
                            selected.length === result.items.length
                         )
                      }
+                     aria-label="Выбрать все сообщения"
                   />
                </div>
             </div>
-            {result.error && <p style={{ color: 'red' }}>Что-то пошло не так, попробуйте ещё раз!</p>}
+            {result.error && !result.loading && <div className="no-messages"><p style={{ color: 'red' }}>Не удалось загрузить сообщения. Попробуйте ещё раз!</p></div>}
+
             {result.items && result.items.length > 0 ? (
                result.items.map(item => (
                   <MessagesContentItem
@@ -251,10 +268,11 @@ const MessagesContent = () => {
                      selected={selected}
                      setSelected={setSelected}
                      key={item.id}
+                     is_read={item.is_read}
                   />
                ))
             ) : (
-               <div className="no-messages">
+               !result.loading && !result.error && <div className="no-messages">
                   <p>Сообщений не найдено</p>
                </div>
             )}
@@ -264,18 +282,15 @@ const MessagesContent = () => {
             totalPages={totalPages}
             page={page}
             itemsLength={result.items ? result.items.length : 0}
-            cityId={0}
-            tagIds={[]}
-            search=""
             visiblePages={5}
             type="messages"
          />
 
-         {/* Модальное окно подтверждения удаления */}
          {showDeleteConfirm && (
             <div className="modal-overlay">
                <div className="modal-confirm">
                   <h3>Подтверждение удаления</h3>
+                  <p>Вы уверены, что хотите удалить выбранные сообщения ({selected.length} шт.)?</p>
                   <p>Выберите тип удаления:</p>
 
                   <div className="delete-options">
@@ -283,6 +298,7 @@ const MessagesContent = () => {
                         <input
                            type="radio"
                            name="deleteType"
+                           value="local"
                            checked={deleteType === 'local'}
                            onChange={() => setDeleteType('local')}
                         />
@@ -293,6 +309,7 @@ const MessagesContent = () => {
                         <input
                            type="radio"
                            name="deleteType"
+                           value="global"
                            checked={deleteType === 'global'}
                            onChange={() => setDeleteType('global')}
                         />

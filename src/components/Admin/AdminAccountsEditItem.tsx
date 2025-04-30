@@ -1,5 +1,5 @@
 import dayjs from "dayjs"
-import { IHomeAccount } from "../../types/IAccounts"
+import { IAccount, IHomeAccount } from "../../types/IAccounts"
 import { useNavigate } from "react-router-dom"
 import transformPhoto from "../../utils/transformPhoto"
 import { useState, useRef, useEffect } from "react"
@@ -16,7 +16,8 @@ const AdminAccountsEditItem = ({
    apiUrlDateUpdate,
    apiUrlAccUpdate,
    setError,
-   setSuccess
+   setSuccess,
+   updateAccount
 }: {
    account: IHomeAccount,
    setAccountsSelected: Function,
@@ -27,12 +28,14 @@ const AdminAccountsEditItem = ({
    apiUrlAccUpdate: string,
    setError: Function, // Функция будет вызывать модальное окно
    setSuccess: Function // Функция будет вызывать модальное окно
+   updateAccount: Function // Функция для обновления account в родительском компоненте
 }) => {
    const navigate = useNavigate()
    const [isChecked, setIsChecked] = useState<boolean>(false)
    const [isEditing, setIsEditing] = useState<boolean>(false)
    const [loading, setLoading] = useState<boolean>(false)
    const [accountDetail, setAccountDetail] = useState<IAdminAccountAll | null>(null)
+   const [localAccount, setLocalAccount] = useState<IHomeAccount>(account)
 
    // Состояния для редактирования
    const [accountName, setAccountName] = useState<string>('')
@@ -57,13 +60,18 @@ const AdminAccountsEditItem = ({
       }
    }, [accountPhoto])
 
+   // Синхронизируем локальный account с пропсом account при изменении
+   useEffect(() => {
+      setLocalAccount(account);
+   }, [account]);
+
    const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const checked = event.target.checked;
       setIsChecked(checked);
       setAccountsSelected((prevSelected: number[]) =>
          checked
-            ? [...prevSelected, account.id]
-            : prevSelected.filter(id => id !== account.id)
+            ? [...prevSelected, localAccount.id]
+            : prevSelected.filter(id => id !== localAccount.id)
       );
 
       // Если снимаем выделение, закрываем редактирование
@@ -76,7 +84,7 @@ const AdminAccountsEditItem = ({
       if (!isEditing) {
          setLoading(true);
          try {
-            const result = await axios.get(`${apiUrlGet}?id=${account.id}`)
+            const result = await axios.get(`${apiUrlGet}?id=${localAccount.id}`)
             setAccountDetail(result.data);
             setAccountName(result.data.account.name || '');
             setAccountCity(result.data.city?.name_ru || '');
@@ -137,14 +145,34 @@ const AdminAccountsEditItem = ({
             formData.append("photo", accountPhoto);
             formData.append("id", String(accountDetail.account.id));
 
-            await axios.post(apiUrlUpdate, formData, {
+            const response = await axios.post(apiUrlUpdate, formData, {
                headers: {
                   "Content-Type": "multipart/form-data",
                },
             });
-            setSuccess('Фото успешно обновленно');
+
+            if (response.data && response.data.result && response.data.result.photo) {
+               const updatedPhotoData = response.data.result.photo;
+               setAccountDetail(prev => prev ? { ...prev, account: { ...prev.account, photo: updatedPhotoData } } : null);
+               const updatedAccountData: IAccount = {
+                  ...localAccount,
+                  photo: updatedPhotoData
+               };
+
+               setLocalAccount(updatedAccountData as IHomeAccount);
+
+               updateAccount(updatedAccountData);
+
+               setSuccess('Фото успешно обновлено');
+               setAccountPhoto(null);
+               if (fileInputRef.current) {
+                  fileInputRef.current.value = "";
+               }
+            } else {
+               console.error("Server response did not contain updated photo data at 'result.photo'. Response:", response.data);
+               setError("Фото на сервере обновлено, но не удалось обновить миниатюру (неверный ответ сервера). Пожалуйста, обновите страницу.");
+            }
          } catch (error: any) {
-            // Получаем сообщение об ошибке от сервера, если оно есть
             const errorMessage = error.response?.data?.message || 'Ошибка при обновлении фото, попробуйте ещё раз!';
             setError(errorMessage);
          }
@@ -192,16 +220,50 @@ const AdminAccountsEditItem = ({
                   value = date.toISOString();
                }
             }
+
             // Независимо от значения, делаем запрос
             await axios.post(apiUrlDateUpdate, {
                id: accountDetail.account.id,
                new_date_of_create: value
             });
 
-            setSuccess('Дата успешно обновлена');
+            // Создаем обновленную версию аккаунта с новой датой
+            const updatedAccount = {
+               ...localAccount,
+               date_of_create: action === 'save' ? new Date(accountDate) : null
+            };
+
+            // Обновляем локальный state
+            setLocalAccount(updatedAccount);
+
+            // Обновляем родительский компонент
+            updateAccount(updatedAccount);
+
+            // После успешного запроса обновляем поле ввода
+            if (action === 'reset') {
+               // Если это был сброс даты, очищаем значение в поле
+               setAccountDate('');
+
+               // Также обновляем данные в accountDetail
+               setAccountDetail(prev => {
+                  if (prev) {
+                     return {
+                        ...prev,
+                        account: {
+                           ...prev.account,
+                           date_of_create: null
+                        }
+                     };
+                  }
+                  return prev;
+               });
+            }
+
+            setSuccess(action === 'save' ? 'Дата успешно обновлена' : 'Дата успешно сброшена');
          } catch (error: any) {
             // Получаем сообщение об ошибке от сервера, если оно есть
-            const errorMessage = error.response?.data?.message || 'Произошла ошибка при обновлении даты';
+            const errorMessage = error.response?.data?.message ||
+               (action === 'save' ? 'Произошла ошибка при обновлении даты' : 'Произошла ошибка при сбросе даты');
             setError(errorMessage);
          }
       } else {
@@ -219,6 +281,18 @@ const AdminAccountsEditItem = ({
                tags: accountTags,
                socials: accountSocials,
             });
+
+            // Создаем обновленную версию аккаунта
+            const updatedAccount = {
+               ...localAccount,
+               name: accountName
+            };
+
+            // Обновляем локальный state
+            setLocalAccount(updatedAccount);
+
+            // Обновляем родительский компонент
+            updateAccount(updatedAccount);
 
             setSuccess('Аккаунт успешно изменен');
          } catch (error: any) {
@@ -339,18 +413,20 @@ const AdminAccountsEditItem = ({
                   </svg>
                )}
                <div className="admin-accounts-edit__img">
-                  {typeof account.photo == 'string' ? <img src={`${account.photo}`} /> :
-                     account.photo && account.photo.data ? <img src={transformPhoto(account.photo)} /> :
-                        <img src='/images/blog_image.jpg' />}
+                  <img
+                     src={transformPhoto(localAccount.photo)}
+                     alt={`Аватар ${localAccount.name || 'аккаунта'}`}
+                     onError={(e) => { e.currentTarget.src = '/images/blog_image.jpg'; }} // Добавил onError
+                  />
                </div>
             </div>
-            <p className="admin-accounts-edit__name">Название: <svg onClick={() => { navigate(`/${account.id}`) }} width="20" height="20" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <p className="admin-accounts-edit__name">Название: <svg onClick={() => { navigate(`/${localAccount.id}`) }} width="20" height="20" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                <path d="M45.3629 45.3629C47.2751 43.4507 48.792 41.1805 49.8269 38.6821C50.8618 36.1836 51.3945 33.5058 51.3945 30.8015C51.3945 28.0971 50.8618 25.4193 49.8269 22.9209C48.792 20.4224 47.2751 18.1522 45.3629 16.24C43.4507 14.3278 41.1805 12.8109 38.6821 11.776C36.1836 10.7411 33.5058 10.2084 30.8014 10.2084C28.0971 10.2084 25.4193 10.7411 22.9208 11.776C20.4224 12.8109 18.1522 14.3278 16.24 16.24C12.378 20.1019 10.2084 25.3398 10.2084 30.8015C10.2084 36.2631 12.378 41.501 16.24 45.3629C20.1019 49.2249 25.3398 51.3945 30.8014 51.3945C36.2631 51.3945 41.501 49.2249 45.3629 45.3629ZM45.3629 45.3629L58.3333 58.3333" stroke="#79C0AD" strokeWidth="4.375" strokeLinecap="round" strokeLinejoin="round" />
-            </svg><br /><span>{account.name}</span></p>
+            </svg><br /><span>{localAccount.name}</span></p>
             <p className="admin-accounts-edit__date">Дата создания: <br />
                <span>
-                  {account.date_of_create
-                     ? dayjs(account.date_of_create).format("DD.MM.YYYY HH:mm")
+                  {localAccount.date_of_create
+                     ? dayjs(localAccount.date_of_create).format("DD.MM.YYYY HH:mm")
                      : "Не указана"}
                </span>
             </p>

@@ -3,12 +3,20 @@ import axios from "axios"
 import { IAdminUser, IAdminUserToolbar } from "../../types/Admin"
 import IUser from "../../types/IUser"
 import { refreshUserData } from "../../utils/userSessionChecker"
+import SuccessModal from "../UX/modals/SuccessModal"
+import ErrorModal from "../UX/modals/ErrorModal"
+
 
 const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar) => {
    const apiUrlAddRole = `http://167.86.84.197:5000/add-role`
    const [role, setRole] = useState<string>('user')
-   const [error, setError] = useState<string>('')
-   const [success, setSuccess] = useState<string>('')
+
+   // Заменяем текстовые сообщения на модальные окна
+   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false)
+   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false)
+   const [errorMessage, setErrorMessage] = useState<string>('')
+   const [successMessage, setSuccessMessage] = useState<string>('')
+
    const [canEditRole, setCanEditRole] = useState<boolean>(true)
 
    const storedUser = localStorage.getItem('user');
@@ -28,10 +36,11 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
                   selectedUser &&
                   (selectedUser.name === 'moder' || selectedUser.name === 'admin')) {
                   setCanEditRole(false);
-                  setError('Модераторам запрещено изменять права других модераторов и админов');
+                  // Показываем модальное окно с ошибкой
+                  setErrorMessage('Модераторам запрещено изменять права других модераторов и админов');
+                  setIsErrorModalOpen(true);
                } else {
                   setCanEditRole(true);
-                  setError('');
                }
             } catch (err) {
                console.error("Ошибка при получении информации о пользователе:", err);
@@ -44,9 +53,6 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
 
    const editRole = async () => {
       try {
-         setError('')
-         setSuccess('')
-
          // Получаем актуальную информацию о пользователе перед изменением роли
          const userResponse = await axios.get(`http://167.86.84.197:5000/get-role?user_id=${userId}`);
          const selectedUser = userResponse.data;
@@ -54,7 +60,9 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
          // Дополнительная проверка прав перед отправкой запроса
          if (currentUser?.role === 'moder' &&
             (selectedUser.name === 'moder' || selectedUser.name === 'admin')) {
-            setError('Модераторам запрещено изменять права других модераторов и админов');
+            // Показываем модальное окно с ошибкой
+            setErrorMessage('Модераторам запрещено изменять права других модераторов и админов');
+            setIsErrorModalOpen(true);
             return;
          }
 
@@ -89,16 +97,27 @@ const AdminUsersToolbar = ({ setResult, setSelected, userId }: IAdminUserToolbar
             refreshUserData();
          }
 
-         setSuccess('Роль успешно задана.');
+         // Показываем модальное окно с успехом
+         setSuccessMessage('Роль успешно задана.');
+         setIsSuccessModalOpen(true);
       } catch (error) {
-         setError('Что-то пошло не так при смене роли, попробуйте ещё раз!');
+         // Показываем модальное окно с ошибкой
+         setErrorMessage('Что-то пошло не так при смене роли, попробуйте ещё раз!');
+         setIsErrorModalOpen(true);
       }
    }
 
    return (
       <>
-         {error && <p style={{ color: 'red' }}>{error}</p>}
-         {success && <p style={{ color: 'green' }}>{success}</p>}
+         {/* Подключаем модальные окна */}
+         <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}>
+            {successMessage}
+         </SuccessModal>
+
+         <ErrorModal isOpen={isErrorModalOpen} setIsOpen={setIsErrorModalOpen}>
+            {errorMessage}
+         </ErrorModal>
+
          <div className="admin-users-toolbar">
             <div className="admin-users-toolbar__form">
                <select

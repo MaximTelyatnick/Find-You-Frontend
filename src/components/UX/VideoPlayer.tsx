@@ -84,7 +84,40 @@ export const VideoPlayer = ({ src }: { src: string }) => {
 
          // Setup control bar auto-hide functionality
          setupControlBarAutoHide(player);
+
+         // Handle fullscreen changes
+         player.on('fullscreenchange', () => {
+            handleFullscreenChange(player);
+         });
       });
+   };
+
+   // New function to handle fullscreen changes
+   const handleFullscreenChange = (player: any) => {
+      const isFullscreen = player.isFullscreen();
+      const videoElement = player.tech_.el_;
+
+      if (isFullscreen) {
+         // Detect if mobile device is in portrait mode
+         const isPortrait = window.innerHeight > window.innerWidth;
+
+         if (isPortrait) {
+            // For portrait orientation, prioritize filling height
+            videoElement.style.objectFit = 'contain';
+            videoElement.style.width = '100%';
+            videoElement.style.height = '100%';
+         } else {
+            // For landscape, normal behavior
+            videoElement.style.objectFit = 'contain';
+            videoElement.style.width = '100%';
+            videoElement.style.height = '100%';
+         }
+      } else {
+         // Reset styles when exiting fullscreen
+         videoElement.style.objectFit = '';
+         videoElement.style.width = '';
+         videoElement.style.height = '';
+      }
    };
 
    // Function to handle auto-hiding of control bar
@@ -232,24 +265,48 @@ export const VideoPlayer = ({ src }: { src: string }) => {
                background-color: rgba(0, 0, 0, 0.9);
             }
 
-                        /* Mobile responsive styles */
+            /* Mobile responsive styles */
             @media (max-width: 768px) {
                .video-js.vjs-youtube-like {
                   max-width: 100% !important;
                }
             }
 
+            /* Improved fullscreen styles */
+            .video-js.vjs-youtube-like.vjs-fullscreen {
+               padding-top: 0 !important;
+            }
+            
+            .video-js.vjs-youtube-like.vjs-fullscreen video {
+               object-fit: contain !important;
+               width: 100% !important;
+               height: 100% !important;
+            }
+            
+            /* Portrait-specific fullscreen style */
+            @media (orientation: portrait) {
+               .video-js.vjs-youtube-like.vjs-fullscreen {
+                  display: flex !important;
+                  align-items: center !important;
+                  justify-content: center !important;
+               }
+               
                .video-js.vjs-youtube-like.vjs-fullscreen video {
-                  width: 100% !important;
-                  height: auto !important;
+                  max-height: 100% !important;
+                  max-width: 100% !important;
                   object-fit: contain !important;
                }
+            }
          `;
          document.head.appendChild(styleElement);
 
          const videoElement = document.createElement('video');
          videoElement.className = 'video-js vjs-big-play-centered';
          videoElement.id = playerIdRef.current;
+
+         // Add playsInline attribute for better mobile handling
+         videoElement.setAttribute('playsinline', 'true');
+         videoElement.setAttribute('webkit-playsinline', 'true');
 
          videoRef.current.appendChild(videoElement);
 
@@ -265,11 +322,24 @@ export const VideoPlayer = ({ src }: { src: string }) => {
    }, [src]);
 
    useEffect(() => {
+      // Add orientation change listener
+      const handleOrientationChange = () => {
+         if (playerRef.current && playerRef.current.isFullscreen()) {
+            handleFullscreenChange(playerRef.current);
+         }
+      };
+
+      window.addEventListener('orientationchange', handleOrientationChange);
+      window.addEventListener('resize', handleOrientationChange);
+
       return () => {
          // Clear inactivity timeout on component unmount
          if (inactivityTimeoutRef.current) {
             clearTimeout(inactivityTimeoutRef.current);
          }
+
+         window.removeEventListener('orientationchange', handleOrientationChange);
+         window.removeEventListener('resize', handleOrientationChange);
 
          const styleElement = document.getElementById(styleIdRef.current);
          if (styleElement) {

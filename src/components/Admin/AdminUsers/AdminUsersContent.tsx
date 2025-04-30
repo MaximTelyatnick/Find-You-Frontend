@@ -7,14 +7,21 @@ import axios from "axios"
 import transformPhoto from "../../../utils/transformPhoto"
 import AdminUsersToolbar from "../AdminUsersToolbar"
 import IUser from "../../../types/IUser"
+import SuccessModal from "../../UX/modals/SuccessModal"
+import ErrorModal from "../../UX/modals/ErrorModal"
 
 const AdminUsersContent = () => {
    const [login, setLogin] = useState<string>('')
    const [users, setUsers] = useState<IAdminUser[]>([])
    const [usersSelected, setUsersSelected] = useState<IAdminUser[]>([])
    const navigate = useNavigate()
-   const [error, setError] = useState<string>('');
-   const [success, setSuccess] = useState<string>('');
+
+   // Заменяем текстовые сообщения на модальные окна
+   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false)
+   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false)
+   const [errorMessage, setErrorMessage] = useState<string>('')
+   const [successMessage, setSuccessMessage] = useState<string>('')
+
    const apiUrlDelete = 'http://167.86.84.197:5000/users-delete'
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
@@ -27,9 +34,6 @@ const AdminUsersContent = () => {
 
    const deleteAccountsHandler = async () => {
       try {
-         setError('')
-         setSuccess('')
-
          // Отправляем только массив ID вместо полных объектов
          const userIds = usersSelected.map(user => user.id);
 
@@ -39,14 +43,20 @@ const AdminUsersContent = () => {
             }
          })
 
-         setSuccess('Аккаунты успешно удалены')
+         // Показываем модальное окно с успешным сообщением
+         setSuccessMessage('Аккаунты успешно удалены')
+         setIsSuccessModalOpen(true)
+
          usersSelected.forEach(itemSelected => {
             setUsers(prev => prev && prev.filter(item => item.id != itemSelected.id))
          })
          setUsersSelected([])
       } catch (error) {
          console.error('Ошибка удаления:', error);
-         setError('Ошибка при удалении аккаунтов, попробуйте ещё раз!')
+
+         // Показываем модальное окно с ошибкой
+         setErrorMessage('Ошибка при удалении аккаунтов, попробуйте ещё раз!')
+         setIsErrorModalOpen(true)
       }
    }
 
@@ -56,9 +66,17 @@ const AdminUsersContent = () => {
 
    return (
       <div className="admin-users">
-         <Title >Пользователи</Title>
-         {error && <p style={{ color: 'red' }}>{error}</p>}
-         {success && <p style={{ color: 'green' }}>{success}</p>}
+         <Title>Пользователи</Title>
+
+         {/* Подключаем модальные окна */}
+         <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}>
+            {successMessage}
+         </SuccessModal>
+
+         <ErrorModal isOpen={isErrorModalOpen} setIsOpen={setIsErrorModalOpen}>
+            {errorMessage}
+         </ErrorModal>
+
          <form className="admin-accounts-get__form" onSubmit={submitSearchHandler}>
             <input type="text" placeholder="Логин пользователя" value={login} onChange={(e) => { setLogin(e.target.value) }} />
             <button type="submit" className="btn btn-info">Получить</button>

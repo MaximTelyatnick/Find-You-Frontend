@@ -107,7 +107,7 @@ const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
                         onClick={() => clickHandler(item.id)}
                         style={{ color: '#e36f6f', cursor: 'pointer', marginRight: '5px' }}
                      >
-                        {item.name_ru}
+                        {item.name_ru}{tags.length - 1 != index && ' , '}
                      </span>
                   ))
                }

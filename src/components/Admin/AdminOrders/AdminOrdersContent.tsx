@@ -11,6 +11,7 @@ import Pagination from "../../UX/Pagination"
 import { useSearchParams } from "react-router-dom"
 import SendMessageModal from "../../UX/modals/SendMessageModal"
 import { format, startOfDay } from 'date-fns'
+import ErrorModal from "../../UX/modals/ErrorModal";
 
 const AdminOrdersContent = () => {
    const storedUser = localStorage.getItem('user');
@@ -29,11 +30,14 @@ const AdminOrdersContent = () => {
    const [isOpenSend, setIsOpenSend] = useState<boolean>(false);
    const [responseLogin, setResponseLogin] = useState<string>('');
 
+   // Состояние для модальных окон
+   const [isErrorOpen, setIsErrorOpen] = useState<boolean>(false);
+   const [errorMessage, setErrorMessage] = useState<string>('');
+
    // Состояние для хранения всех дат заказов для подсветки
    const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
    // Состояние для отслеживания загрузки всех дат
    const [allDatesLoading, setAllDatesLoading] = useState<boolean>(false);
-   const [allDatesError, setAllDatesError] = useState<boolean>(false);
 
    const openSendMessageModal = (login: string) => {
       setResponseLogin(login);
@@ -67,7 +71,6 @@ const AdminOrdersContent = () => {
    // Функция для получения всех дат заказов для подсветки
    const getAllOrderDates = async () => {
       setAllDatesLoading(true);
-      setAllDatesError(false);
 
       try {
          const response = await fetch(`http://167.86.84.197:5000/get-all-order-dates?user_id=${user?.id}`);
@@ -85,7 +88,8 @@ const AdminOrdersContent = () => {
          }
       } catch (error) {
          console.error('Ошибка при получении дат заказов:', error);
-         setAllDatesError(true);
+         setErrorMessage('Ошибка при получении дат заказов');
+         setIsErrorOpen(true);
       } finally {
          setAllDatesLoading(false);
       }
@@ -197,7 +201,7 @@ const AdminOrdersContent = () => {
    };
 
    if (user?.role != 'admin' && user?.role != 'moder') {
-      return
+      return null;
    }
 
    return (
@@ -206,6 +210,12 @@ const AdminOrdersContent = () => {
          {(result.loading || allDatesLoading) && <div className="loader">
             <div className="loader__circle"></div>
          </div>}
+
+         {/* Модальное окно для ошибок */}
+         <ErrorModal isOpen={isErrorOpen} setIsOpen={setIsErrorOpen}>
+            {errorMessage}
+         </ErrorModal>
+
          <div className="admin-order__header">
             <div className="admin-order__buttons">
                <button className="btn admin-order__button" onClick={() => { setFilterHandler('') }}>
@@ -247,12 +257,18 @@ const AdminOrdersContent = () => {
                   highlightDates={highlightedDates}
                   renderCustomHeader={renderCustomHeader}
                />
-               {allDatesError && <p className="datepicker-error">Ошибка загрузки дат</p>}
             </div>
          </div>
          <div className="admin-order__items">
             {!result.items && <p>Ещё нет заказов</p>}
-            {result.error && <p>Что-то пошло не так, попробуйте ещё раз</p>}
+            {result.error && (
+               <ErrorModal
+                  isOpen={result.error}
+                  setIsOpen={() => setResult(prev => ({ ...prev, error: false }))}
+               >
+                  Что-то пошло не так, попробуйте ещё раз
+               </ErrorModal>
+            )}
             <SendMessageModal
                responseLogin={responseLogin}
                setResponseLogin={setResponseLogin}

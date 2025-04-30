@@ -3,19 +3,21 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { IAdminReport, IAdminReportsItemState, IAdminReportsState } from "../../types/Admin"
 import dayjs from "dayjs"
+import SuccessModal from "../UX/modals/SuccessModal"
+import ErrorModal from "../UX/modals/ErrorModal"
 
 const AdminReportsItem = ({ reporter_user_login, reported_user_login, account_name, account_id, created_at, report_text, comment_id, id, setResult, comment_text }: IAdminReportsItemState) => {
    const apiUrlDelete = 'http://167.86.84.197:5000/delete-reports'
    const apiUrlDeleteComment = 'http://167.86.84.197:5000/delete-comment'
    const navigate = useNavigate()
-   const [error, setError] = useState<string>('')
-   const [seccess, setSeccess] = useState<string>('')
+
+   // Состояния для модальных окон вместо простых текстовых сообщений
+   const [errorModalOpen, setErrorModalOpen] = useState<boolean>(false)
+   const [successModalOpen, setSuccessModalOpen] = useState<boolean>(false)
+   const [modalMessage, setModalMessage] = useState<string>('')
 
    const removeComment = async (comment_id: number) => {
       try {
-         setError('')
-         setSeccess('')
-
          await axios.delete(apiUrlDeleteComment, {
             data: {
                comment_id: comment_id
@@ -26,17 +28,19 @@ const AdminReportsItem = ({ reporter_user_login, reported_user_login, account_na
             ...prev,
             items: prev.items ? [...prev.items].filter(item => item.id != id) : prev.items
          }))
-         setSeccess('Коментарий успешно удален!')
+
+         // Показываем модальное окно с успешным сообщением
+         setModalMessage('Комментарий успешно удален!')
+         setSuccessModalOpen(true)
       } catch (error) {
-         setError('Ошибка при удалении коментария, попробуйте ещё раз!')
+         // Показываем модальное окно с ошибкой
+         setModalMessage('Ошибка при удалении комментария, попробуйте ещё раз!')
+         setErrorModalOpen(true)
       }
    }
 
    const deleteHandler = async (id: number) => {
       try {
-         setError('')
-         setSeccess('')
-
          await axios.delete(apiUrlDelete, {
             data: {
                id,
@@ -47,16 +51,27 @@ const AdminReportsItem = ({ reporter_user_login, reported_user_login, account_na
             ...prev,
             items: prev.items?.filter((item: IAdminReport) => item.id != id)
          }))
-         setSeccess('Жалоба успешно удалена')
+
+         // Показываем модальное окно с успешным сообщением
+         setModalMessage('Жалоба успешно удалена')
+         setSuccessModalOpen(true)
       } catch (error) {
-         setError('Что-то пошло не так при удалении, попробуйте ещё раз!')
+         // Показываем модальное окно с ошибкой
+         setModalMessage('Что-то пошло не так при удалении, попробуйте ещё раз!')
+         setErrorModalOpen(true)
       }
    }
 
    return (
       <div className="admin-reports-item">
-         {error && <p style={{ color: 'red' }}>{error}</p>}
-         {seccess && <p style={{ color: 'green' }}>{seccess}</p>}
+         {/* Модальные окна */}
+         <SuccessModal isOpen={successModalOpen} setIsOpen={setSuccessModalOpen}>
+            {modalMessage}
+         </SuccessModal>
+         <ErrorModal isOpen={errorModalOpen} setIsOpen={setErrorModalOpen}>
+            {modalMessage}
+         </ErrorModal>
+
          <div className="admin-reports-item__header">
             <div className="admin-reports-item__names">
                <p><span>From:</span> {reporter_user_login}</p>
@@ -83,7 +98,7 @@ const AdminReportsItem = ({ reporter_user_login, reported_user_login, account_na
          </div>
          <div className="admin-reports-item__footer">
             <div className="admin-reports-item__comment">
-               <span>Текст коментария:</span>
+               <span>Текст комментария:</span>
                <p>{comment_text}</p>
             </div>
             <div>

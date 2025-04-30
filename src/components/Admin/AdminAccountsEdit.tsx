@@ -40,6 +40,14 @@ const AdminAccountsEdit = () => {
       setIsSuccessModalOpen(true);
    };
 
+   const updateAccount = (updatedAccount: IAccount) => {
+      setAccounts(prevAccounts =>
+         prevAccounts && prevAccounts.map(acc =>
+            acc.id === updatedAccount.id ? updatedAccount : acc
+         )
+      );
+   };
+
    const getAccountsHandler = async () => {
       setError('')
       setSuccess('')
@@ -128,6 +136,7 @@ const AdminAccountsEdit = () => {
                   apiUrlAccUpdate={apiUrlAccUpdate}
                   setError={handleError}  // Передаем новую функцию обработки ошибок
                   setSuccess={handleSuccess}  // Передаем новую функцию обработки успешных действий
+                  updateAccount={updateAccount}
                />
             })}
          </div>

@@ -51,7 +51,7 @@ const TagsContent = () => {
                <p style={{ color: '#e36f6f', cursor: 'pointer' }}>
                   {result.items.map((tag, index) => (
                      tag.usage_count > 0 && <span key={index} onClick={() => { clickHandler(tag.id) }}>
-                        {tag.name_ru} <sup>{tag.usage_count}</sup>
+                        <span>{tag.name_ru} <sup>{tag.usage_count}</sup> , </span>
                      </span>
                   ))}
                </p>

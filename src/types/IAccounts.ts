@@ -71,7 +71,7 @@ export interface IAccountAll {
 export interface IAccount {
    id: number;
    name: string;
-   date_of_create: Date;
+   date_of_create: Date | null;
    date_of_birth?: string | null; // может быть null или строкой
    identificator?: string | null; // может быть null или строкой
    photo: {

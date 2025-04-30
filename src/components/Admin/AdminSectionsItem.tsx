@@ -2,12 +2,18 @@ import { useState } from "react"
 import Layout from "../UX/Layout"
 import { IAdminSectionsItem, ISection } from "../../types/Admin"
 import TextEditor from "../UX/TextEditor"
+import SuccessModal from "../UX/modals/SuccessModal"
+import ErrorModal from "../UX/modals/ErrorModal"
 
 const AdminSectionsItem = ({ setSections, id }: IAdminSectionsItem) => {
    const [layout, setLayout] = useState<number>(0)
    const [message, setMessage] = useState<string>("");
    const [dropdownLayouts, setDropdownLayouts] = useState<boolean>(false);
    const [files, setFiles] = useState<File[]>([])
+   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
+   const [successMessage, setSuccessMessage] = useState<string>('');
+   const [errorMessage, setErrorMessage] = useState<string>('');
 
    const layoutNames: string[] = ['Текст | Изображение', 'Изображение | Текст', 'Текст', 'Текст | 2 Изображения', '2 Изображения | Текст', 'Изображение | Изображение', 'Изображение | 2 Изображения', '2 Изображения | Изображение', '3 Изображения']
 
@@ -21,20 +27,27 @@ const AdminSectionsItem = ({ setSections, id }: IAdminSectionsItem) => {
                item.id === id ? { ...item, files: [...item.files, ...newFiles] } : item
             )
          );
+
+         setSuccessMessage("Файлы успешно добавлены");
+         setIsSuccessModalOpen(true);
       }
    };
 
    const setMessageHandler = (text: string) => {
-      const newValue = text.length > 5000 ? message : text;
-      setMessage(newValue);
+      if (text.length > 5000) {
+         setErrorMessage("Текст не может быть длиннее 5000 символов");
+         setIsErrorModalOpen(true);
+         return;
+      }
+
+      setMessage(text);
 
       setSections((prev: ISection[]) =>
          prev.map((item) =>
-            item.id === id ? { ...item, text: newValue } : item
+            item.id === id ? { ...item, text: text } : item
          )
       );
    };
-
 
    const setLayoutHandler = (layoutNum: number) => {
       setLayout(layoutNum);
@@ -45,6 +58,9 @@ const AdminSectionsItem = ({ setSections, id }: IAdminSectionsItem) => {
             item.id === id ? { ...item, layout: layoutNum } : item
          )
       );
+
+      setSuccessMessage("Макет успешно изменен");
+      setIsSuccessModalOpen(true);
    };
 
    const removeHandler = () => {
@@ -54,7 +70,6 @@ const AdminSectionsItem = ({ setSections, id }: IAdminSectionsItem) => {
    const generateFileURLs = (files: File[]): string[] => {
       return files.map((file) => URL.createObjectURL(file));
    };
-
 
    return (
       <div className="admin-section-editor">
@@ -110,6 +125,14 @@ const AdminSectionsItem = ({ setSections, id }: IAdminSectionsItem) => {
                <Layout layoutId={layout} text={message} urls={generateFileURLs(files)} />
             </div>
          </div>
+
+         <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}>
+            {successMessage}
+         </SuccessModal>
+
+         <ErrorModal isOpen={isErrorModalOpen} setIsOpen={setIsErrorModalOpen}>
+            {errorMessage}
+         </ErrorModal>
       </div>
    )
 }

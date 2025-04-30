@@ -4,30 +4,31 @@ import { useSearchParams } from "react-router-dom";
 import { IAdminUsersState } from "../../../types/Admin";
 import Pagination from "../../UX/Pagination";
 import AdminUsersContentItem from "./AdminUsersContentItem";
+import ErrorModal from "../../UX/modals/ErrorModal";
 
 const AdminUsersContentItems = ({ users, setUsers, setUsersSelected }: IAdminUsersState) => {
-   const [error, setError] = useState<string>('');
+   // Заменяем текстовое сообщение ошибки на модальное окно
+   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
+   const [errorMessage, setErrorMessage] = useState<string>('');
+
    const [totalPages, setTotalPages] = useState<number>(1);
    const [searchParams] = useSearchParams();
    const page = Number(searchParams.get("page")) || 1;
    const search = searchParams.get("login") || '';
 
    const getUsersHandler = async () => {
-      setError('')
-
       let apiUrlAccouts = `http://167.86.84.197:5000/users?page=${page}`;
       if (search) {
          apiUrlAccouts += `&login=${search}`
       }
-
       try {
          const result = await axios.get(`${apiUrlAccouts}`)
-
          setTotalPages(result.data.totalPages || 1);
-
          setUsers(result.data.users)
       } catch (error) {
-         setError('Ошибка при получении аккаунта, попробуйте ещё раз!')
+         // Показываем модальное окно с ошибкой вместо текстового сообщения
+         setErrorMessage('Ошибка при получении аккаунта, попробуйте ещё раз!');
+         setIsErrorModalOpen(true);
       }
    }
 
@@ -37,7 +38,11 @@ const AdminUsersContentItems = ({ users, setUsers, setUsersSelected }: IAdminUse
 
    return (
       <div>
-         {error && <p style={{ color: 'red' }}>{error}</p>}
+         {/* Подключаем модальное окно с ошибкой */}
+         <ErrorModal isOpen={isErrorModalOpen} setIsOpen={setIsErrorModalOpen}>
+            {errorMessage}
+         </ErrorModal>
+
          {users && users.map(item => (
             <AdminUsersContentItem key={item.id} user={{ ...item }} setUsersSelected={setUsersSelected} />
          ))}

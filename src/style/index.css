@@ -2716,6 +2716,11 @@
                 display: -webkit-box;
                 display: flex;
                 display: -ms-flexbox;
+                z-index: 999;
+                
+            }
+            #successModal, #errorModal {
+                z-index: 1000;
             }
     
             /* Содержимое формы */

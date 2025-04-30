@@ -4,13 +4,17 @@ import { ISection } from "../../../types/Admin"
 import Title from "../../UX/Title"
 import AdminSectionsItem from "../AdminSectionsItem"
 import IUser from "../../../types/IUser"
+import SuccessModal from "../../UX/modals/SuccessModal"
+import ErrorModal from "../../UX/modals/ErrorModal"
 
 const AdminSectionsContent = () => {
    const [sections, setSections] = useState<ISection[]>([])
    const [page, setPage] = useState<string>('')
    const [dropdownPage, setDropdownPage] = useState<boolean>(false);
-   const [error, setError] = useState<string>('')
-   const [success, setSuccess] = useState<string>('')
+   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
+   const [successMessage, setSuccessMessage] = useState<string>('');
+   const [errorMessage, setErrorMessage] = useState<string>('');
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
 
@@ -26,14 +30,12 @@ const AdminSectionsContent = () => {
 
    const savePageHandler = async () => {
       if (!page) {
-         setError("Выберите страницу!");
+         setErrorMessage("Выберите страницу!");
+         setIsErrorModalOpen(true);
          return;
       }
 
       try {
-         setError("");
-         setSuccess("");
-
          const formData = new FormData();
          formData.append("page_name", page);
 
@@ -57,23 +59,23 @@ const AdminSectionsContent = () => {
             },
          });
 
-         setSuccess("Секции сохранены!");
+         setSuccessMessage("Секции сохранены!");
+         setIsSuccessModalOpen(true);
       } catch (error) {
-         setError("Ошибка при сохранении секций");
+         setErrorMessage("Ошибка при сохранении секций");
+         setIsErrorModalOpen(true);
          console.error(error);
       }
    };
 
    if (user?.role != 'admin' && user?.role != 'moder') {
-      return
+      return null;
    }
 
    return (
       <div className="admin-section">
          <Title classes='pt'>Конструктор</Title>
          <div className="admin-section__content">
-            {error && <p>{error}</p>}
-            {success && <p>{success}</p>}
             <div className={`admin-section-dropdown ${dropdownPage && 'active' || ''}`}>
                <button className="admin-section-dropdown__button btn" onClick={() => { setDropdownPage(prev => !prev) }}>
                   <span>{page ? page : 'Страница'}</span> <svg width="15" height="10" viewBox="0 0 28 15" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -120,6 +122,14 @@ const AdminSectionsContent = () => {
                <button className="btn btn-info" onClick={() => { savePageHandler() }}>Сохранить страницу</button>
             </div>
          </div>
+
+         <SuccessModal isOpen={isSuccessModalOpen} setIsOpen={setIsSuccessModalOpen}>
+            {successMessage}
+         </SuccessModal>
+
+         <ErrorModal isOpen={isErrorModalOpen} setIsOpen={setIsErrorModalOpen}>
+            {errorMessage}
+         </ErrorModal>
       </div>
    )
 }
