@@ -12,6 +12,7 @@ import { useSearchParams } from "react-router-dom"
 import SendMessageModal from "../../UX/modals/SendMessageModal"
 import { format, startOfDay } from 'date-fns'
 import ErrorModal from "../../UX/modals/ErrorModal";
+import SuccessModal from "../../UX/modals/SuccessModal";
 
 const AdminOrdersContent = () => {
    const storedUser = localStorage.getItem('user');
@@ -30,14 +31,27 @@ const AdminOrdersContent = () => {
    const [isOpenSend, setIsOpenSend] = useState<boolean>(false);
    const [responseLogin, setResponseLogin] = useState<string>('');
 
-   // Состояние для модальных окон
+   // Состояния для модальных окон
    const [isErrorOpen, setIsErrorOpen] = useState<boolean>(false);
    const [errorMessage, setErrorMessage] = useState<string>('');
+   const [isSuccessOpen, setIsSuccessOpen] = useState<boolean>(false);
+   const [successMessage, setSuccessMessage] = useState<string>('');
 
    // Состояние для хранения всех дат заказов для подсветки
    const [highlightedDates, setHighlightedDates] = useState<Date[]>([]);
    // Состояние для отслеживания загрузки всех дат
    const [allDatesLoading, setAllDatesLoading] = useState<boolean>(false);
+
+   // Функции для обработки успешной отправки и ошибок в модальном окне SendMessage
+   const handleShowSuccess = (message: string) => {
+      setSuccessMessage(message);
+      setIsSuccessOpen(true);
+   };
+
+   const handleShowError = (message: string) => {
+      setErrorMessage(message);
+      setIsErrorOpen(true);
+   };
 
    const openSendMessageModal = (login: string) => {
       setResponseLogin(login);
@@ -88,8 +102,7 @@ const AdminOrdersContent = () => {
          }
       } catch (error) {
          console.error('Ошибка при получении дат заказов:', error);
-         setErrorMessage('Ошибка при получении дат заказов');
-         setIsErrorOpen(true);
+         handleShowError('Ошибка при получении дат заказов');
       } finally {
          setAllDatesLoading(false);
       }
@@ -211,7 +224,11 @@ const AdminOrdersContent = () => {
             <div className="loader__circle"></div>
          </div>}
 
-         {/* Модальное окно для ошибок */}
+         {/* Модальные окна для успеха и ошибок */}
+         <SuccessModal isOpen={isSuccessOpen} setIsOpen={setIsSuccessOpen}>
+            {successMessage}
+         </SuccessModal>
+
          <ErrorModal isOpen={isErrorOpen} setIsOpen={setIsErrorOpen}>
             {errorMessage}
          </ErrorModal>
@@ -274,6 +291,8 @@ const AdminOrdersContent = () => {
                setResponseLogin={setResponseLogin}
                isOpen={isOpenSend}
                setIsOpen={setIsOpenSend}
+               showSuccess={handleShowSuccess}
+               showError={handleShowError}
             >
                <div style={{ display: 'none' }}>Невидимый элемент</div>
             </SendMessageModal>
