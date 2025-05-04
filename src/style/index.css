@@ -373,6 +373,7 @@
     
     .sidebar {
         width: 20.8%;
+        padding: 5px 0 20px 0;
     }
     .sidebar-user__item {
         display: -webkit-box;
@@ -2789,4 +2790,197 @@
                 text-decoration: underline;
             }
 
+    /* Стили для формы входа админ-панели */
+.admin-login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+  }
+  
+  .admin-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .admin-login-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .admin-login-form label {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .admin-login-form input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .admin-login-form .form-actions {
+    margin: 0px;
+  }
+  
+  .error-message {
+    color: #e67c73;
+    background-color: #ffebeb;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #e67c73;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  /* Для разных типов уведомлений */
+  .success-message {
+    color: #00a32a;
+    background-color: #edfaef;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #79c0ad;
+    margin-bottom: 20px;
+  }
+  
+  .warning-message {
+    color: #dba617;
+    background-color: #fcf9e8;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #dba617;
+    margin-bottom: 20px;
+  }
+  
+  /* Стили для шапки админ-панели */
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+
+    .status-badge {
+        padding: 15px 0;
+    }
+    .site-status__enable {
+        background: #e67c73;
+        transition: 0.3s all !important;
+        margin: 20px 0 0 0;
+        color: #fff;
+    }
+    .site-status__disable {
+        background: #79c0ad;
+        transition: 0.3s all !important;
+        margin: 20px 0 0 0;
+        color: #fff;
+    }
+    .site-status__enable:hover {
+        background: #e36f6f;
+        color: #fff;
+    }
+    .site-status__disable:hover {
+        background: #5B9A8B;
+        color: #fff;
+    }
+  .admin-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .btn-logout {
+    padding: 6px 12px;
+    background-color: #e67c73;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .btn-logout:hover {
+    background-color: #e36f6f;
+  }
+
+  .not-found-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    padding: 20px;
+  }
+  
+  .not-found-content {
+    text-align: center;
+    max-width: 600px;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .not-found-content h1 {
+    font-size: 6rem;
+    margin: 0;
+    color: #e36f6f;
+    line-height: 1;
+  }
+  
+  .not-found-content h2 {
+    font-size: 2rem;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .not-found-content p {
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+  }
+  
+  .not-found-actions {
+    margin-top: 30px;
+  }
+  
+  .not-found-actions .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    transition: 0.3s all !important;
+  }
+  
+  @media (max-width: 480px) {
+    .not-found-content h1 {
+      font-size: 4rem;
+    }
     
+    .not-found-content h2 {
+      font-size: 1.5rem;
+    }
+    
+    .not-found-content {
+      padding: 20px;
+    }
+  }
+
+  #root {
+    min-height: 100vh;
+    
+    display: flex;
+    flex-direction: column;
+  }
+  .footer {
+    margin: auto 0 0 0;
+  }
+  #root > .layout-container{
+    flex: 1;
+    width: 100%;
+  }

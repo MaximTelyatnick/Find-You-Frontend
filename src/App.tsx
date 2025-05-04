@@ -26,6 +26,9 @@ import AdminSections from "./pages/AdminSections";
 import { useEffect } from "react";
 import { startSessionChecker, stopSessionChecker } from "./utils/userSessionChecker";
 import UserUpdateListener from "./components/Admin/UserUpdateListener";
+import NotFound from "./pages/NotFound";
+import AdminSiteSwitchPage from "./pages/AdminSiteSwitchPage";
+import SiteStatusRouter from "./components/UX/SiteStatusRouter";
 
 
 const App = () => {
@@ -60,29 +63,158 @@ const App = () => {
       <BrowserRouter>
          <UserUpdateListener />
          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="access" element={<Access />} />
-            <Route path="cities" element={<Cities />} />
-            <Route path="tags" element={<Tags />} />
-            <Route path="order" element={<Order />} />
-            <Route path="delete" element={<Delete />} />
-            <Route path="mirrors" element={<Mirrors />} />
-            <Route path="about" element={<About />} />
-            <Route path="referral" element={<Referral />} />
-            <Route path="refusual" element={<Refusual />} />
-            <Route path="bypassing" element={<Bypassing />} />
-            <Route path="recovery" element={<Recovery />} />
-            <Route path="registration" element={<Registration />} />
-            <Route path="favorites" element={<Favorites />} />
-            <Route path="comments" element={<Comments />} />
-            <Route path="messages" element={<Messages />} />
-            <Route path="admin" element={<Admin />} />
-            <Route path="admin-orders" element={<AdminOrders />} />
-            <Route path="admin-reports" element={<AdminReports />} />
-            <Route path="admin-users" element={<AdminUsers />} />
-            <Route path="admin-accounts" element={<AdminAccounts />} />
-            <Route path="admin-sections" element={<AdminSections />} />
-            <Route path="/:accountId" element={<AccountPage />} />
+            {/* Страница 404 всегда доступна */}
+            <Route path="/404error" element={<NotFound />} />
+
+            {/* Административные маршруты доступны для админов даже при выключенном сайте */}
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin-orders" element={<AdminOrders />} />
+            <Route path="/admin-reports" element={<AdminReports />} />
+            <Route path="/admin-users" element={<AdminUsers />} />
+            <Route path="/admin-accounts" element={<AdminAccounts />} />
+            <Route path="/admin-sections" element={<AdminSections />} />
+            <Route path="/admin-site-switch" element={<AdminSiteSwitchPage />} />
+
+            {/* Публичные маршруты, которые будут перенаправлены на 404 при выключенном сайте */}
+            <Route
+               path="/"
+               element={
+                  <SiteStatusRouter>
+                     <Home />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/access"
+               element={
+                  <SiteStatusRouter>
+                     <Access />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/cities"
+               element={
+                  <SiteStatusRouter>
+                     <Cities />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/tags"
+               element={
+                  <SiteStatusRouter>
+                     <Tags />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/order"
+               element={
+                  <SiteStatusRouter>
+                     <Order />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/delete"
+               element={
+                  <SiteStatusRouter>
+                     <Delete />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/mirrors"
+               element={
+                  <SiteStatusRouter>
+                     <Mirrors />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/about"
+               element={
+                  <SiteStatusRouter>
+                     <About />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/referral"
+               element={
+                  <SiteStatusRouter>
+                     <Referral />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/refusual"
+               element={
+                  <SiteStatusRouter>
+                     <Refusual />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/bypassing"
+               element={
+                  <SiteStatusRouter>
+                     <Bypassing />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/recovery"
+               element={
+                  <SiteStatusRouter>
+                     <Recovery />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/registration"
+               element={
+                  <SiteStatusRouter>
+                     <Registration />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/favorites"
+               element={
+                  <SiteStatusRouter>
+                     <Favorites />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/comments"
+               element={
+                  <SiteStatusRouter>
+                     <Comments />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/messages"
+               element={
+                  <SiteStatusRouter>
+                     <Messages />
+                  </SiteStatusRouter>
+               }
+            />
+            <Route
+               path="/:accountId"
+               element={
+                  <SiteStatusRouter>
+                     <AccountPage />
+                  </SiteStatusRouter>
+               }
+            />
+
+            {/* Перенаправление всех несуществующих маршрутов на страницу 404 */}
+            <Route path="*" element={<NotFound />} />
          </Routes>
       </BrowserRouter>
    );
