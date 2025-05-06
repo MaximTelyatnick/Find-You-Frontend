@@ -11,7 +11,7 @@ const CitiesContent = () => {
       error: false,
       loading: false,
    });
-
+   //http://localhost:5000
    useEffect(() => {
       fetchData('get', apiUrl, setResult)
    }, []);
