@@ -29,7 +29,7 @@ const AdminReportsContent = () => {
          await fetchData('get', url, setResult)
 
          // Показываем модальное окно, если нет жалоб
-         if (!result.items || result.items.length === 0) {
+         if (result.items && result.items.length === 0) {
             setModalMessage('Жалоб нет')
             setSuccessModalOpen(true)
          }
