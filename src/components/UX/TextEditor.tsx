@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
-import { ITextEditorProps, SelectionPosition, SelectionRange, StyleTag } from '../../types/TextEditor';
+import { ITextEditorProps, SelectionPosition, StyleTag } from '../../types/TextEditor';
 import DOMPurify from 'dompurify';
 
 const TextEditor = ({ content, setContent }: ITextEditorProps) => {
@@ -87,9 +87,6 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
          setLinkInputVisible(true);
          return;
       }
-
-      let command = '';
-      let value = null;
 
       switch (tag) {
          case 'h1':

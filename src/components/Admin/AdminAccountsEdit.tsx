@@ -8,12 +8,12 @@ import ErrorModal from "../UX/modals/ErrorModal";
 import SuccessModal from "../UX/modals/SuccessModal";
 
 const AdminAccountsEdit = () => {
-   const apiUrlGet = 'http://localhost:5000/account'
-   const apiUrlDeleteAccounts = 'http://localhost:5000/delete-accounts'
-   const apiUrlUpdate = 'http://localhost:5000/update-photo'
-   const apiUrlDateUpdate = 'http://localhost:5000/update-account-date'
-   const apiUrlAccUpdate = 'http://localhost:5000/update-account'
-   const apiUrl = 'http://localhost:5000'
+   const apiUrlGet = 'http://167.86.84.197:5000/account'
+   const apiUrlDeleteAccounts = 'http://167.86.84.197:5000/delete-accounts'
+   const apiUrlUpdate = 'http://167.86.84.197:5000/update-photo'
+   const apiUrlDateUpdate = 'http://167.86.84.197:5000/update-account-date'
+   const apiUrlAccUpdate = 'http://167.86.84.197:5000/update-account'
+   const apiUrl = 'http://167.86.84.197:5000'
    const [accounts, setAccounts] = useState<IAccount[] | null>(null)
    const [accountsSelected, setAccountsSelected] = useState<number[]>([])
    const [success, setSuccess] = useState<string>('');
@@ -52,7 +52,7 @@ const AdminAccountsEdit = () => {
       setError('')
       setSuccess('')
 
-      let apiUrlAccouts = `http://localhost:5000/accounts?page=${page}&limit=20&admin_mode=true`;
+      let apiUrlAccouts = `http://167.86.84.197:5000/accounts?page=${page}&limit=20&admin_mode=true`;
       if (searchInput) apiUrlAccouts += `&search=${searchInput}`;
 
       try {
