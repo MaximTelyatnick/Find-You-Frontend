@@ -9,7 +9,7 @@ const HomeContent = ({ items, loading, error }: IAccountsState) => {
             <div className="loader__circle"></div>
          </div>}
          {!items?.length && !loading && <div><p>По запросу ничего не найдено. Попробуйте другой город, тег или ключевое слово. </p></div>}
-         {!loading && error && <div><p>Что-то пошло не так, попробуйте ещё раз</p></div>}
+         {error && <div><p>Что-то пошло не так, попробуйте ещё раз</p></div>}
          {items && items.filter(item => {
             if (!item.date_of_create) return false
             if (new Date(item.date_of_create) > new Date()) return false

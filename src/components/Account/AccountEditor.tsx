@@ -1,139 +1,127 @@
 import { useEffect, useState, useRef } from "react";
-import Title from "../UX/Title";
-import { AccountReplyProps, IAccountState, IComment } from "../../types/IAccounts";
+import Title from "../UX/Title"; // Убедитесь, что путь правильный
+import { IAccountReplyComment, IAccountState, IComment } from "../../types/IAccounts"; // Убедитесь, что типы корректны
 import IUser from "../../types/IUser";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import DOMPurify from 'dompurify';
+import { useNavigate } from "react-router-dom";
 
-const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, setResult }: AccountReplyProps) => {
-   const apiUrlAdd: string = 'http://167.86.84.197:5000/add-comment';
-   const apiUrlUpdate: string = 'http://167.86.84.197:5000/update-comment';
-   const [error, setError] = useState<boolean>(false);
+export interface AccountEditorProps { // Переименовал для ясности, так как это общий редактор
+   replyComment?: IAccountReplyComment | null; // Allow null
+   cancelAction: () => void;
+   editComment?: IAccountReplyComment | null; // Allow null
+   accountId: number;
+   setResult: Function;
+}
+
+const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, setResult }: AccountEditorProps) => {
+   const apiUrlAdd: string = 'http://localhost:5000/add-comment';
+   const apiUrlUpdate: string = 'http://localhost:5000/update-comment';
+   const [error, setError] = useState<string | null>(null); // Сообщение об ошибке может быть строкой
    const [success, setSuccess] = useState<boolean>(false);
    const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
    const [showColorPicker, setShowColorPicker] = useState<boolean>(false);
    const [activeColor, setActiveColor] = useState<string>("text-black");
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
-   const navigate = useNavigate();
+   const navigate = useNavigate()
+
    const emojiPickerRef = useRef<HTMLDivElement>(null);
    const colorPickerRef = useRef<HTMLDivElement>(null);
    const emojiButtonRef = useRef<HTMLButtonElement>(null);
    const colorButtonRef = useRef<HTMLButtonElement>(null);
    const editorRef = useRef<HTMLDivElement>(null);
 
-   // Emoji list
-   const emojis = [
+   const emojis = [ /* ... ваш список эмодзи ... */
       '😀', '😃', '😄', '😁', '😆', '😅', '🤣', '😂', '🙂', '🙃',
       '😉', '😊', '😇', '🥰', '😍', '🤩', '😘', '😗', '😚', '😙',
       '😋', '😛', '😜', '😝', '🤑', '🤗', '🤭', '🤫', '🤔', '🤐',
       '🤨', '😐', '😑', '😶', '😏', '😒', '🙄', '😬', '🤥', '😌',
       '😔', '😪', '🤤', '😴', '😷', '🤒', '🤕', '🤢', '🤮', '🤧'
    ];
-
-   // Color options with corresponding class names
-   const colorOptions = [
-      { value: '#000000', class: 'text-black' },
-      { value: '#ff0000', class: 'text-red' },
-      { value: '#0000ff', class: 'text-blue' },
-      { value: '#008000', class: 'text-green' },
-      { value: '#800080', class: 'text-purple' },
-      { value: '#ffa500', class: 'text-orange' },
-      { value: '#a52a2a', class: 'text-brown' },
-      { value: '#808080', class: 'text-gray' },
-      { value: '#800000', class: 'text-maroon' },
-      { value: '#008080', class: 'text-teal' }
+   const colorOptions = [ /* ... ваши опции цвета ... */
+      { value: '#000000', class: 'text-black' }, { value: '#ff0000', class: 'text-red' },
+      { value: '#0000ff', class: 'text-blue' }, { value: '#008000', class: 'text-green' },
+      { value: '#800080', class: 'text-purple' }, { value: '#ffa500', class: 'text-orange' },
+      { value: '#a52a2a', class: 'text-brown' }, { value: '#808080', class: 'text-gray' },
+      { value: '#800000', class: 'text-maroon' }, { value: '#008080', class: 'text-teal' }
    ];
 
-   // Исправление: обновляем и state, и contentEditable когда меняется editComment
-   useEffect(() => {
-      if (editComment) {
-         // Устанавливаем содержимое редактора при изменении комментария
-         if (editorRef.current) {
-            editorRef.current.innerHTML = sanitizeComment(editComment.text);
-         }
-      }
-   }, [editComment]);
-
-   // Начальная инициализация редактора
    useEffect(() => {
       if (editorRef.current) {
-         // Проверяем, есть ли начальное содержимое
-         const initialContent = replyComment ? replyComment.text :
-            editComment ? editComment.text :
-               "Комментарий...";
+         let initialContent = ""; // По умолчанию пусто для ответа/редактирования
+         if (editComment) {
+            initialContent = editComment.text;
+         } else if (replyComment) {
+            // Для ответа начинаем с пустого поля. Если нужна цитата, добавьте ее сюда.
+            // Например: initialContent = `<blockquote>${replyComment.text}</blockquote><p></p>`;
+            initialContent = "";
+         } else {
+            // Это для нового комментария верхнего уровня (если этот редактор используется и так)
+            initialContent = editorRef.current.innerHTML === "" || editorRef.current.innerHTML === "<p><br></p>" ? "Комментарий..." : editorRef.current.innerHTML;
+         }
          editorRef.current.innerHTML = sanitizeComment(initialContent);
 
-         // Если это новый комментарий, а не редактирование
+         // Логика плейсхолдера для нового комментария (не для ответа/редактирования)
          if (!editComment && !replyComment) {
-            // Добавляем обработчик фокуса для очистки placeholder
             const handleFocus = () => {
                if (editorRef.current && editorRef.current.innerHTML === "Комментарий...") {
                   editorRef.current.innerHTML = "";
                }
             };
-
+            const handleBlur = () => {
+               if (editorRef.current && (editorRef.current.innerHTML === "" || editorRef.current.innerHTML === "<p><br></p>")) {
+                  editorRef.current.innerHTML = "Комментарий...";
+               }
+            };
             editorRef.current.addEventListener('focus', handleFocus);
+            editorRef.current.addEventListener('blur', handleBlur);
             return () => {
                if (editorRef.current) {
                   editorRef.current.removeEventListener('focus', handleFocus);
+                  editorRef.current.removeEventListener('blur', handleBlur);
                }
             };
+         } else if (editorRef.current && editorRef.current.innerHTML === "Комментарий...") {
+            editorRef.current.innerHTML = ""; // Очистить плейсхолдер, если это редактирование/ответ
          }
       }
-   }, []);
+   }, [editComment, replyComment]); // Переинициализация при смене режима
 
-   // Close emoji and color pickers when clicking outside
    useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
-         if (emojiPickerRef.current &&
-            !emojiPickerRef.current.contains(event.target as Node) &&
-            emojiButtonRef.current &&
-            !emojiButtonRef.current.contains(event.target as Node)) {
+         if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node) && emojiButtonRef.current && !emojiButtonRef.current.contains(event.target as Node)) {
             setShowEmojiPicker(false);
          }
-         if (colorPickerRef.current &&
-            !colorPickerRef.current.contains(event.target as Node) &&
-            colorButtonRef.current &&
-            !colorButtonRef.current.contains(event.target as Node)) {
+         if (colorPickerRef.current && !colorPickerRef.current.contains(event.target as Node) && colorButtonRef.current && !colorButtonRef.current.contains(event.target as Node)) {
             setShowColorPicker(false);
          }
       };
-
       document.addEventListener('mousedown', handleClickOutside);
       return () => {
          document.removeEventListener('mousedown', handleClickOutside);
       };
    }, []);
 
-   const addCommentRecursively = (comments: IComment[], replyCommentId: number, newComment: IComment): IComment[] => {
+   const addCommentRecursively = (comments: IComment[], replyToCommentId: number, newComment: IComment): IComment[] => {
       return comments.map(comment => {
-         if (comment.id === replyCommentId) {
-            return {
-               ...comment,
-               children: [...comment.children, newComment]
-            };
+         if (comment.id === replyToCommentId) {
+            return { ...comment, children: [...comment.children, newComment] };
          }
-
          if (comment.children && comment.children.length > 0) {
-            return {
-               ...comment,
-               children: addCommentRecursively(comment.children, replyCommentId, newComment)
-            };
+            return { ...comment, children: addCommentRecursively(comment.children, replyToCommentId, newComment) };
          }
-
          return comment;
       });
    };
 
-   const updateCommentText = (comments: IComment[], commentId: number | undefined, newText: string): IComment[] => {
+   const updateCommentText = (comments: IComment[], commentIdToUpdate: number | undefined, newText: string): IComment[] => {
       return comments.map(comment => {
-         if (comment.id === commentId) {
+         if (comment.id === commentIdToUpdate) {
             return { ...comment, text: newText };
          }
          if (comment.children && comment.children.length > 0) {
-            return { ...comment, children: updateCommentText(comment.children, commentId, newText) };
+            return { ...comment, children: updateCommentText(comment.children, commentIdToUpdate, newText) };
          }
          return comment;
       });
@@ -142,7 +130,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
    const sanitizeComment = (text: string) => {
       return DOMPurify.sanitize(text, {
          ALLOWED_TAGS: ['p', 'b', 'i', 'u', 's', 'strong', 'em', 'br', 'h1', 'h2', 'h3', 'blockquote', 'pre', 'code', 'ol', 'ul', 'li', 'span'],
-         ALLOWED_ATTR: ['class'], // Changed from 'style' to 'class'
+         ALLOWED_ATTR: ['class'],
          ADD_ATTR: ['target'],
          FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
          FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover', 'style'],
@@ -150,276 +138,211 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
       });
    };
 
+   // Исправления для функции handleSubmit в AccountEditor.tsx
+
    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      setError(false);
+      setError(null);
+      setSuccess(false);
 
-      // Получаем HTML из contentEditable и сохраняем в комментарий
       const editorContent = editorRef.current?.innerHTML || '';
+      if (!editorContent.trim() || editorContent === "Комментарий..." || editorContent === "<p><br></p>") {
+         setError("Комментарий не может быть пустым.");
+         setTimeout(() => setError(null), 3000);
+         return;
+      }
       const sanitizedComment = sanitizeComment(editorContent);
 
       try {
-         if (replyComment || !editComment) {
-            const response = await axios.post(apiUrlAdd, {
-               account_id: accountId,
-               user_id: user?.id,
-               text: sanitizedComment,
-               parent_id: replyComment?.parent_id,
-            });
-
-            const commentToAdd: IComment = {
-               ...response.data.comment,
-               children: [],
-               author_nickname: user?.login,
+         if (editComment) { // Редактирование
+            // Проверка наличия parent_id и правильное его использование
+            const commentIdToUpdate = editComment.parent_id;
+            if (!commentIdToUpdate) {
+               setError("Ошибка: ID комментария не определен");
+               setTimeout(() => setError(null), 3000);
+               return;
             }
 
-            setResult((prev: IAccountState) => {
-               if (prev.items) {
-                  if (replyComment?.parent_id) {
-                     const updatedComments: IComment[] = addCommentRecursively(prev.items.comments, replyComment.parent_id, commentToAdd);
+            // Журналирование отправляемых данных для отладки
+            console.log("Updating comment with data:", { comment_id: commentIdToUpdate, text: sanitizedComment });
 
-                     return {
-                        ...prev,
-                        items: {
-                           ...prev.items,
-                           comments: updatedComments,
-                        }
-                     };
-                  } else {
-                     if (!prev.items.comments.includes(commentToAdd)) {
-                        return {
-                           ...prev,
-                           items: {
-                              ...prev.items,
-                              comments: [...prev.items.comments, commentToAdd],
-                           }
-                        };
-                     }
-                  }
-               }
-               return prev;
-            });
-            cancelAction('reply');
-         } else {
-            // Исправленный запрос на обновление комментария
             await axios.put(apiUrlUpdate, {
-               comment_id: editComment.parent_id, // Используем id комментария
+               comment_id: commentIdToUpdate, // Используем как ID комментария
                text: sanitizedComment,
             });
 
             setResult((prev: IAccountState) => {
                if (prev.items) {
-                  const updatedComments = updateCommentText(prev.items.comments, editComment.parent_id, sanitizedComment);
-                  return {
-                     ...prev,
-                     items: {
-                        ...prev.items,
-                        comments: updatedComments,
-                     }
-                  };
+                  const updatedComments = updateCommentText(prev.items.comments, commentIdToUpdate, sanitizedComment);
+                  return { ...prev, items: { ...prev.items, comments: updatedComments } };
                }
                return prev;
             });
+            cancelAction(); // Закрыть редактор
+         } else { // Добавление нового или ответ
+            // Проверки наличия необходимых данных
+            if (!accountId) {
+               setError("Ошибка: ID аккаунта не определен");
+               setTimeout(() => setError(null), 3000);
+               return;
+            }
 
-            cancelAction('edit');
+            if (!user?.id) {
+               setError("Ошибка: Пользователь не авторизован");
+               setTimeout(() => setError(null), 3000);
+               return;
+            }
+
+            // Журналирование отправляемых данных для отладки
+            const requestData = {
+               account_id: accountId,
+               user_id: user.id,
+               text: sanitizedComment,
+               parent_id: replyComment ? replyComment.parent_id : null,
+            };
+            console.log("Adding comment with data:", requestData);
+
+            await axios.post(apiUrlAdd, requestData);
+
+            cancelAction(); // Закрыть редактор
          }
-
          setSuccess(true);
-         navigate(0);
-      } catch (error) {
-         setError(true);
+         if (editorRef.current) editorRef.current.innerHTML = ""; // Очистить поле после успеха
+         navigate(0)
+         setTimeout(() => setSuccess(false), 3000);
+      } catch (err: any) {
+         console.error("API Error:", err.response || err);
+         // Более подробное сообщение об ошибке с кодом ответа, если доступно
+         const errorMessage = err.response?.status
+            ? `Ошибка ${err.response.status}: ${err.response.data?.message || 'при обработке запроса'}`
+            : "Ошибка соединения с сервером";
+         setError(errorMessage);
+         setTimeout(() => setError(null), 5000);
          setSuccess(false);
       }
    };
 
-   // Получение текущего выделения
-   const getSelection = (): { selectedText: string, range: Range } | null => {
+   const getSelection = (): { selectedText: string, range: Range } | null => { /* ... ваша функция ... */
       const selection = document.getSelection();
       if (!selection || selection.rangeCount === 0) return null;
-
       const range = selection.getRangeAt(0);
       const selectedText = range.toString();
-
-      // Проверяем, что выделение находится внутри нашего редактора
       if (!editorRef.current?.contains(range.commonAncestorContainer)) return null;
-
       return { selectedText, range };
    };
-
-   // Применение форматирования к тексту
-   const handleFormat = (format: string) => {
+   const handleFormat = (format: string) => { /* ... ваша функция ... */
       if (!editorRef.current) return;
       editorRef.current.focus();
       document.execCommand(format, false);
    };
-
-   // Вставка смайлика
-   const insertEmoji = (emoji: string) => {
+   const insertEmoji = (emoji: string) => { /* ... ваша функция ... */
       if (!editorRef.current) return;
       editorRef.current.focus();
       document.execCommand('insertText', false, emoji);
       setShowEmojiPicker(false);
    };
-
-   // Установка цвета для печати и выделенного текста
-   const applyColor = (colorOption: { value: string, class: string }) => {
+   const applyColor = (colorOption: { value: string, class: string }) => { /* ... ваша функция ... */
       if (!editorRef.current) return;
       editorRef.current.focus();
-
-      // Установка активного цвета для последующего ввода
       setActiveColor(colorOption.class);
       setShowColorPicker(false);
-
-      // Применение цвета к выделенному тексту, если есть выделение
       const selection = getSelection();
       if (selection && selection.selectedText.length > 0) {
-         // Удаляем выделение
          document.execCommand('delete', false);
-
-         // Вставляем отформатированный текст
          const formattedText = `<span class="${colorOption.class}">${selection.selectedText}</span>`;
          document.execCommand('insertHTML', false, formattedText);
       }
    };
-
-   // ИСПРАВЛЕНИЕ: Обработчик ввода символов - с улучшенной поддержкой пробелов
-   const handleBeforeInput = (e: React.FormEvent<HTMLDivElement>) => {
-      // Получаем информацию о вводимом тексте
+   const handleBeforeInput = (e: React.FormEvent<HTMLDivElement>) => { /* ... ваша функция ... */
       const inputEvent = e.nativeEvent as InputEvent;
       const inputData = inputEvent.data;
-
-      // Если текущий цвет не черный (т.е. применяется активный цвет)
       if (activeColor !== 'text-black' && inputData !== null) {
          e.preventDefault();
-
-         // Специальная обработка для пробелов
          let formattedText;
          if (inputData === ' ') {
-            // Для пробела просто вставляем его внутри span-элемента текущего цвета
             formattedText = `<span class="${activeColor}">&nbsp;</span>`;
          } else {
             formattedText = `<span class="${activeColor}">${inputData}</span>`;
          }
-
-         // Вставляем отформатированный текст
          document.execCommand('insertHTML', false, formattedText);
       }
    };
 
+   let editorTitle = "Оставить комментарий";
+   let submitButtonText = "Добавить";
+
+   if (editComment) {
+      editorTitle = `Редактирование комментария`;
+      submitButtonText = "Сохранить";
+   } else if (replyComment && replyComment.author_nickname) {
+      editorTitle = `Ответ для ${replyComment.author_nickname}:`;
+      submitButtonText = "Ответить";
+   }
+
    return (
       <div>
-         <Title>Оставить комментарий</Title>
+         <Title>{editorTitle}</Title>
          <form onSubmit={handleSubmit}>
             <div className="comment-editor">
                <div className="editor-toolbar">
-                  <button type="button" onClick={() => handleFormat('bold')} className="toolbar-btn" title="Жирный">
-                     <span className="format-icon">B</span>
-                  </button>
-                  <button type="button" onClick={() => handleFormat('italic')} className="toolbar-btn" title="Курсив">
-                     <span className="format-icon">I</span>
-                  </button>
-                  <button type="button" onClick={() => handleFormat('underline')} className="toolbar-btn" title="Подчеркнутый">
-                     <span className="format-icon">U</span>
-                  </button>
-                  <button type="button" onClick={() => handleFormat('strikeThrough')} className="toolbar-btn" title="Зачеркнутый">
-                     <span className="format-icon">S</span>
-                  </button>
-
+                  <button type="button" onClick={() => handleFormat('bold')} className="toolbar-btn" title="Жирный"><span className="format-icon">B</span></button>
+                  <button type="button" onClick={() => handleFormat('italic')} className="toolbar-btn" title="Курсив"><span className="format-icon">I</span></button>
+                  <button type="button" onClick={() => handleFormat('underline')} className="toolbar-btn" title="Подчеркнутый"><span className="format-icon">U</span></button>
+                  <button type="button" onClick={() => handleFormat('strikeThrough')} className="toolbar-btn" title="Зачеркнутый"><span className="format-icon">S</span></button>
                   <div className="toolbar-divider"></div>
-
-                  {/* Emoji Picker Button */}
                   <div className="dropdown-container">
-                     <button
-                        type="button"
-                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                        className="toolbar-btn emoji-btn"
-                        title="Смайлики"
-                        ref={emojiButtonRef}
-                     >
-                        <span className="emoji-icon">😊</span>
-                     </button>
-
+                     <button type="button" onClick={() => setShowEmojiPicker(!showEmojiPicker)} className="toolbar-btn emoji-btn" title="Смайлики" ref={emojiButtonRef}><span className="emoji-icon">😊</span></button>
                      {showEmojiPicker && (
                         <div className="emoji-picker" ref={emojiPickerRef}>
                            {emojis.map((emoji, index) => (
-                              <button
-                                 key={index}
-                                 type="button"
-                                 onClick={() => insertEmoji(emoji)}
-                                 className="emoji-item"
-                              >
-                                 {emoji}
-                              </button>
+                              <button key={index} type="button" onClick={() => insertEmoji(emoji)} className="emoji-item">{emoji}</button>
                            ))}
                         </div>
                      )}
                   </div>
-
-                  {/* Color Picker Button */}
                   <div className="dropdown-container">
-                     <button
-                        type="button"
-                        onClick={() => setShowColorPicker(!showColorPicker)}
-                        className={`toolbar-btn color-btn ${activeColor}`}
-                        title="Цвет текста"
-                        ref={colorButtonRef}
-                     >
-                        <span className="color-icon">A</span>
-                     </button>
-
+                     <button type="button" onClick={() => setShowColorPicker(!showColorPicker)} className={`toolbar-btn color-btn ${activeColor}`} title="Цвет текста" ref={colorButtonRef}><span className="color-icon">A</span></button>
                      {showColorPicker && (
                         <div className="color-picker" ref={colorPickerRef}>
                            {colorOptions.map((colorOption, index) => (
-                              <button
-                                 key={index}
-                                 type="button"
-                                 onClick={() => applyColor(colorOption)}
-                                 className={`color-item ${activeColor === colorOption.class ? 'active' : ''}`}
-                                 style={{ backgroundColor: colorOption.value }}
-                                 title={colorOption.value}
-                              />
+                              <button key={index} type="button" onClick={() => applyColor(colorOption)} className={`color-item ${activeColor === colorOption.class ? 'active' : ''}`} style={{ backgroundColor: colorOption.value }} title={colorOption.value} />
                            ))}
                         </div>
                      )}
                   </div>
                </div>
-
-               {/* Rich Text Editor с contentEditable вместо textarea */}
                <div
                   ref={editorRef}
                   contentEditable
                   className="rich-text-editor"
                   onBeforeInput={handleBeforeInput}
                   suppressContentEditableWarning={true}
+                  // Добавьте aria-label для доступности
+                  aria-label={editComment ? "Редактировать комментарий" : replyComment ? `Ответить ${replyComment.author_nickname}` : "Новый комментарий"}
                ></div>
-
-               {error && <div className="error-message">Произошла ошибка при отправке комментария.</div>}
-               {success && <div className="success-message">Комментарий успешно отправлен.</div>}
+               {error && <div className="error-message" style={{ color: 'red', marginTop: '5px' }}>{error}</div>}
+               {success && <div className="success-message" style={{ color: 'green', marginTop: '5px' }}>Комментарий успешно отправлен.</div>}
             </div>
-
             <div className="comment-editor__rules">
-               <div>
-                  <p className="text-muted small mt-2">
-                     Запрещено использовать ненормативную лексику, оскорбление других пользователей, активные ссылки и рекламу.
-                  </p>
-               </div>
-               <div className="action-buttons">
+               {(!editComment && !replyComment) && ( // Правила только для нового комментария верхнего уровня
+                  <div>
+                     <p className="text-muted small mt-2">
+                        Запрещено использовать ненормативную лексику, оскорбление других пользователей, активные ссылки и рекламу.
+                     </p>
+                  </div>
+               )}
+               <div className="action-buttons" style={{ marginTop: '10px' }}>
+                  {/* Кнопка "Отмена" всегда отображается, если это ответ или редактирование */}
                   {(replyComment || editComment) && (
-                     <button
-                        type="button"
-                        onClick={() => cancelAction(editComment ? 'edit' : 'reply')}
-                        className="btn btn-secondary mr-2"
-                     >
-                        Отмена
-                     </button>
+                     <button type="button" onClick={cancelAction} className="btn">Отмена</button>
                   )}
                   <button type="submit" className="btn btn-info">
-                     {editComment ? 'Сохранить' : 'Добавить'}
+                     {submitButtonText}
                   </button>
                </div>
             </div>
-
-            <style>{`
+         </form>
+         <style>{`
             .comment-editor {
                display: flex;
                flex-direction: column;
@@ -598,11 +521,7 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
                display: flex;
                gap: 10px;
             }
-            
-            .btn-secondary {
-               background-color: #6c757d;
-               color: white;
-            }
+         
             
             .mr-2 {
                margin-right: 10px;
@@ -632,7 +551,6 @@ const AccountEditor = ({ replyComment, cancelAction, editComment, accountId, set
             .text-maroon { color: #800000; }
             .text-teal { color: #008080; }
          `}</style>
-         </form>
       </div>
    );
 };

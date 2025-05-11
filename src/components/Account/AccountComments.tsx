@@ -2,7 +2,7 @@ import { AccountCommentsProps } from "../../types/IAccounts"
 import Title from "../UX/Title"
 import AccountCommenItem from "./AccountCommenItem";
 
-const AccountComments = ({ comments, onAction, setResult }: AccountCommentsProps) => {
+const AccountComments = ({ comments, onAction, setResult, accountId }: AccountCommentsProps) => {
    return (
       <div style={{ padding: "40px 0 0 0" }}>
          <Title>Комментарии</Title>
@@ -15,6 +15,7 @@ const AccountComments = ({ comments, onAction, setResult }: AccountCommentsProps
                   onAction={onAction}
                   key={item.id}
                   setResult={setResult}
+                  accountId={accountId}
                />
             )
          )}

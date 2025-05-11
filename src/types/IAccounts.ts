@@ -56,6 +56,7 @@ export interface ICommentProps extends IComment {
    margin?: boolean;
    onAction: Function,
    setResult: Function,
+   accountId: number
 }
 
 export interface IAccountAll {
@@ -115,10 +116,11 @@ export interface AccountCommentsProps {
    comments: IComment[] | null,
    onAction: Function,
    setResult: Function,
+   accountId: number
 }
 
 export interface IAccountReplyComment {
-   author_nickname: number;
+   author_nickname: string;
    text: string;
    parent_id?: number;
 }

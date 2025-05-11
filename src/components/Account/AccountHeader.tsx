@@ -10,9 +10,9 @@ import dayjs from "dayjs";
 const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
    const storedUser = localStorage.getItem('user');
    const user: IUser | null = storedUser ? JSON.parse(storedUser) : null;
-   const apiUrlCheck = `http://167.86.84.197:5000/favorites?users_id=${user?.id}`;
-   const apiUrlAdd = 'http://167.86.84.197:5000/add-favorite';
-   const apiUrlDelete = 'http://167.86.84.197:5000/delete-favorite';
+   const apiUrlCheck = `http://localhost:5000/favorites?users_id=${user?.id}`;
+   const apiUrlAdd = 'http://localhost:5000/add-favorite';
+   const apiUrlDelete = 'http://localhost:5000/delete-favorite';
    const [isFav, setIsFav] = useState<boolean>(false);
    const [seccess, setSeccess] = useState<string>('');
    const [error, setError] = useState<string>('');
@@ -70,9 +70,17 @@ const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
       setError('');
    }, [account.id]);
 
-   const clickHandler = (id: number): void => {
+   const clickTagHandler = (id: number): void => {
       navigate(`/?page=1&tag_id=${id}`);
    };
+
+   const clickCityHandler = (id: number): void => {
+      navigate(`/?page=1&city_id=${id}`);
+   }
+
+   const clickDateHandler = (date: Date | null): void => {
+      date && navigate(`/?date_range=["${dayjs(date).format("YYYY-MM-DD")}"%2C"${dayjs(date).format("YYYY-MM-DD")}"]`);
+   }
 
    return (
       <div className="account-header">
@@ -80,12 +88,12 @@ const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
             {error && <p style={{ color: 'red' }}>{error}</p>}
             {seccess && <p style={{ color: 'green' }}>{seccess}</p>}
             <p>
-               Дата добавления: <span style={{ color: '#e36f6f' }}>
+               Дата добавления: <span style={{ color: '#e36f6f', cursor: 'pointer' }} onClick={() => { clickDateHandler(account.date_of_create) }}>
                   {account.date_of_create
                      ? dayjs(account.date_of_create).format("DD.MM.YYYY")
                      : "Не указана"}
                </span> /
-               Город: <span style={{ color: '#e36f6f' }}>{city.name_ru}</span> /
+               Город: <span style={{ color: '#e36f6f', cursor: 'pointer' }} onClick={() => { clickCityHandler(city.id) }}>{city.name_ru}</span> /
                Просмотры: <span style={{ color: '#e36f6f' }}>{account.views || 0}</span> /
                Закладки
                {isFav ?
@@ -104,7 +112,7 @@ const AccountHeader = ({ account, city, tags, rating }: IAccountAll) => {
                   tags.map((item, index) => (
                      <span
                         key={index}
-                        onClick={() => clickHandler(item.id)}
+                        onClick={() => clickTagHandler(item.id)}
                         style={{ color: '#e36f6f', cursor: 'pointer', marginRight: '5px' }}
                      >
                         {item.name_ru}{tags.length - 1 != index && ' , '}

@@ -1,16 +1,15 @@
 import { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
 import { ITextEditorProps, SelectionPosition, SelectionRange, StyleTag } from '../../types/TextEditor';
-
+import DOMPurify from 'dompurify';
 
 const TextEditor = ({ content, setContent }: ITextEditorProps) => {
    const [fontSize, setFontSize] = useState<string>('16px');
    const [color, setColor] = useState<string>('#000000');
-   const [selectionRange, setSelectionRange] = useState<SelectionRange | null>(null);
    const [linkInputVisible, setLinkInputVisible] = useState<boolean>(false);
    const [linkUrl, setLinkUrl] = useState<string>('https://');
    const [selectionPosition, setSelectionPosition] = useState<SelectionPosition>({ top: 0, left: 0 });
 
-   const textareaRef = useRef<HTMLTextAreaElement>(null);
+   const editorRef = useRef<HTMLDivElement>(null);
    const linkInputRef = useRef<HTMLInputElement>(null);
 
    useEffect(() => {
@@ -19,8 +18,29 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
       }
    }, [linkInputVisible]);
 
-   const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>): void => {
-      setContent(e.target.value);
+   // Инициализируем содержимое редактора при первой загрузке
+   useEffect(() => {
+      if (editorRef.current && content) {
+         editorRef.current.innerHTML = sanitizeContent(content);
+      }
+   }, []);
+
+   const sanitizeContent = (html: string) => {
+      return DOMPurify.sanitize(html, {
+         ALLOWED_TAGS: ['p', 'b', 'i', 'u', 's', 'strong', 'em', 'br', 'h1', 'h2', 'h3', 'ul', 'ol', 'li', 'span', 'a'],
+         ALLOWED_ATTR: ['style', 'href', 'target'],
+         ADD_ATTR: ['target'],
+         FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+         FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+         ALLOW_DATA_ATTR: false
+      });
+   };
+
+   const handleContentChange = () => {
+      if (editorRef.current) {
+         const newContent = editorRef.current.innerHTML;
+         setContent(newContent);
+      }
    };
 
    const handleFontSizeChange = (e: ChangeEvent<HTMLSelectElement>): void => {
@@ -31,111 +51,100 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
       setColor(e.target.value);
    };
 
-   const saveSelection = (): void => {
-      const textarea = textareaRef.current;
-      if (!textarea) return;
+   const saveSelection = (): { range: Range | null, text: string } => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return { range: null, text: '' };
 
-      const selection: SelectionRange = {
-         start: textarea.selectionStart,
-         end: textarea.selectionEnd,
-         text: content.substring(textarea.selectionStart, textarea.selectionEnd)
-      };
+      const range = selection.getRangeAt(0);
+      const selectedText = range.toString();
 
-      if (selection.start !== selection.end) {
-         setSelectionRange(selection);
+      // Проверяем, находится ли выделение внутри нашего редактора
+      if (editorRef.current && editorRef.current.contains(range.commonAncestorContainer)) {
+         if (selectedText) {
+            const rect = range.getBoundingClientRect();
+            const editorRect = editorRef.current.getBoundingClientRect();
 
-         // Расчет позиции для отображения инпута над выделенным текстом
-         const textareaRect = textarea.getBoundingClientRect();
-         const selectionCoords = getSelectionCoordinates(textarea);
+            setSelectionPosition({
+               top: rect.top - editorRect.top - 40,
+               left: rect.left - editorRect.left
+            });
 
-         setSelectionPosition({
-            top: selectionCoords.top - textareaRect.top - 40,
-            left: selectionCoords.left - textareaRect.left
-         });
-      } else {
-         setLinkInputVisible(false);
+            return { range, text: selectedText };
+         }
       }
-   };
 
-   // Функция для расчета координат выделенного текста
-   const getSelectionCoordinates = (textarea: HTMLTextAreaElement): SelectionPosition => {
-      const startPos = textarea.selectionStart;
-
-      // Создаем временный элемент для расчета позиции
-      const tempDiv = document.createElement('div');
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.visibility = 'hidden';
-      tempDiv.style.whiteSpace = 'pre-wrap';
-      tempDiv.style.font = window.getComputedStyle(textarea).font;
-      tempDiv.style.width = window.getComputedStyle(textarea).width;
-      tempDiv.style.padding = window.getComputedStyle(textarea).padding;
-
-      const text = content.substring(0, startPos);
-      tempDiv.textContent = text;
-      document.body.appendChild(tempDiv);
-
-      const textCoords: SelectionPosition = {
-         top: textarea.offsetTop + tempDiv.offsetHeight,
-         left: textarea.offsetLeft + tempDiv.offsetWidth
-      };
-
-      document.body.removeChild(tempDiv);
-      return textCoords;
+      setLinkInputVisible(false);
+      return { range: null, text: '' };
    };
 
    const applyStyle = (tag: StyleTag): void => {
-      if (!selectionRange) return;
+      const { range, text } = saveSelection();
+      if (!range || !text) return;
+
+      editorRef.current?.focus();
 
       if (tag === 'link') {
          setLinkInputVisible(true);
          return;
       }
 
-      const before = content.substring(0, selectionRange.start);
-      const after = content.substring(selectionRange.end);
-      let newText = '';
+      let command = '';
+      let value = null;
 
       switch (tag) {
          case 'h1':
-            newText = `<h1>${selectionRange.text}</h1>`;
-            break;
          case 'h2':
-            newText = `<h2>${selectionRange.text}</h2>`;
-            break;
          case 'h3':
-            newText = `<h3>${selectionRange.text}</h3>`;
+            document.execCommand('formatBlock', false, tag);
             break;
          case 'ul':
-            newText = `<ul><li>${selectionRange.text}</li></ul>`;
+            document.execCommand('insertUnorderedList', false);
             break;
          case 'ol':
-            newText = `<ol><li>${selectionRange.text}</li></ol>`;
+            document.execCommand('insertOrderedList', false);
             break;
          case 'color':
-            newText = `<span style="color:${color}">${selectionRange.text}</span>`;
+            document.execCommand('foreColor', false, color);
             break;
          case 'size':
-            newText = `<span style="font-size:${fontSize}">${selectionRange.text}</span>`;
+            // Для размера шрифта нужно использовать HTML-тег
+            document.execCommand('fontSize', false, '7'); // Временный размер
+            const fontElements = document.getElementsByTagName('font');
+            for (let i = 0; i < fontElements.length; i++) {
+               if (fontElements[i].size === '7') {
+                  fontElements[i].removeAttribute('size');
+                  fontElements[i].style.fontSize = fontSize;
+               }
+            }
             break;
          default:
             return;
       }
 
-      setContent(before + newText + after);
+      handleContentChange();
    };
 
    const handleLinkSubmit = (e: FormEvent): void => {
       e.preventDefault();
 
-      if (!selectionRange) return;
+      const { range } = saveSelection();
+      if (!range) return;
 
-      const before = content.substring(0, selectionRange.start);
-      const after = content.substring(selectionRange.end);
-      const newText = `<a href="${linkUrl}">${selectionRange.text}</a>`;
+      editorRef.current?.focus();
+      document.execCommand('createLink', false, linkUrl);
 
-      setContent(before + newText + after);
+      // Находим только что созданную ссылку и добавляем атрибут target="_blank"
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+         const linkNode = selection.anchorNode?.parentElement;
+         if (linkNode && linkNode.tagName === 'A') {
+            linkNode.setAttribute('target', '_blank');
+         }
+      }
+
       setLinkInputVisible(false);
       setLinkUrl('https://');
+      handleContentChange();
    };
 
    const cancelLinkInput = (): void => {
@@ -158,28 +167,26 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
 
             <input type="color" value={color} onChange={handleColorChange} />
 
-            <button onClick={() => applyStyle('h1')}>H1</button>
-            <button onClick={() => applyStyle('h2')}>H2</button>
-            <button onClick={() => applyStyle('h3')}>H3</button>
-            <button onClick={() => applyStyle('ul')}>Список</button>
-            <button onClick={() => applyStyle('ol')}>Нумерованный список</button>
-            <button onClick={() => applyStyle('link')}>Ссылка</button>
-            <button onClick={() => applyStyle('color')}>Применить цвет</button>
-            <button onClick={() => applyStyle('size')}>Применить размер</button>
+            <button type="button" onClick={() => applyStyle('h1')}>H1</button>
+            <button type="button" onClick={() => applyStyle('h2')}>H2</button>
+            <button type="button" onClick={() => applyStyle('h3')}>H3</button>
+            <button type="button" onClick={() => applyStyle('ul')}>Список</button>
+            <button type="button" onClick={() => applyStyle('ol')}>Нумерованный список</button>
+            <button type="button" onClick={() => applyStyle('link')}>Ссылка</button>
+            <button type="button" onClick={() => applyStyle('color')}>Применить цвет</button>
+            <button type="button" onClick={() => applyStyle('size')}>Применить размер</button>
          </div>
 
-         <div className="text-editor-textarea-container">
-            <textarea
-               id="editor"
-               ref={textareaRef}
-               value={content}
-               onChange={handleContentChange}
-               onMouseUp={saveSelection}
-               onKeyUp={saveSelection}
-               rows={5}
-               cols={50}
-               className="text-editor-textarea"
-            />
+         <div className="text-editor-content-container">
+            <div
+               ref={editorRef}
+               contentEditable
+               onInput={handleContentChange}
+               onMouseUp={() => saveSelection()}
+               onKeyUp={() => saveSelection()}
+               className="text-editor-content"
+               aria-label="Редактор текста"
+            ></div>
 
             {linkInputVisible && (
                <div
@@ -206,7 +213,104 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
                </div>
             )}
          </div>
-      </div >
+         <style>{`
+            .text-editor-container {
+               display: flex;
+               flex-direction: column;
+               border: 1px solid #ddd;
+               border-radius: 4px;
+               overflow: hidden;
+            }
+            
+            .text-editor-toolbar {
+               display: flex;
+               padding: 8px;
+               background-color: #f5f5f5;
+               border-bottom: 1px solid #ddd;
+               flex-wrap: wrap;
+               align-items: center;
+               gap: 5px;
+            }
+            
+            .text-editor-toolbar button {
+               background: none;
+               border: 1px solid #ccc;
+               margin-right: 5px;
+               cursor: pointer;
+               padding: 5px 8px;
+               border-radius: 3px;
+            }
+            
+            .text-editor-toolbar button:hover {
+               background-color: #e0e0e0;
+            }
+            
+            .text-editor-toolbar select,
+            .text-editor-toolbar input[type="color"] {
+               padding: 4px;
+               border: 1px solid #ccc;
+               border-radius: 3px;
+               margin-right: 5px;
+            }
+            
+            .text-editor-content-container {
+               position: relative;
+               width: 100%;
+            }
+            
+            .text-editor-content {
+               width: 100%;
+               min-height: 150px;
+               padding: 12px;
+               border: none;
+               font-family: Arial, sans-serif;
+               font-size: 14px;
+               outline: none;
+               overflow: auto;
+            }
+            
+            .text-editor-content:empty:before {
+               content: "Введите текст...";
+               color: #aaa;
+            }
+            
+            .link-input-container {
+               position: absolute;
+               background-color: white;
+               border: 1px solid #ddd;
+               border-radius: 4px;
+               box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+               padding: 8px;
+               z-index: 1000;
+            }
+            
+            .link-input {
+               width: 250px;
+               padding: 6px;
+               border: 1px solid #ccc;
+               border-radius: 3px;
+               margin-bottom: 5px;
+            }
+            
+            .link-buttons {
+               display: flex;
+               justify-content: flex-end;
+               gap: 5px;
+            }
+            
+            .link-button {
+               padding: 4px 8px;
+               background-color: #f0f0f0;
+               border: 1px solid #ccc;
+               border-radius: 3px;
+               cursor: pointer;
+            }
+            
+            .link-button:hover {
+               background-color: #e0e0e0;
+            }
+         `}</style>
+      </div>
    );
 };
 

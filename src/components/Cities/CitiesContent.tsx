@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import fetchData from "../../services/fetchData";
 
 const CitiesContent = () => {
-   const apiUrl: string = 'http://167.86.84.197:5000/cities'
+   const apiUrl: string = 'http://localhost:5000/cities'
    const navigate = useNavigate()
    const [result, setResult] = useState<ICityProps>({
       items: null,
