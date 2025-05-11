@@ -11,6 +11,7 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
 
    const editorRef = useRef<HTMLDivElement>(null);
    const linkInputRef = useRef<HTMLInputElement>(null);
+   const savedSelectionRef = useRef<Range | null>(null);
 
    useEffect(() => {
       if (linkInputVisible && linkInputRef.current) {
@@ -69,12 +70,43 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
                left: rect.left - editorRect.left
             });
 
+            savedSelectionRef.current = range.cloneRange();
             return { range, text: selectedText };
          }
       }
 
       setLinkInputVisible(false);
+      savedSelectionRef.current = null;
       return { range: null, text: '' };
+   };
+
+   const restoreSelection = () => {
+      if (savedSelectionRef.current) {
+         const selection = window.getSelection();
+         if (selection) {
+            selection.removeAllRanges();
+            selection.addRange(savedSelectionRef.current);
+         }
+      }
+   };
+
+   const surroundWithTag = (tagName: string) => {
+      if (savedSelectionRef.current) {
+         const range = savedSelectionRef.current;
+         const selectedText = range.toString();
+         if (!selectedText) return;
+
+         const element = document.createElement(tagName);
+         element.textContent = selectedText;
+
+         // Заменяем выделенный текст новым элементом
+         range.deleteContents();
+         range.insertNode(element);
+
+         // Снимаем выделение
+         window.getSelection()?.removeAllRanges();
+         handleContentChange();
+      }
    };
 
    const applyStyle = (tag: StyleTag): void => {
@@ -90,9 +122,13 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
 
       switch (tag) {
          case 'h1':
+            surroundWithTag('h1');
+            break;
          case 'h2':
+            surroundWithTag('h2');
+            break;
          case 'h3':
-            document.execCommand('formatBlock', false, tag);
+            surroundWithTag('h3');
             break;
          case 'ul':
             document.execCommand('insertUnorderedList', false);
@@ -104,14 +140,20 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
             document.execCommand('foreColor', false, color);
             break;
          case 'size':
-            // Для размера шрифта нужно использовать HTML-тег
-            document.execCommand('fontSize', false, '7'); // Временный размер
-            const fontElements = document.getElementsByTagName('font');
-            for (let i = 0; i < fontElements.length; i++) {
-               if (fontElements[i].size === '7') {
-                  fontElements[i].removeAttribute('size');
-                  fontElements[i].style.fontSize = fontSize;
-               }
+            // Для размера шрифта используем подход с оборачиванием в span
+            if (savedSelectionRef.current) {
+               const span = document.createElement('span');
+               span.style.fontSize = fontSize;
+
+               const range = savedSelectionRef.current;
+               const selectedText = range.toString();
+               span.textContent = selectedText;
+
+               range.deleteContents();
+               range.insertNode(span);
+
+               window.getSelection()?.removeAllRanges();
+               handleContentChange();
             }
             break;
          default:
@@ -124,8 +166,8 @@ const TextEditor = ({ content, setContent }: ITextEditorProps) => {
    const handleLinkSubmit = (e: FormEvent): void => {
       e.preventDefault();
 
-      const { range } = saveSelection();
-      if (!range) return;
+      restoreSelection();
+      if (!savedSelectionRef.current) return;
 
       editorRef.current?.focus();
       document.execCommand('createLink', false, linkUrl);
