@@ -99,7 +99,7 @@ const AdminReportsItem = ({ reporter_user_login, reported_user_login, account_na
          <div className="admin-reports-item__footer">
             <div className="admin-reports-item__comment">
                <span>Текст комментария:</span>
-               <p>{comment_text}</p>
+               <p dangerouslySetInnerHTML={{ __html: comment_text }} />
             </div>
             <div>
                <svg onClick={() => { removeComment(comment_id) }} className="admin-order-item__bin" width="20" height="20" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">
